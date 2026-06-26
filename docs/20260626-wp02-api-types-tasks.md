@@ -843,7 +843,7 @@ describe('GET /api/analytics/overview', () => {
 
 | Done | Priority | Task | Depends on | Effort |
 |------|----------|------|------------|--------|
-| [ ]  | 1        | T-1: TypeScript API types | - | Small |
+| [x]  | 1        | T-1: TypeScript API types | - | Small |
 | [ ]  | 2        | T-2: Seed utilities | - | Small |
 | [ ]  | 3        | T-3: Org generators | T-1 | Small |
 | [ ]  | 4        | T-4: Overview generator | T-1, T-2 | Medium |
