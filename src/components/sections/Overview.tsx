@@ -6,6 +6,7 @@ import {
   formatNumber,
   formatPercent,
   formatQuality,
+  formatTokens,
 } from "../../lib/kpi/formatters";
 import {
   computeCostPerAcceptedOutput,
@@ -82,12 +83,14 @@ export function Overview(): JSX.Element {
           id: "input_tokens",
           label: "Input Tokens",
           color: "#0d9488",
+          formatValue: formatTokens,
           data: ts.points.map((p) => ({ date: p.date, value: p.input_tokens })),
         },
         {
           id: "output_tokens",
           label: "Output Tokens",
           color: "#2563eb",
+          formatValue: formatTokens,
           data: ts.points.map((p) => ({ date: p.date, value: p.output_tokens })),
         },
       ]
@@ -128,7 +131,7 @@ export function Overview(): JSX.Element {
         : null;
 
     const series = [
-      { id: "cost", label: "Actual", color: "#2563eb" as const, data: actualData },
+      { id: "cost", label: "Actual", color: "#2563eb" as const, formatValue: formatCurrency, data: actualData },
       ...(projected.length > 1
         ? [
             {
@@ -137,6 +140,7 @@ export function Overview(): JSX.Element {
               color: "#2563eb" as const,
               dashed: true,
               fillOpacity: 0.05,
+              formatValue: formatCurrency,
               data: projected,
             },
           ]
