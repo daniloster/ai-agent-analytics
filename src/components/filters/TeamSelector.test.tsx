@@ -62,8 +62,9 @@ it('selecting a team sets teamId.value', async () => {
 
 it('selecting all teams sets teamId.value to undefined', () => {
   teamId.value = 'team_001'
-  // simulate onValueChange('') which sets teamId.value = undefined
-  teamId.value = '' || undefined
+  // simulate onValueChange('') which sets teamId.value = '' || undefined = undefined
+  const v = ''
+  teamId.value = v || undefined
   expect(teamId.value).toBeUndefined()
 })
 

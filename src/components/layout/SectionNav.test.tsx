@@ -15,7 +15,7 @@ function makeObserverMock() {
   function trigger(id: string, isIntersecting: boolean) {
     const el = document.createElement('section')
     el.id = id
-    savedCallback?.([{ isIntersecting, target: el } as IntersectionObserverEntry])
+    savedCallback?.([{ isIntersecting, target: el } as unknown as IntersectionObserverEntry])
   }
   return { MockIO, disconnect, observe, trigger }
 }
