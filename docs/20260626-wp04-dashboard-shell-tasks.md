@@ -707,6 +707,6 @@ export const router = createBrowserRouter([
 | [x]  | 4        | T-4: SectionNav | - | Small |
 | [x]  | 5        | T-5: DateRangePicker | T-1, T-2 | Medium |
 | [x]  | 6        | T-6: TeamSelector | T-1, T-2 | Medium |
-| [ ]  | 7        | T-7: FilterBar | T-5, T-6 | Small |
+| [x]  | 7        | T-7: FilterBar | T-5, T-6 | Small |
 | [ ]  | 8        | T-8: DashboardLayout | T-3, T-4, T-7 | Medium |
 | [ ]  | 9        | T-9: Router wiring | T-2, T-8 | Small |
