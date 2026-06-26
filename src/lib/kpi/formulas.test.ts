@@ -7,6 +7,9 @@ import {
   computeProjectedMonthEnd,
   computeDeltaPercent,
   computeErrorRateSeverity,
+  computeProjectedAnnualSpend,
+  computeTokenRateEfficiency,
+  computeCostPerSuccessfulRun,
 } from './formulas'
 
 describe('computeRetentionCost', () => {
@@ -117,5 +120,35 @@ describe('computeErrorRateSeverity', () => {
 
   it('returns critical for errorRate > 0.05', () => {
     expect(computeErrorRateSeverity(0.06)).toBe('critical')
+  })
+})
+
+describe('computeProjectedAnnualSpend', () => {
+  it('returns (cost90d / 90) * 365 for a known input', () => {
+    expect(computeProjectedAnnualSpend(38780)).toBeCloseTo((38780 / 90) * 365, 5)
+  })
+
+  it('returns 0 when cost90d is 0', () => {
+    expect(computeProjectedAnnualSpend(0)).toBe(0)
+  })
+})
+
+describe('computeTokenRateEfficiency', () => {
+  it('returns totalTokenCost / (totalTokens / 1_000_000) for known inputs', () => {
+    expect(computeTokenRateEfficiency(3, 1_000_000)).toBeCloseTo(3.0, 5)
+  })
+
+  it('returns 0 when totalTokens is 0 (zero guard)', () => {
+    expect(computeTokenRateEfficiency(0, 0)).toBe(0)
+  })
+})
+
+describe('computeCostPerSuccessfulRun', () => {
+  it('returns totalCost / successfulRunCount for known inputs', () => {
+    expect(computeCostPerSuccessfulRun(14200, 11720)).toBeCloseTo(14200 / 11720, 5)
+  })
+
+  it('returns 0 when successfulRunCount is 0 (zero guard)', () => {
+    expect(computeCostPerSuccessfulRun(0, 0)).toBe(0)
   })
 })

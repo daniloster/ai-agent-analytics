@@ -51,3 +51,17 @@ export function computeErrorRateSeverity(errorRate: number): ErrorRateSeverity {
   if (errorRate < 0.05) return 'warning'
   return 'critical'
 }
+
+export function computeProjectedAnnualSpend(cost90d: number): number {
+  return (cost90d / 90) * 365
+}
+
+export function computeTokenRateEfficiency(totalTokenCost: number, totalTokens: number): number {
+  if (totalTokens === 0) return 0
+  return totalTokenCost / (totalTokens / 1_000_000)
+}
+
+export function computeCostPerSuccessfulRun(totalCost: number, successfulRunCount: number): number {
+  if (successfulRunCount === 0) return 0
+  return totalCost / successfulRunCount
+}

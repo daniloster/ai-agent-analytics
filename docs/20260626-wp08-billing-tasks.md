@@ -669,7 +669,7 @@ Also modify `src/components/sections/Overview.tsx` to import `buildQueryParams` 
 
 | Done | Priority | Task | Depends on | Effort |
 |------|----------|------|------------|--------|
-| [ ]  | 1        | T-1: Billing formula functions | - | Small |
+| [x]  | 1        | T-1: Billing formula functions | - | Small |
 | [ ]  | 2        | T-2: ColumnChart trendLine + AreaChart dashed | WP-06 T-2, WP-05 T-6 | Medium |
 | [ ]  | 3        | T-3: Heatmap data generalization | WP-07 T-1 | Small |
 | [ ]  | 4        | T-4: GaugeChart component | - | Medium |
