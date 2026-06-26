@@ -5,25 +5,28 @@ import type { ReadonlySignal } from '@preact/signals-react'
 import { ParentSizeComputed } from './primitives/ParentSizeComputed'
 import { useChartTokens, type ChartTokens } from './primitives/useChartTokens'
 
+type HeatmapDatum = { date: string; value: number } & Record<string, unknown>
+
 export interface HeatmapProps {
-  data: Array<{ date: string; uptime_pct: number }>
+  data: HeatmapDatum[]
   colorScale: 'availability' | 'cost'
   height?: number
   ariaLabel?: string
+  getAriaLabel?: (datum: HeatmapDatum) => string
 }
 
 interface HeatmapCanvasProps {
-  data: Array<{ date: string; uptime_pct: number }>
+  data: HeatmapDatum[]
   colorScale: 'availability' | 'cost'
   width: ReadonlySignal<number>
   height: number
   tokens: ChartTokens
+  getAriaLabel?: (datum: HeatmapDatum) => string
 }
 
-type DayEntry = { date: string; uptime_pct: number }
-type WeekCol = { weekIndex: number; days: DayEntry[] }
+type WeekCol = { weekIndex: number; days: HeatmapDatum[] }
 
-function HeatmapCanvas({ data, colorScale, width, height, tokens }: HeatmapCanvasProps): JSX.Element | null {
+function HeatmapCanvas({ data, colorScale, width, height, tokens, getAriaLabel }: HeatmapCanvasProps): JSX.Element | null {
   const w = width.value
   if (w === 0 || data.length === 0) return null
 
@@ -36,19 +39,24 @@ function HeatmapCanvas({ data, colorScale, width, height, tokens }: HeatmapCanva
     weeks.push({ weekIndex: i, days: data.slice(i * 7, i * 7 + 7) })
   }
 
-  let getColor: (v: number) => string
+  let getColor: (datum: HeatmapDatum) => string
   if (colorScale === 'availability') {
     const scale = scaleSequential(interpolateRgb('#ef4444', '#22c55e')).domain([0, 100])
-    getColor = (v) => scale(v) ?? '#cccccc'
+    getColor = (datum) => scale(datum.value) ?? '#cccccc'
   } else {
-    const maxValue = Math.max(...data.map((d) => d.uptime_pct), 1)
-    const scale = scaleSequential(interpolateRgb(tokens.background, tokens.destructive)).domain([0, maxValue])
-    getColor = (v) => scale(v) ?? '#cccccc'
+    getColor = (datum) => (Boolean(datum.isAnomaly) ? tokens.destructive : tokens.muted)
   }
+
+  const defaultAriaLabel = (datum: HeatmapDatum): string =>
+    colorScale === 'availability'
+      ? `${datum.date}: ${datum.value}% uptime`
+      : `${datum.date}: ${datum.value}`
+
+  const labelFor = getAriaLabel ?? defaultAriaLabel
 
   return (
     <svg width={w} height={height}>
-      <HeatmapRect<WeekCol, DayEntry>
+      <HeatmapRect<WeekCol, HeatmapDatum>
         data={weeks}
         binWidth={cellWidth}
         binHeight={cellHeight}
@@ -56,8 +64,8 @@ function HeatmapCanvas({ data, colorScale, width, height, tokens }: HeatmapCanva
         xScale={(col) => col * cellWidth}
         yScale={(row) => row * cellHeight}
         bins={(col) => col.days}
-        count={(day) => day.uptime_pct}
-        colorScale={(count) => getColor(count as number)}
+        count={(day) => day.value}
+        colorScale={(count) => getColor({ value: count as number, date: '' })}
       >
         {(cells) =>
           cells.flatMap((colCells) =>
@@ -70,14 +78,10 @@ function HeatmapCanvas({ data, colorScale, width, height, tokens }: HeatmapCanva
                   y={cell.y}
                   width={cell.width}
                   height={cell.height}
-                  fill={cell.color ?? getColor(datum.uptime_pct)}
+                  fill={getColor(datum)}
                   tabIndex={0}
                   role="listitem"
-                  aria-label={
-                    colorScale === 'availability'
-                      ? `${datum.date}: ${datum.uptime_pct}% uptime`
-                      : `${datum.date}: ${datum.uptime_pct}`
-                  }
+                  aria-label={labelFor(datum)}
                 />
               )
             }),
@@ -88,7 +92,7 @@ function HeatmapCanvas({ data, colorScale, width, height, tokens }: HeatmapCanva
   )
 }
 
-export function Heatmap({ data, colorScale, height = 120, ariaLabel }: HeatmapProps): JSX.Element {
+export function Heatmap({ data, colorScale, height = 120, ariaLabel, getAriaLabel }: HeatmapProps): JSX.Element {
   const tokens = useChartTokens()
   return (
     <figure role="img" aria-label={ariaLabel ?? 'Availability heatmap'}>
@@ -100,6 +104,7 @@ export function Heatmap({ data, colorScale, height = 120, ariaLabel }: HeatmapPr
             width={widthSig}
             height={height}
             tokens={tokens}
+            getAriaLabel={getAriaLabel}
           />
         )}
       </ParentSizeComputed>

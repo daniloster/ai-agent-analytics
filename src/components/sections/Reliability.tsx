@@ -153,7 +153,7 @@ export function Reliability(): JSX.Element {
                   : 'Platform availability'}
               </figcaption>
               <Heatmap
-                data={d ? d.availability_by_day : []}
+                data={d ? d.availability_by_day.map((day) => ({ date: day.date, value: day.uptime_pct })) : []}
                 colorScale="availability"
                 ariaLabel="Platform availability calendar"
               />

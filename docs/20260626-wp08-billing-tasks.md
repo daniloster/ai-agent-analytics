@@ -671,7 +671,7 @@ Also modify `src/components/sections/Overview.tsx` to import `buildQueryParams` 
 |------|----------|------|------------|--------|
 | [x]  | 1        | T-1: Billing formula functions | - | Small |
 | [x]  | 2        | T-2: ColumnChart trendLine + AreaChart dashed | WP-06 T-2, WP-05 T-6 | Medium |
-| [ ]  | 3        | T-3: Heatmap data generalization | WP-07 T-1 | Small |
+| [x]  | 3        | T-3: Heatmap data generalization | WP-07 T-1 | Small |
 | [ ]  | 4        | T-4: GaugeChart component | - | Medium |
 | [ ]  | 5        | T-5: ChargebackTable | WP-06 T-1 | Small |
 | [ ]  | 6        | T-6: Billing section | T-1, T-2, T-3, T-4, T-5, WP-05 T-5, WP-06 T-1 | Large |

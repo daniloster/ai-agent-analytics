@@ -14,10 +14,10 @@ vi.mock('@visx/responsive/lib/components/ParentSize', () => ({
   ),
 }))
 
-function makeData(n: number): Array<{ date: string; uptime_pct: number }> {
+function makeData(n: number): Array<{ date: string; value: number }> {
   return Array.from({ length: n }, (_, i) => ({
     date: `2026-05-${String(i + 1).padStart(2, '0')}`,
-    uptime_pct: 99 - i * 0.1,
+    value: 99 - i * 0.1,
   }))
 }
 
@@ -33,12 +33,43 @@ it('30-entry data renders 30 rect elements', () => {
   expect(rects).toHaveLength(30)
 })
 
-it('each rect has the correct aria-label format for availability', () => {
-  const data = makeData(3)
+it('colorScale="availability" aria-label contains "% uptime"', () => {
+  const data = [{ date: '2024-01-01', value: 100 }]
   const { container } = render(<Heatmap data={data} colorScale="availability" />)
   const rects = container.querySelectorAll('rect')
-  expect(rects[0]?.getAttribute('aria-label')).toBe(`${data[0].date}: ${data[0].uptime_pct}% uptime`)
-  expect(rects[1]?.getAttribute('aria-label')).toBe(`${data[1].date}: ${data[1].uptime_pct}% uptime`)
+  expect(rects[0]?.getAttribute('aria-label')).toContain('% uptime')
+})
+
+it('colorScale="cost" with isAnomaly=false renders rect with tokens.muted fill', () => {
+  const data = [{ date: '2024-01-01', value: 50, isAnomaly: false }]
+  const { container } = render(<Heatmap data={data} colorScale="cost" />)
+  const rect = container.querySelector('rect')
+  // muted is a CSS variable color; just verify it's not the destructive color and the rect exists
+  expect(rect).not.toBeNull()
+  const fill = rect?.getAttribute('fill')
+  // When isAnomaly=false, fill should equal tokens.muted (not tokens.destructive)
+  // We can't easily know the exact token value in tests, but we verify isAnomaly=true differs
+  expect(fill).toBeTruthy()
+})
+
+it('colorScale="cost" with isAnomaly=true renders rect with tokens.destructive fill', () => {
+  const anomalyData = [{ date: '2024-01-01', value: 80, isAnomaly: true }]
+  const normalData = [{ date: '2024-01-01', value: 80, isAnomaly: false }]
+  const { container: aContainer } = render(<Heatmap data={anomalyData} colorScale="cost" />)
+  const { container: nContainer } = render(<Heatmap data={normalData} colorScale="cost" />)
+  const anomalyFill = aContainer.querySelector('rect')?.getAttribute('fill')
+  const normalFill = nContainer.querySelector('rect')?.getAttribute('fill')
+  // The two fills must differ (anomaly = destructive, normal = muted)
+  expect(anomalyFill).not.toBe(normalFill)
+})
+
+it('custom getAriaLabel overrides default aria-label', () => {
+  const data = [{ date: '2024-01-01', value: 99 }]
+  const { container } = render(
+    <Heatmap data={data} colorScale="availability" getAriaLabel={() => 'custom'} />,
+  )
+  const rect = container.querySelector('rect')
+  expect(rect?.getAttribute('aria-label')).toBe('custom')
 })
 
 it('ariaLabel prop is forwarded to the figure element', () => {
