@@ -853,7 +853,7 @@ export function Overview(): JSX.Element
 | [x]  | 1        | T-1: KPI formula functions | - | Small |
 | [x]  | 2        | T-2: KPI formatter functions | - | Small |
 | [x]  | 3        | T-3: Card UI component | - | Small |
-| [ ]  | 4        | T-4: Sparkline chart component | - | Small |
+| [x]  | 4        | T-4: Sparkline chart component | - | Small |
 | [ ]  | 5        | T-5: KpiCard atom | T-2, T-3, T-4 | Medium |
 | [ ]  | 6        | T-6: AreaChart component | - | Medium |
 | [ ]  | 7        | T-7: DonutChart and BarChart | - | Medium |
