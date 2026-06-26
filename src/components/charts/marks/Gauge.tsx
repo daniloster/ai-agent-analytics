@@ -1,0 +1,72 @@
+import { Pie } from '@visx/shape'
+import { useVisualizationContext } from '../VisualizationContext'
+
+export interface GaugeProps {
+  series: string
+  domain?: [number, number]
+  criticalThreshold?: number
+  label?: string
+}
+
+export function Gauge(props: GaugeProps): JSX.Element | null {
+  const { dataSignal, innerWidth, innerHeight, tokens } = useVisualizationContext()
+
+  if (innerWidth === 0) return null
+
+  const data = dataSignal.value
+  if (data.length === 0) return null
+
+  const value = data[0][props.series] as number
+  const [, domainMax] = props.domain ?? [0, 100]
+  const threshold = props.criticalThreshold ?? 90
+  const progressColor = value > threshold ? tokens.destructive : tokens.primary
+
+  const cx = innerWidth / 2
+  const cy = innerHeight
+  const radius = Math.min(innerWidth / 2, innerHeight) * 0.9
+  const innerRadius = radius * 0.6
+
+  const pieData = [value, Math.max(0, domainMax - value)]
+
+  return (
+    <g>
+      <Pie
+        data={pieData}
+        pieValue={(d) => d}
+        outerRadius={radius}
+        innerRadius={innerRadius}
+        startAngle={-Math.PI / 2}
+        endAngle={Math.PI / 2}
+        pieSort={null}
+        pieSortValues={null}
+        top={cy}
+        left={cx}
+      >
+        {({ arcs, path }) =>
+          arcs.map((arc, i) => {
+            const fill = i === 0 ? progressColor : tokens.muted
+            const d = path(arc) ?? ''
+            if (i === 0) {
+              return (
+                <path
+                  key={i}
+                  d={d}
+                  fill={fill}
+                  tabIndex={0}
+                  role="listitem"
+                  aria-label={`${props.series}: ${value} of ${domainMax}`}
+                />
+              )
+            }
+            return <path key={i} d={d} fill={fill} />
+          })
+        }
+      </Pie>
+      {props.label && (
+        <text x={cx} y={cy} textAnchor="middle" dy="-0.5em" fill={tokens.muted}>
+          {props.label}
+        </text>
+      )}
+    </g>
+  )
+}
