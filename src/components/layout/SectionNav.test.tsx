@@ -27,6 +27,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.unstubAllGlobals()
+  window.history.replaceState({}, '', '/')
 })
 
 it('renders four anchors with correct href and text', () => {
@@ -48,17 +49,30 @@ it('Overview link has aria-current on initial render', () => {
   expect(getByText('Reliability')).not.toHaveAttribute('aria-current')
 })
 
-it('IntersectionObserver intersection on reliability sets active', () => {
+it('IntersectionObserver intersection on reliability sets active after user scrolls', () => {
   const { MockIO, trigger } = makeObserverMock()
   vi.stubGlobal('IntersectionObserver', MockIO)
   const { getByText, rerender } = render(<SectionNav />)
+  // simulate user scroll to unlock IO-driven updates
+  fireEvent.scroll(window)
   trigger('reliability', true)
   rerender(<SectionNav />)
   expect(getByText('Reliability')).toHaveAttribute('aria-current', 'true')
   expect(getByText('Overview')).not.toHaveAttribute('aria-current')
 })
 
-it('clicking a link calls scrollIntoView and does not navigate', () => {
+it('IntersectionObserver is ignored before user scrolls (preserves URL param on mount)', () => {
+  const { MockIO, trigger } = makeObserverMock()
+  vi.stubGlobal('IntersectionObserver', MockIO)
+  const { getByText, rerender } = render(<SectionNav />)
+  // trigger without scrolling first — should be ignored
+  trigger('teams', true)
+  rerender(<SectionNav />)
+  expect(getByText('Overview')).toHaveAttribute('aria-current', 'true')
+  expect(getByText('Teams')).not.toHaveAttribute('aria-current')
+})
+
+it('clicking a link calls scrollIntoView and does not hard-navigate', () => {
   const scrollIntoView = vi.fn()
   const el = document.createElement('section')
   el.id = 'teams'
@@ -66,10 +80,11 @@ it('clicking a link calls scrollIntoView and does not navigate', () => {
   document.body.appendChild(el)
 
   const { getByText } = render(<SectionNav />)
-  const originalHref = window.location.href
+  const originalPathname = window.location.pathname
   fireEvent.click(getByText('Teams'))
   expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth' })
-  expect(window.location.href).toBe(originalHref)
+  // pathname unchanged - only query param updated
+  expect(window.location.pathname).toBe(originalPathname)
 
   document.body.removeChild(el)
 })
@@ -82,4 +97,33 @@ it('isIntersecting=false does not change active section', () => {
   rerender(<SectionNav />)
   expect(getByText('Overview')).toHaveAttribute('aria-current', 'true')
   expect(getByText('Billing')).not.toHaveAttribute('aria-current')
+})
+
+it('clicking Overview calls window.scrollTo(top:0) instead of scrollIntoView', () => {
+  const scrollTo = vi.fn()
+  vi.stubGlobal('scrollTo', scrollTo)
+  const { getByText } = render(<SectionNav />)
+  fireEvent.click(getByText('Overview'))
+  expect(scrollTo).toHaveBeenCalledWith({ top: 0, behavior: 'smooth' })
+})
+
+it('clicking a link updates the section URL param', () => {
+  const el = document.createElement('section')
+  el.id = 'reliability'
+  el.scrollIntoView = vi.fn()
+  document.body.appendChild(el)
+
+  const { getByText } = render(<SectionNav />)
+  fireEvent.click(getByText('Reliability'))
+  expect(new URLSearchParams(window.location.search).get('section')).toBe('reliability')
+
+  document.body.removeChild(el)
+})
+
+it('reads initial active section from URL param', () => {
+  window.history.replaceState({}, '', '?section=billing')
+  const { getByText } = render(<SectionNav />)
+  expect(getByText('Billing')).toHaveAttribute('aria-current', 'true')
+  expect(getByText('Overview')).not.toHaveAttribute('aria-current')
+  window.history.replaceState({}, '', '/')
 })

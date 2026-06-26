@@ -31,17 +31,19 @@ function DeltaBadge({ delta, deltaLabel }: { delta: number; deltaLabel?: string 
   const isNegative = delta < 0
   const prefix = isPositive ? '+' : isNegative ? '-' : ''
   const colorClass = isPositive
-    ? 'bg-emerald-100 text-emerald-700'
+    ? 'bg-green-50 text-green-600'
     : isNegative
-      ? 'bg-red-100 text-red-700'
+      ? 'bg-red-50 text-red-600'
       : 'bg-muted text-muted-foreground'
 
   return (
     <div className="flex items-center gap-1">
-      <span className={`inline-flex items-center rounded px-1.5 py-0.5 text-xs font-medium ${colorClass}`}>
+      <span
+        className={`inline-flex items-center rounded-full px-[7px] py-0.5 text-[11px] font-semibold ${colorClass}`}
+      >
         {prefix}{formatPercent(Math.abs(delta), 1)}
       </span>
-      {deltaLabel && <span className="text-xs text-muted-foreground">{deltaLabel}</span>}
+      {deltaLabel && <span className="text-[11px] text-muted-foreground">{deltaLabel}</span>}
     </div>
   )
 }
@@ -51,7 +53,7 @@ export function KpiCard(props: KpiCardProps): JSX.Element {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="p-5 pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             {props.statusDot && (
@@ -60,13 +62,13 @@ export function KpiCard(props: KpiCardProps): JSX.Element {
                 aria-hidden="true"
               />
             )}
-            <span className="text-sm font-medium text-muted-foreground">{props.label}</span>
+            <span className="text-[12px] font-medium text-muted-foreground">{props.label}</span>
           </div>
           <Popover open={open.value} onOpenChange={(v) => { open.value = v }}>
             <PopoverTrigger asChild>
               <button
                 aria-label="More information"
-                className="flex h-5 w-5 items-center justify-center rounded-full text-xs text-muted-foreground hover:bg-muted"
+                className="flex h-[18px] w-[18px] items-center justify-center rounded-full border border-border bg-muted text-[10px] text-muted-foreground hover:bg-border"
               >
                 ?
               </button>
@@ -78,8 +80,8 @@ export function KpiCard(props: KpiCardProps): JSX.Element {
           </Popover>
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-1">
+      <CardContent className="px-5 pb-5 pt-0">
+        <div className="space-y-1.5">
           {props.value === undefined ? (
             <Skeleton className="h-8 w-24" />
           ) : props.insufficientData ? (
@@ -90,10 +92,10 @@ export function KpiCard(props: KpiCardProps): JSX.Element {
               )}
             </>
           ) : (
-            <div className="text-2xl font-bold">{props.value}</div>
+            <div className="text-[28px] font-bold leading-none tracking-tight">{props.value}</div>
           )}
           {props.subValue && (
-            <p className="text-xs text-muted-foreground">{props.subValue}</p>
+            <p className="text-[11px] text-muted-foreground">{props.subValue}</p>
           )}
           {typeof props.delta === 'number' && (
             <DeltaBadge delta={props.delta} deltaLabel={props.deltaLabel} />

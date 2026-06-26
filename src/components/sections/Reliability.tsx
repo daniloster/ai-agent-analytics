@@ -28,7 +28,10 @@ export function Reliability(): JSX.Element {
 
   return (
     <Section id="reliability" labelledBy="reliability-heading">
-      <h2 id="reliability-heading">Reliability</h2>
+      <div className="mb-6">
+        <h2 id="reliability-heading" className="text-[22px] font-bold tracking-tight text-foreground">Reliability</h2>
+        <p className="text-[13px] text-muted-foreground mt-1">Error rates, latency, and incident tracking</p>
+      </div>
 
       {query.isLoading ? (
         <>
@@ -112,8 +115,11 @@ export function Reliability(): JSX.Element {
 
           {/* Chart row: AreaChart + DonutChart */}
           <div className="grid grid-cols-2 gap-4 mt-4">
-            <figure>
-              <figcaption className="text-sm font-medium mb-2">Error rate trend (7-day avg)</figcaption>
+            <figure className="rounded-lg border bg-card shadow-sm p-6" aria-label="Error rate trend">
+              <div className="mb-4">
+                <p className="text-[14px] font-semibold text-foreground">Error rate trend</p>
+                <p className="text-[12px] text-muted-foreground mt-0.5">7-day rolling average</p>
+              </div>
               <AreaChart
                 series={
                   d
@@ -130,8 +136,11 @@ export function Reliability(): JSX.Element {
                 ariaLabel="Error rate trend"
               />
             </figure>
-            <figure>
-              <figcaption className="text-sm font-medium mb-2">Error type breakdown</figcaption>
+            <figure className="rounded-lg border bg-card shadow-sm p-6" aria-label="Error type breakdown">
+              <div className="mb-4">
+                <p className="text-[14px] font-semibold text-foreground">Error type breakdown</p>
+                <p className="text-[12px] text-muted-foreground mt-0.5">Distribution of error categories</p>
+              </div>
               <DonutChart
                 slices={d ? d.error_type_breakdown.map((e) => ({ label: e.type, value: e.count })) : []}
                 ariaLabel="Error type breakdown"
@@ -141,12 +150,13 @@ export function Reliability(): JSX.Element {
 
           {/* Availability row: Heatmap + optional IncidentTable */}
           <div className="mt-4">
-            <figure>
-              <figcaption className="text-sm font-medium mb-2">
-                {d
-                  ? `Platform availability - ${formatPercent(d.platform_availability * 100)}`
-                  : 'Platform availability'}
-              </figcaption>
+            <figure className="rounded-lg border bg-card shadow-sm p-6" aria-label="Platform availability">
+              <div className="mb-4">
+                <p className="text-[14px] font-semibold text-foreground">
+                  {d ? `Platform availability - ${formatPercent(d.platform_availability * 100)}` : 'Platform availability'}
+                </p>
+                <p className="text-[12px] text-muted-foreground mt-0.5">Daily uptime percentage</p>
+              </div>
               <Heatmap
                 data={d ? d.availability_by_day.map((day) => ({ date: day.date, value: day.uptime_pct })) : []}
                 colorScale="availability"

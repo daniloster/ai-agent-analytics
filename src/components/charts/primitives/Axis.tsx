@@ -21,7 +21,7 @@ export function AxisBottom({ scale, top, left, tickFormat, numTicks, label, toke
       tickFormat={tickFormat as ((value: unknown, index: number) => string) | undefined}
       numTicks={numTicks}
       label={label}
-      tickLabelProps={{ fill: tokens.muted, fontSize: 11 }}
+      tickLabelProps={{ fill: tokens.muted, fontSize: 10 }}
       stroke={tokens.muted}
       tickStroke={tokens.muted}
     />
@@ -37,7 +37,7 @@ export function AxisLeft({ scale, top, left, tickFormat, numTicks, label, tokens
       tickFormat={tickFormat as ((value: unknown, index: number) => string) | undefined}
       numTicks={numTicks}
       label={label}
-      tickLabelProps={{ fill: tokens.muted, fontSize: 11 }}
+      tickLabelProps={{ fill: tokens.muted, fontSize: 10 }}
       stroke={tokens.muted}
       tickStroke={tokens.muted}
     />
@@ -53,7 +53,7 @@ export function AxisRight({ scale, top, left, tickFormat, numTicks, label, token
       tickFormat={tickFormat as ((value: unknown, index: number) => string) | undefined}
       numTicks={numTicks}
       label={label}
-      tickLabelProps={{ fill: tokens.muted, fontSize: 11 }}
+      tickLabelProps={{ fill: tokens.muted, fontSize: 10 }}
       stroke={tokens.muted}
       tickStroke={tokens.muted}
     />

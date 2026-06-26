@@ -51,21 +51,21 @@ it('renders Skeleton when value is undefined', () => {
 it('positive delta renders green badge with + prefix', () => {
   const { container } = render(<KpiCard {...BASE_PROPS} delta={18.4} />)
   expect(screen.getByText('+18.4%')).toBeTruthy()
-  const badge = container.querySelector('.bg-emerald-100')
+  const badge = container.querySelector('.bg-green-50')
   expect(badge).not.toBeNull()
 })
 
 it('negative delta renders red badge with - prefix', () => {
   const { container } = render(<KpiCard {...BASE_PROPS} delta={-3.2} />)
   expect(screen.getByText('-3.2%')).toBeTruthy()
-  const badge = container.querySelector('.bg-red-100')
+  const badge = container.querySelector('.bg-red-50')
   expect(badge).not.toBeNull()
 })
 
 it('undefined delta renders no badge', () => {
   const { container } = render(<KpiCard {...BASE_PROPS} delta={undefined} />)
-  expect(container.querySelector('.bg-emerald-100')).toBeNull()
-  expect(container.querySelector('.bg-red-100')).toBeNull()
+  expect(container.querySelector('.bg-green-50')).toBeNull()
+  expect(container.querySelector('.bg-red-50')).toBeNull()
 })
 
 it('insufficientData=true renders status span with Insufficient data', () => {

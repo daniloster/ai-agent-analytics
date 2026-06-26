@@ -40,7 +40,10 @@ export function Billing(): JSX.Element {
 
   return (
     <Section id="billing" labelledBy="billing-heading">
-      <h2 id="billing-heading">Billing & Financial</h2>
+      <div className="mb-6">
+        <h2 id="billing-heading" className="text-[22px] font-bold tracking-tight text-foreground">Billing & Financial</h2>
+        <p className="text-[13px] text-muted-foreground mt-1">Spend tracking, budget utilization, and cost analysis</p>
+      </div>
 
       {isLoading ? (
         <>
@@ -91,8 +94,11 @@ export function Billing(): JSX.Element {
 
           {/* Row 2: Cumulative Spend vs Budget AreaChart + Invoice History ColumnChart */}
           <div className="grid grid-cols-2 gap-4 mt-4">
-            <figure>
-              <figcaption className="text-sm font-medium mb-2">Cumulative spend vs budget</figcaption>
+            <figure className="rounded-lg border bg-card shadow-sm p-6" aria-label="Cumulative spend vs budget">
+              <div className="mb-4">
+                <p className="text-[14px] font-semibold text-foreground">Cumulative spend vs budget</p>
+                <p className="text-[12px] text-muted-foreground mt-0.5">Monthly actual and projected spend</p>
+              </div>
               {billing && (() => {
                 const ih = billing.invoice_history
                 const last = ih[ih.length - 1]
@@ -122,8 +128,11 @@ export function Billing(): JSX.Element {
                 )
               })()}
             </figure>
-            <figure>
-              <figcaption className="text-sm font-medium mb-2">Invoice history</figcaption>
+            <figure className="rounded-lg border bg-card shadow-sm p-6" aria-label="Invoice history">
+              <div className="mb-4">
+                <p className="text-[14px] font-semibold text-foreground">Invoice history</p>
+                <p className="text-[12px] text-muted-foreground mt-0.5">Monthly billed amounts</p>
+              </div>
               <ColumnChart
                 bars={billing ? billing.invoice_history.map((h) => ({ label: h.month, value: h.total_billed })) : []}
                 trendLine={true}
@@ -134,8 +143,11 @@ export function Billing(): JSX.Element {
 
           {/* Row 3: Team cost allocation DonutChart + ChargebackTable */}
           <div className="grid grid-cols-2 gap-4 mt-4">
-            <figure>
-              <figcaption className="text-sm font-medium mb-2">Cost by team</figcaption>
+            <figure className="rounded-lg border bg-card shadow-sm p-6" aria-label="Cost by team">
+              <div className="mb-4">
+                <p className="text-[14px] font-semibold text-foreground">Cost by team</p>
+                <p className="text-[12px] text-muted-foreground mt-0.5">Token and seat cost allocation</p>
+              </div>
               <DonutChart
                 slices={billing ? billing.cost_by_team.map((t) => ({ label: t.team_name, value: t.total })) : []}
                 ariaLabel="Cost by team"
@@ -146,8 +158,11 @@ export function Billing(): JSX.Element {
 
           {/* Row 4: Cost anomaly Heatmap */}
           <div className="mt-4">
-            <figure>
-              <figcaption className="text-sm font-medium mb-2">Cost anomaly calendar</figcaption>
+            <figure className="rounded-lg border bg-card shadow-sm p-6" aria-label="Cost anomaly calendar">
+              <div className="mb-4">
+                <p className="text-[14px] font-semibold text-foreground">Cost anomaly calendar</p>
+                <p className="text-[12px] text-muted-foreground mt-0.5">Days with anomalous spend highlighted</p>
+              </div>
               <Heatmap
                 data={
                   billing

@@ -44,7 +44,10 @@ export function TeamBreakdown(): JSX.Element {
 
   return (
     <Section id="teams" labelledBy="teams-heading">
-      <h2 id="teams-heading">Teams</h2>
+      <div className="mb-6">
+        <h2 id="teams-heading" className="text-[22px] font-bold tracking-tight text-foreground">Teams</h2>
+        <p className="text-[13px] text-muted-foreground mt-1">Usage and cost breakdown by team</p>
+      </div>
 
       {query.isLoading ? (
         <div className="space-y-4">
@@ -130,8 +133,11 @@ export function TeamBreakdown(): JSX.Element {
           <div className="space-y-4">
             <TeamTable teams={data.teams} orgAvgFailedRunRate={orgAvgFailedRunRate} />
 
-            <figure>
-              <figcaption className="text-sm font-medium mb-2">Runs per team</figcaption>
+            <figure className="rounded-lg border bg-card shadow-sm p-6" aria-label="Runs per team">
+              <figcaption className="mb-4">
+                <p className="text-[14px] font-semibold text-foreground">Runs per team</p>
+                <p className="text-[12px] text-muted-foreground mt-0.5">Total runs sorted by volume</p>
+              </figcaption>
               <BarChart
                 bars={[...data.teams]
                   .sort((a, b) => b.runs - a.runs)
@@ -139,8 +145,11 @@ export function TeamBreakdown(): JSX.Element {
               />
             </figure>
 
-            <figure>
-              <figcaption className="text-sm font-medium mb-2">Cost per team</figcaption>
+            <figure className="rounded-lg border bg-card shadow-sm p-6" aria-label="Cost per team">
+              <figcaption className="mb-4">
+                <p className="text-[14px] font-semibold text-foreground">Cost per team</p>
+                <p className="text-[12px] text-muted-foreground mt-0.5">Total API spend sorted by cost</p>
+              </figcaption>
               <BarChart
                 bars={[...data.teams]
                   .sort((a, b) => b.cost - a.cost)
@@ -148,8 +157,11 @@ export function TeamBreakdown(): JSX.Element {
               />
             </figure>
 
-            <figure>
-              <figcaption className="text-sm font-medium mb-2">Quality score per team</figcaption>
+            <figure className="rounded-lg border bg-card shadow-sm p-6" aria-label="Quality score per team">
+              <figcaption className="mb-4">
+                <p className="text-[14px] font-semibold text-foreground">Quality score per team</p>
+                <p className="text-[12px] text-muted-foreground mt-0.5">Average rated quality scores</p>
+              </figcaption>
               <ColumnChart
                 bars={[...data.teams]
                   .filter((t) => t.avg_quality_score !== null)
@@ -158,8 +170,11 @@ export function TeamBreakdown(): JSX.Element {
               />
             </figure>
 
-            <figure>
-              <figcaption className="text-sm font-medium mb-2">Use cases by team</figcaption>
+            <figure className="rounded-lg border bg-card shadow-sm p-6" aria-label="Use cases by team">
+              <figcaption className="mb-4">
+                <p className="text-[14px] font-semibold text-foreground">Use cases by team</p>
+                <p className="text-[12px] text-muted-foreground mt-0.5">Category distribution per team</p>
+              </figcaption>
               <div role="list" className="space-y-2">
                 {data.teams.map((team) => (
                   <div key={team.team_id} role="listitem">
@@ -181,9 +196,10 @@ export function TeamBreakdown(): JSX.Element {
               </div>
             </figure>
 
-            <figure>
-              <figcaption className="text-sm font-medium mb-2">
-                Cost per quality point (lower is better)
+            <figure className="rounded-lg border bg-card shadow-sm p-6" aria-label="Cost per quality point">
+              <figcaption className="mb-4">
+                <p className="text-[14px] font-semibold text-foreground">Cost per quality point</p>
+                <p className="text-[12px] text-muted-foreground mt-0.5">Lower is better</p>
               </figcaption>
               <ColumnChart
                 bars={[...data.teams]
