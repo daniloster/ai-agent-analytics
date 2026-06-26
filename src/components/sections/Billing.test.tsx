@@ -78,6 +78,7 @@ const OVERVIEW: OverviewResponse = {
   total_cost: 9800,
   total_cost_prior: 9000,
   retention_cost: 28.8,
+  retained_users_7d: 110,
   success_rate: 94.2,
   success_rate_prior: 93.0,
   avg_run_duration_ms: 47000,

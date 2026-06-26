@@ -47,7 +47,7 @@ export function Overview(): JSX.Element {
   const orgConfig = orgConfigQuery.data
   const loading = overview.isLoading || timeseries.isLoading
 
-  const retentionCost = d ? computeRetentionCost(d.total_cost, d.mau) : null
+  const retentionCost = d ? computeRetentionCost(d.total_cost, d.retained_users_7d) : null
   const costPerQualityPoint = d
     ? computeCostPerQualityPoint(d.total_cost, d.rated_run_count, d.avg_quality_score)
     : null
@@ -125,10 +125,10 @@ export function Overview(): JSX.Element {
       {/* Row 2 */}
       <div className="grid grid-cols-4 gap-4 mt-4">
         <KpiCard
-          label="Retention Cost"
+          label="7 Days Retention Cost"
           value={d && retentionCost !== null ? formatCurrency(retentionCost) : undefined}
-          formulaTooltip="Total cost / MAU - cost to retain each active user."
-          exampleTooltip="e.g. $41.76 / user"
+          formulaTooltip="Total cost / users retained in the last 7 days of the period."
+          exampleTooltip="e.g. $100.00 / user"
         />
         <KpiCard
           label="Success Rate"

@@ -26,6 +26,7 @@ describe('generateOverview', () => {
     expect(typeof result.total_cost).toBe('number')
     expect(typeof result.total_cost_prior).toBe('number')
     expect(typeof result.retention_cost).toBe('number')
+    expect(typeof result.retained_users_7d).toBe('number')
     expect(typeof result.success_rate).toBe('number')
     expect(typeof result.success_rate_prior).toBe('number')
     expect(typeof result.avg_run_duration_ms).toBe('number')
@@ -70,6 +71,15 @@ describe('generateOverview', () => {
       const result = generateOverview(makeSeededFaker(seed), STD_PARAMS)
       expect(result.success_rate).toBeGreaterThanOrEqual(0)
       expect(result.success_rate).toBeLessThanOrEqual(100)
+    }
+  })
+
+  it('retained_users_7d is a non-negative integer not exceeding mau', () => {
+    for (let seed = 0; seed < 20; seed++) {
+      const result = generateOverview(makeSeededFaker(seed), STD_PARAMS)
+      expect(Number.isInteger(result.retained_users_7d)).toBe(true)
+      expect(result.retained_users_7d).toBeGreaterThanOrEqual(0)
+      expect(result.retained_users_7d).toBeLessThanOrEqual(result.mau)
     }
   })
 

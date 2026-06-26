@@ -13,11 +13,11 @@ import {
 } from './formulas'
 
 describe('computeRetentionCost', () => {
-  it('returns totalCost / mau for valid inputs', () => {
+  it('returns totalCost / retainedUsers for valid inputs', () => {
     expect(computeRetentionCost(14200, 340)).toBeCloseTo(41.76, 2)
   })
 
-  it('returns 0 when mau is 0', () => {
+  it('returns 0 when retainedUsers is 0', () => {
     expect(computeRetentionCost(14200, 0)).toBe(0)
   })
 })

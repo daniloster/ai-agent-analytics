@@ -46,6 +46,7 @@ const OVERVIEW: Record<string, unknown> = {
   total_cost: 14200,
   total_cost_prior: 15000,
   retention_cost: 41.76,
+  retained_users_7d: 142,
   success_rate: 94.2,
   success_rate_prior: 91.0,
   avg_run_duration_ms: 47000,
@@ -114,6 +115,15 @@ it('renders exactly 12 KpiCard instances when API returns full OverviewResponse'
     // Each KpiCard renders a "More information" button; KPI-04 and KPI-14 are charts
     const infoButtons = screen.getAllByRole('button', { name: /more information/i })
     expect(infoButtons).toHaveLength(12)
+  })
+})
+
+it('Retention Cost KpiCard is labelled "7 Days Retention Cost"', async () => {
+  mockFetch()
+  const { Overview } = await import('./Overview')
+  render(<Overview />, { wrapper: makeWrapper() })
+  await waitFor(() => {
+    expect(screen.getByText('7 Days Retention Cost')).toBeTruthy()
   })
 })
 

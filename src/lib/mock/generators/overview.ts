@@ -30,7 +30,11 @@ export function generateOverview(faker: Faker, params: FilterParams): OverviewRe
 
   const totalCost = faker.number.float({ min: 100, max: 50000, fractionDigits: 2 })
   const totalCostPrior = faker.number.float({ min: 80, max: 48000, fractionDigits: 2 })
-  const retentionCost = mau > 0 ? totalCost / mau : 0
+
+  // Users who re-engaged within the last 7 days of the period (7-day retention window).
+  const retentionRate7d = faker.number.float({ min: 0.2, max: 0.7, fractionDigits: 2 })
+  const retained_users_7d = Math.round(mau * retentionRate7d)
+  const retentionCost = retained_users_7d > 0 ? totalCost / retained_users_7d : 0
 
   const successRate = clamp(faker.number.float({ min: 60, max: 99, fractionDigits: 1 }), 0, 100)
   const successRatePrior = clamp(faker.number.float({ min: 55, max: 99, fractionDigits: 1 }), 0, 100)
@@ -89,6 +93,7 @@ export function generateOverview(faker: Faker, params: FilterParams): OverviewRe
     total_cost: totalCost,
     total_cost_prior: totalCostPrior,
     retention_cost: retentionCost,
+    retained_users_7d,
     success_rate: successRate,
     success_rate_prior: successRatePrior,
     avg_run_duration_ms: avgRunDurationMs,

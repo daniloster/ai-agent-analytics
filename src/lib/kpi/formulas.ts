@@ -1,6 +1,6 @@
-export function computeRetentionCost(totalCost: number, mau: number): number {
-  if (mau === 0) return 0
-  return totalCost / mau
+export function computeRetentionCost(totalCost: number, retainedUsers: number): number {
+  if (retainedUsers === 0) return 0
+  return totalCost / retainedUsers
 }
 
 export function computeCostPerQualityPoint(
