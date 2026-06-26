@@ -1,0 +1,25 @@
+import { createContext, useContext } from 'react'
+import type { ReadonlySignal, Signal } from '@preact/signals-react'
+import type { ActivePoint, AnyD3Scale } from '../../types/charts'
+import type { ChartTokens } from './primitives/useChartTokens'
+
+export interface VisualizationContextValue {
+  dataSignal: ReadonlySignal<Record<string, unknown>[]>
+  innerWidth: number
+  innerHeight: number
+  tokens: ChartTokens
+  scales: Record<string, AnyD3Scale>
+  baseScale: AnyD3Scale | null
+  activePoint: Signal<ActivePoint | null>
+  mousePosition: Signal<{ x: number; y: number } | null>
+}
+
+export const VisualizationContext = createContext<VisualizationContextValue | null>(null)
+
+export function useVisualizationContext(): VisualizationContextValue {
+  const ctx = useContext(VisualizationContext)
+  if (ctx === null) {
+    throw new Error('useVisualizationContext must be called inside a <Visualization> component')
+  }
+  return ctx
+}

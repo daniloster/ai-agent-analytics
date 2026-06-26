@@ -1197,7 +1197,7 @@ export function Annotation(props: AnnotationProps): JSX.Element | null {
 | [x]  | 1        | T-1: Shared chart types + useChartTokens | - | Small |
 | [x]  | 2        | T-2: D3 scale helpers | T-1 | Small |
 | [x]  | 3        | T-3: ChartSVG, Axis, Grid primitives | T-1 | Medium |
-| [ ]  | 4        | T-4: VisualizationContext | T-1 | Small |
+| [x]  | 4        | T-4: VisualizationContext | T-1 | Small |
 | [ ]  | 5        | T-5: Visualization root | T-2, T-3, T-4 | Large |
 | [ ]  | 6        | T-6: Line mark | T-5 | Small |
 | [ ]  | 7        | T-7: Area mark | T-5 | Medium |
