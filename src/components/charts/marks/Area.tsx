@@ -1,0 +1,111 @@
+import { AreaClosed } from '@visx/shape'
+import { LinearGradient } from '@visx/gradient'
+import { useVisualizationContext } from '../VisualizationContext'
+import type { ActivePoint, AnyD3Scale } from '../../../types/charts'
+import type { LineProps } from './Line'
+
+export interface AreaProps extends LineProps {
+  fillOpacity?: number
+}
+
+function makeActivePoint(
+  series: string,
+  axis: string,
+  datum: Record<string, unknown>,
+  xScale: (v: unknown) => number,
+  yScale: (v: unknown) => number,
+  baseAxisAccessor: (d: Record<string, unknown>) => unknown,
+): ActivePoint {
+  return {
+    series,
+    axis,
+    datum,
+    x: xScale(baseAxisAccessor(datum)),
+    y: yScale(datum[series]),
+  }
+}
+
+export function Area(props: AreaProps): JSX.Element | null {
+  const {
+    dataSignal,
+    scales,
+    baseScale,
+    baseAxisAccessor,
+    innerWidth,
+    tokens,
+    activePoint,
+  } = useVisualizationContext()
+
+  if (innerWidth === 0) return null
+
+  const data = dataSignal.value
+  const color = props.color ?? tokens.primary
+  const gradientId = `area-gradient-${props.series}`
+
+  const yScale = scales[props.axis] as unknown as AnyD3Scale
+  const xScaleFn = baseScale as ((v: unknown) => number) | null
+  const yScaleFn = yScale as unknown as (v: unknown) => number
+
+  if (!xScaleFn || !baseAxisAccessor) return null
+
+  const buildPoint = (datum: Record<string, unknown>) =>
+    makeActivePoint(props.series, props.axis, datum, xScaleFn, yScaleFn, baseAxisAccessor)
+
+  return (
+    <>
+      <defs>
+        <LinearGradient
+          id={gradientId}
+          from={color}
+          to={color}
+          fromOpacity={1}
+          toOpacity={props.fillOpacity ?? 0.2}
+          vertical
+        />
+      </defs>
+      <AreaClosed
+        data={data}
+        x={(d) => xScaleFn(baseAxisAccessor(d))}
+        y={(d) => yScaleFn(d[props.series])}
+        yScale={yScale as Parameters<typeof AreaClosed>[0]['yScale']}
+        fill={`url(#${gradientId})`}
+        stroke={color}
+        strokeWidth={props.strokeWidth ?? 2}
+      />
+      {data.map((datum, i) => {
+        const cx = xScaleFn(baseAxisAccessor(datum))
+        const cy = yScaleFn(datum[props.series])
+        const handleActivate = () => {
+          activePoint.value = buildPoint(datum)
+        }
+        const handleDeactivate = () => {
+          activePoint.value = null
+        }
+        return (
+          <circle
+            key={i}
+            cx={cx}
+            cy={cy}
+            r={4}
+            opacity={0}
+            fill={color}
+            tabIndex={0}
+            role="listitem"
+            aria-label={`${props.series}: ${datum[props.series]}`}
+            onPointerEnter={handleActivate}
+            onPointerLeave={handleDeactivate}
+            onFocus={handleActivate}
+            onBlur={handleDeactivate}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                activePoint.value = buildPoint(datum)
+              } else if (e.key === 'Escape') {
+                activePoint.value = null
+              }
+            }}
+          />
+        )
+      })}
+    </>
+  )
+}

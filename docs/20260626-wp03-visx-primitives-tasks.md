@@ -1200,7 +1200,7 @@ export function Annotation(props: AnnotationProps): JSX.Element | null {
 | [x]  | 4        | T-4: VisualizationContext | T-1 | Small |
 | [x]  | 5        | T-5: Visualization root | T-2, T-3, T-4 | Large |
 | [x]  | 6        | T-6: Line mark | T-5 | Small |
-| [ ]  | 7        | T-7: Area mark | T-5 | Medium |
+| [x]  | 7        | T-7: Area mark | T-5 | Medium |
 | [ ]  | 8        | T-8: Bar mark | T-5 | Medium |
 | [ ]  | 9        | T-9: Gauge mark | T-5 | Small |
 | [ ]  | 10       | T-10: HeatmapMark | T-5 | Medium |
