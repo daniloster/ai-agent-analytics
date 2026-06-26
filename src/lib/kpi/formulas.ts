@@ -43,3 +43,11 @@ export function computeDeltaPercent(current: number, prior: number): number {
   if (prior === 0) return 0
   return ((current - prior) / prior) * 100
 }
+
+export type ErrorRateSeverity = 'good' | 'warning' | 'critical'
+
+export function computeErrorRateSeverity(errorRate: number): ErrorRateSeverity {
+  if (errorRate < 0.02) return 'good'
+  if (errorRate < 0.05) return 'warning'
+  return 'critical'
+}

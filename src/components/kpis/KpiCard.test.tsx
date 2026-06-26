@@ -105,3 +105,31 @@ it('no trend prop renders no SVG element', () => {
   const { container } = render(<KpiCard {...BASE_PROPS} />)
   expect(container.querySelector('svg')).toBeNull()
 })
+
+it('statusDot="critical" renders a span with bg-red-500', () => {
+  const { container } = render(<KpiCard {...BASE_PROPS} statusDot="critical" />)
+  expect(container.querySelector('.bg-red-500')).not.toBeNull()
+})
+
+it('statusDot="warning" renders a span with bg-amber-500', () => {
+  const { container } = render(<KpiCard {...BASE_PROPS} statusDot="warning" />)
+  expect(container.querySelector('.bg-amber-500')).not.toBeNull()
+})
+
+it('statusDot="good" renders a span with bg-emerald-500', () => {
+  const { container } = render(<KpiCard {...BASE_PROPS} statusDot="good" />)
+  expect(container.querySelector('.bg-emerald-500')).not.toBeNull()
+})
+
+it('no statusDot prop renders no dot element', () => {
+  const { container } = render(<KpiCard {...BASE_PROPS} />)
+  expect(container.querySelector('.bg-red-500')).toBeNull()
+  expect(container.querySelector('.bg-amber-500')).toBeNull()
+  expect(container.querySelector('.bg-emerald-500')).toBeNull()
+})
+
+it('dot span has aria-hidden="true"', () => {
+  const { container } = render(<KpiCard {...BASE_PROPS} statusDot="good" />)
+  const dot = container.querySelector('.bg-emerald-500')
+  expect(dot?.getAttribute('aria-hidden')).toBe('true')
+})

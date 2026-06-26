@@ -6,6 +6,7 @@ import {
   computeQualityCostEfficiency,
   computeProjectedMonthEnd,
   computeDeltaPercent,
+  computeErrorRateSeverity,
 } from './formulas'
 
 describe('computeRetentionCost', () => {
@@ -94,5 +95,27 @@ describe('computeDeltaPercent', () => {
 
   it('returns 0 when prior is 0', () => {
     expect(computeDeltaPercent(100, 0)).toBe(0)
+  })
+})
+
+describe('computeErrorRateSeverity', () => {
+  it('returns good for errorRate < 0.02', () => {
+    expect(computeErrorRateSeverity(0.01)).toBe('good')
+  })
+
+  it('returns warning at boundary 0.02 (inclusive)', () => {
+    expect(computeErrorRateSeverity(0.02)).toBe('warning')
+  })
+
+  it('returns warning for errorRate between 0.02 and 0.05', () => {
+    expect(computeErrorRateSeverity(0.03)).toBe('warning')
+  })
+
+  it('returns critical at boundary 0.05 (inclusive)', () => {
+    expect(computeErrorRateSeverity(0.05)).toBe('critical')
+  })
+
+  it('returns critical for errorRate > 0.05', () => {
+    expect(computeErrorRateSeverity(0.06)).toBe('critical')
   })
 })

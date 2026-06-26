@@ -1,4 +1,10 @@
 import { useSignal } from '@preact/signals-react'
+
+const STATUS_DOT_COLORS: Record<'good' | 'warning' | 'critical', string> = {
+  good: 'bg-emerald-500',
+  warning: 'bg-amber-500',
+  critical: 'bg-red-500',
+}
 import { Card, CardHeader, CardContent } from '../ui/card'
 import { Skeleton } from '../ui/skeleton'
 import { Popover, PopoverTrigger, PopoverContent } from '../ui/popover'
@@ -13,6 +19,7 @@ export interface KpiCardProps {
   deltaLabel?: string
   trend?: Array<{ date: string; value: number }>
   trendColor?: string
+  statusDot?: 'good' | 'warning' | 'critical'
   formulaTooltip: string
   exampleTooltip: string
   insufficientData?: boolean
@@ -46,7 +53,15 @@ export function KpiCard(props: KpiCardProps): JSX.Element {
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-muted-foreground">{props.label}</span>
+          <div className="flex items-center gap-2">
+            {props.statusDot && (
+              <span
+                className={`h-2 w-2 rounded-full ${STATUS_DOT_COLORS[props.statusDot]}`}
+                aria-hidden="true"
+              />
+            )}
+            <span className="text-sm font-medium text-muted-foreground">{props.label}</span>
+          </div>
           <Popover open={open.value} onOpenChange={(v) => { open.value = v }}>
             <PopoverTrigger asChild>
               <button
