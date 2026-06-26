@@ -241,7 +241,7 @@ Test render
 | `src/components/charts/BarChart.test.ts` (modified) | All Bar rects have `role="listitem"`, `tabIndex={0}`, non-empty `aria-label`; keyboard Enter triggers tooltip |
 | `src/components/charts/DonutChart.test.ts` (modified) | All Arc paths have `role="listitem"`, `tabIndex={0}`, `aria-label` with category and percentage |
 | `src/components/charts/Heatmap.test.ts` (modified) | All cells have `role="listitem"`, `tabIndex` managed via roving tabindex; axe-core check passes on full heatmap render |
-| `src/components/sections/ExecutiveOverview.test.ts` (modified) | axe check passes; each chart is inside `<figure>` with `<figcaption>`; section has `aria-labelledby` |
+| `src/components/sections/Overview.test.ts` (modified) | axe check passes; each chart is inside `<figure>` with `<figcaption>`; section has `aria-labelledby` |
 | `src/components/sections/TeamBreakdown.test.ts` (modified) | axe check passes; section has `aria-labelledby` |
 | `src/components/sections/Reliability.test.ts` (modified) | axe check passes; section has `aria-labelledby` |
 | `src/components/sections/Billing.test.ts` (modified) | axe check passes; section has `aria-labelledby` |

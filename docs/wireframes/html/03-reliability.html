@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1440">
+<title>Reliability - AgentCloud Analytics</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    background: #f4f4f5;
+    color: #09090b;
+    min-width: 1440px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .header {
+    background: #fff; border-bottom: 1px solid #e4e4e7;
+    padding: 0 32px; height: 56px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-left { display: flex; align-items: center; gap: 8px; }
+  .logo-icon { width:28px;height:28px;background:#18181b;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700; }
+  .logo-text { font-size:15px;font-weight:600; }
+  .header-right { display: flex; align-items: center; gap: 8px; }
+  .btn { display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid #e4e4e7;background:#fff;color:#09090b; }
+  .btn-primary { background:#18181b;color:#fff;border-color:#18181b; }
+  .nav-tabs { background:#fff;border-bottom:1px solid #e4e4e7;padding:0 32px;display:flex;align-items:flex-end; }
+  .tab { padding:12px 16px;font-size:13px;font-weight:500;color:#71717a;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px; }
+  .tab.active { color:#09090b;border-bottom-color:#18181b; }
+  .page-content { padding: 28px 32px; }
+  .page-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:24px; }
+  .page-title { font-size:22px;font-weight:700;letter-spacing:-0.5px; }
+  .page-subtitle { font-size:13px;color:#71717a;margin-top:2px; }
+  /* KPI grid */
+  .kpi-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px; }
+  .kpi-card { background:#fff;border:1px solid #e4e4e7;border-radius:8px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,0.08); }
+  .kpi-top { display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px; }
+  .kpi-label { font-size:12px;font-weight:500;color:#71717a; }
+  .kpi-help { width:18px;height:18px;border-radius:50%;border:1px solid #e4e4e7;background:#f4f4f5;display:flex;align-items:center;justify-content:center;font-size:10px;color:#71717a;font-weight:600; }
+  .kpi-value-row { display:flex;align-items:center;gap:8px;margin-bottom:6px; }
+  .status-dot { width:8px;height:8px;border-radius:50%;flex-shrink:0; }
+  .kpi-value { font-size:26px;font-weight:700;letter-spacing:-0.8px;font-variant-numeric:tabular-nums;line-height:1; }
+  .delta { display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:20px;font-size:11px;font-weight:600; }
+  .delta-amber { background:#fffbeb;color:#d97706; }
+  .delta-green { background:#f0fdf4;color:#16a34a; }
+  .delta-red { background:#fef2f2;color:#dc2626; }
+  .kpi-sub { font-size:11px;color:#71717a;margin-top:4px; }
+  /* Chart grid 2 */
+  .chart-grid-2 { display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px; }
+  .chart-card { background:#fff;border:1px solid #e4e4e7;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.08);padding:24px; }
+  .chart-card-full { background:#fff;border:1px solid #e4e4e7;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.08);padding:24px;margin-bottom:16px; }
+  .chart-header { display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px; }
+  .chart-title { font-size:14px;font-weight:600; }
+  .chart-subtitle { font-size:12px;color:#71717a;margin-top:2px; }
+  .legend { display:flex;gap:14px;align-items:center; }
+  .legend-item { display:flex;align-items:center;gap:5px;font-size:11px;color:#71717a; }
+  .legend-dot { width:8px;height:8px;border-radius:50%; }
+  /* Heatmap */
+  .heatmap-label-row { display:flex;gap:0;margin-bottom:6px; }
+  .heatmap-row { display:flex;gap:4px;flex-wrap:wrap; }
+  .heatmap-cell {
+    width: 36px; height: 36px; border-radius: 5px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 500; cursor: pointer;
+    border: 1px solid transparent;
+  }
+  .cell-day { font-size: 9px; color: rgba(0,0,0,0.4); line-height: 1; }
+  .cell-pct { font-size: 9px; font-weight: 600; line-height: 1.2; }
+  .cell-green { background:#dcfce7; color:#16a34a; }
+  .cell-amber { background:#fef3c7; color:#d97706; }
+  .cell-red { background:#fee2e2; color:#dc2626; }
+  .kpi-grid-2 { display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:16px; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <div class="logo-icon">&#x2B21;</div>
+    <span class="logo-text">AgentCloud Analytics</span>
+  </div>
+  <div class="header-right">
+    <button class="btn">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="12" height="8" rx="1"/><path d="M5 4V3M11 4V3"/></svg>
+      Last 30 days
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg>
+    </button>
+    <button class="btn">All Teams <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg></button>
+    <button class="btn btn-primary">Understanding &#8599;</button>
+  </div>
+</header>
+
+<nav class="nav-tabs">
+  <div class="tab">Overview</div>
+  <div class="tab">Teams</div>
+  <div class="tab active">Reliability</div>
+  <div class="tab">Billing</div>
+</nav>
+
+<main class="page-content">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Reliability</div>
+      <div class="page-subtitle">Error rates, latency, and availability metrics</div>
+    </div>
+    <span style="font-size:13px;color:#71717a;">Jun 1 - Jun 30, 2026</span>
+  </div>
+
+  <!-- Row 1: KPI Cards -->
+  <div class="kpi-grid">
+    <!-- Error Rate -->
+    <div class="kpi-card" style="border-left:3px solid #d97706;">
+      <div class="kpi-top">
+        <span class="kpi-label">Error Rate</span>
+        <span class="kpi-help">?</span>
+      </div>
+      <div class="kpi-value-row">
+        <div class="status-dot" style="background:#d97706;box-shadow:0 0 0 3px #fde68a;"></div>
+        <div class="kpi-value" style="color:#d97706;">3.8%</div>
+      </div>
+      <div>
+        <span class="delta delta-amber">&#8593; +0.6pp trending up</span>
+      </div>
+      <div class="kpi-sub" style="margin-top:6px;">Threshold: 5.0% - amber alert</div>
+      <svg width="100%" height="32" viewBox="0 0 200 32" style="margin-top:8px;" preserveAspectRatio="none">
+        <polyline points="0,20 20,18 40,22 60,20 80,24 100,22 120,24 140,26 160,25 180,28 200,27" fill="none" stroke="#d97706" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <!-- Timeout Rate -->
+    <div class="kpi-card" style="border-left:3px solid #16a34a;">
+      <div class="kpi-top">
+        <span class="kpi-label">Timeout Rate</span>
+        <span class="kpi-help">?</span>
+      </div>
+      <div class="kpi-value-row">
+        <div class="status-dot" style="background:#16a34a;box-shadow:0 0 0 3px #bbf7d0;"></div>
+        <div class="kpi-value" style="color:#16a34a;">1.2%</div>
+      </div>
+      <div>
+        <span class="delta delta-green">&#8595; -0.2pp improving</span>
+      </div>
+      <div class="kpi-sub" style="margin-top:6px;">Default timeout: 30s</div>
+      <svg width="100%" height="32" viewBox="0 0 200 32" style="margin-top:8px;" preserveAspectRatio="none">
+        <polyline points="0,14 20,16 40,15 60,18 80,16 100,18 120,16 140,15 160,14 180,13 200,12" fill="none" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <!-- Latency -->
+    <div class="kpi-card" style="border-left:3px solid #2563eb;">
+      <div class="kpi-top">
+        <span class="kpi-label">P50 / P95 / P99 Latency</span>
+        <span class="kpi-help">?</span>
+      </div>
+      <div class="kpi-value-row">
+        <div class="status-dot" style="background:#2563eb;box-shadow:0 0 0 3px #bfdbfe;"></div>
+        <div>
+          <div style="display:flex;gap:12px;align-items:baseline;">
+            <span style="font-size:22px;font-weight:700;color:#09090b;font-variant-numeric:tabular-nums;">2.1s</span>
+            <span style="font-size:14px;font-weight:600;color:#71717a;">8.4s</span>
+            <span style="font-size:14px;font-weight:600;color:#71717a;">18.2s</span>
+          </div>
+          <div style="display:flex;gap:12px;font-size:10px;color:#71717a;margin-top:2px;">
+            <span>P50</span><span style="margin-left:8px;">P95</span><span style="margin-left:10px;">P99</span>
+          </div>
+        </div>
+      </div>
+      <div class="kpi-sub" style="margin-top:4px;">Avg run duration across all agents</div>
+    </div>
+    <!-- Queue Wait -->
+    <div class="kpi-card" style="border-left:3px solid #16a34a;">
+      <div class="kpi-top">
+        <span class="kpi-label">Queue Wait Time</span>
+        <span class="kpi-help">?</span>
+      </div>
+      <div class="kpi-value-row">
+        <div class="status-dot" style="background:#16a34a;box-shadow:0 0 0 3px #bbf7d0;"></div>
+        <div class="kpi-value" style="color:#16a34a;">2.1s</div>
+      </div>
+      <div>
+        <span class="delta delta-green">&#8595; -0.4s vs last week</span>
+      </div>
+      <div class="kpi-sub" style="margin-top:6px;">Median time before execution starts</div>
+      <svg width="100%" height="32" viewBox="0 0 200 32" style="margin-top:8px;" preserveAspectRatio="none">
+        <polyline points="0,10 20,12 40,14 60,12 80,16 100,14 120,16 140,15 160,14 180,13 200,12" fill="none" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Row 2: Charts -->
+  <div class="chart-grid-2">
+    <!-- Error Rate Trend -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Error Rate Trend</div>
+          <div class="chart-subtitle">Daily error rate with 5% alert threshold</div>
+        </div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#dc2626;"></div> Error Rate</div>
+          <div class="legend-item" style="gap:4px;"><div style="width:16px;height:0;border-top:2px dashed #dc2626;opacity:0.5;"></div> 5% threshold</div>
+        </div>
+      </div>
+      <svg width="100%" height="210" viewBox="0 0 540 210">
+        <defs>
+          <linearGradient id="errGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#dc2626" stop-opacity="0.15"/>
+            <stop offset="100%" stop-color="#dc2626" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <!-- Grid -->
+        <line x1="44" y1="15" x2="530" y2="15" stroke="#f4f4f5" stroke-width="1"/>
+        <line x1="44" y1="55" x2="530" y2="55" stroke="#f4f4f5" stroke-width="1"/>
+        <line x1="44" y1="95" x2="530" y2="95" stroke="#f4f4f5" stroke-width="1"/>
+        <line x1="44" y1="135" x2="530" y2="135" stroke="#f4f4f5" stroke-width="1"/>
+        <line x1="44" y1="175" x2="530" y2="175" stroke="#e4e4e7" stroke-width="1"/>
+        <!-- 5% threshold line -->
+        <line x1="44" y1="55" x2="530" y2="55" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.5"/>
+        <text x="533" y="59" font-size="9" fill="#dc2626" font-weight="600">5%</text>
+        <!-- Y labels -->
+        <text x="38" y="19" text-anchor="end" font-size="10" fill="#71717a">8%</text>
+        <text x="38" y="59" text-anchor="end" font-size="10" fill="#71717a">5%</text>
+        <text x="38" y="99" text-anchor="end" font-size="10" fill="#71717a">3%</text>
+        <text x="38" y="139" text-anchor="end" font-size="10" fill="#71717a">1%</text>
+        <text x="38" y="179" text-anchor="end" font-size="10" fill="#71717a">0%</text>
+        <!-- Error rate area -->
+        <path d="M44,135 L87,140 L130,130 L173,125 L216,128 L259,120 L302,122 L345,115 L388,108 L431,102 L474,97 L530,92 L530,175 L44,175 Z" fill="url(#errGrad)"/>
+        <polyline points="44,135 87,140 130,130 173,125 216,128 259,120 302,122 345,115 388,108 431,102 474,97 530,92" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Amber annotation at end -->
+        <circle cx="530" cy="92" r="4" fill="#d97706" stroke="#fff" stroke-width="2"/>
+        <rect x="400" y="74" width="60" height="18" rx="3" fill="#fffbeb" stroke="#d97706" stroke-width="1"/>
+        <text x="430" y="87" text-anchor="middle" font-size="10" fill="#d97706" font-weight="600">3.8% &#8593;</text>
+        <!-- X labels -->
+        <text x="44" y="195" text-anchor="middle" font-size="10" fill="#71717a">Jun 1</text>
+        <text x="130" y="195" text-anchor="middle" font-size="10" fill="#71717a">Jun 7</text>
+        <text x="216" y="195" text-anchor="middle" font-size="10" fill="#71717a">Jun 13</text>
+        <text x="302" y="195" text-anchor="middle" font-size="10" fill="#71717a">Jun 17</text>
+        <text x="388" y="195" text-anchor="middle" font-size="10" fill="#71717a">Jun 23</text>
+        <text x="474" y="195" text-anchor="middle" font-size="10" fill="#71717a">Jun 28</text>
+      </svg>
+    </div>
+
+    <!-- Error Type Donut -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Error Type Distribution</div>
+          <div class="chart-subtitle">Breakdown of failure causes this period</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:32px;justify-content:center;padding:8px 0;">
+        <!-- Donut SVG -->
+        <svg width="160" height="160" viewBox="0 0 160 160">
+          <circle cx="80" cy="80" r="58" fill="none" stroke="#dc2626" stroke-width="24"
+            stroke-dasharray="109 256" stroke-dashoffset="0" transform="rotate(-90 80 80)"/>
+          <circle cx="80" cy="80" r="58" fill="none" stroke="#d97706" stroke-width="24"
+            stroke-dasharray="82 256" stroke-dashoffset="-109" transform="rotate(-90 80 80)"/>
+          <circle cx="80" cy="80" r="58" fill="none" stroke="#2563eb" stroke-width="24"
+            stroke-dasharray="51 256" stroke-dashoffset="-191" transform="rotate(-90 80 80)"/>
+          <circle cx="80" cy="80" r="58" fill="none" stroke="#6b7280" stroke-width="24"
+            stroke-dasharray="14 256" stroke-dashoffset="-242" transform="rotate(-90 80 80)"/>
+          <!-- Center text -->
+          <text x="80" y="75" text-anchor="middle" font-size="18" font-weight="700" fill="#09090b">473</text>
+          <text x="80" y="92" text-anchor="middle" font-size="10" fill="#71717a">errors</text>
+        </svg>
+        <!-- Legend -->
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:12px;height:12px;border-radius:3px;background:#dc2626;flex-shrink:0;"></div>
+            <div>
+              <div style="font-size:12px;font-weight:500;">Model Error</div>
+              <div style="font-size:11px;color:#71717a;">43% - 203 errors</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:12px;height:12px;border-radius:3px;background:#d97706;flex-shrink:0;"></div>
+            <div>
+              <div style="font-size:12px;font-weight:500;">Timeout</div>
+              <div style="font-size:11px;color:#71717a;">32% - 151 errors</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:12px;height:12px;border-radius:3px;background:#2563eb;flex-shrink:0;"></div>
+            <div>
+              <div style="font-size:12px;font-weight:500;">Tool Call Failure</div>
+              <div style="font-size:11px;color:#71717a;">20% - 95 errors</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:12px;height:12px;border-radius:3px;background:#6b7280;flex-shrink:0;"></div>
+            <div>
+              <div style="font-size:12px;font-weight:500;">Other</div>
+              <div style="font-size:11px;color:#71717a;">5% - 24 errors</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Availability Heatmap -->
+  <div class="chart-card-full">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title">Platform Availability - June 2026</div>
+        <div class="chart-subtitle">Daily uptime percentage - hover for incident details</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;font-size:11px;color:#71717a;">
+        <div style="display:flex;align-items:center;gap:4px;"><div style="width:12px;height:12px;border-radius:3px;background:#dcfce7;"></div> &#62;99.9%</div>
+        <div style="display:flex;align-items:center;gap:4px;"><div style="width:12px;height:12px;border-radius:3px;background:#fef3c7;"></div> 99.0-99.9%</div>
+        <div style="display:flex;align-items:center;gap:4px;"><div style="width:12px;height:12px;border-radius:3px;background:#fee2e2;"></div> &#60;99.0%</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:4px;flex-wrap:wrap;">
+      <!-- Days 1-10: all green -->
+      <div class="heatmap-cell cell-green"><span class="cell-day">1</span><span class="cell-pct">100%</span></div>
+      <div class="heatmap-cell cell-green"><span class="cell-day">2</span><span class="cell-pct">100%</span></div>
+      <div class="heatmap-cell cell-green"><span class="cell-day">3</span><span class="cell-pct">100%</span></div>
+      <div class="heatmap-cell cell-green"><span class="cell-day">4</span><span class="cell-pct">99.97%</span></div>
+      <div class="heatmap-cell cell-green"><span class="cell-day">5</span><span class="cell-pct">100%</span></div>
+      <div class="heatmap-cell cell-green"><span class="cell-day">6</span><span class="cell-pct">100%</span></div>
+      <div class="heatmap-cell cell-green"><span class="cell-day">7</span><span class="cell-pct">99.99%</span></div>
+      <div class="heatmap-cell cell-green"><span class="cell-day">8</span><span class="cell-pct">100%</span></div>
+      <div class="heatmap-cell cell-green"><span class="cell-day">9</span><span class="cell-pct">100%</span></div>
+      <div class="heatmap-cell cell-green"><span class="cell-day">10</span><span class="cell-pct">99.98%</span></div>
+      <!-- Day 11: amber -->
+      <div class="heatmap-cell cell-amber" style="border:1px solid #fbbf24;"><span class="cell-day">11</span><span class="cell-pct">99.3%</span></div>
+      <!-- Days 12-17: green -->
+      <div class="heatmap-cell cell-green"><span class="cell-day">12</span><span class="cell-pct">100%</span></div>
+      <div class="heatmap-cell cell-green"><span class="cell-day">13</span><span class="cell-pct">99.99%</span></div>
+      <div class="heatmap-cell cell-green"><span class="cell-day">14</span><span class="cell-pct">100%</span></div>
+      <div class="heatmap-cell cell-green"><span class="cell-day">15</span><span class="cell-pct">100%</span></div>
+      <div class="heatmap-cell cell-green"><span class="cell-day">16</span><span class="cell-pct">99.97%</span></div>
+      <div class="heatmap-cell cell-green"><span class="cell-day">17</span><span class="cell-pct">100%</span></div>
+      <div class="heatmap-cell cell-green"><span class="cell-day">18</span><span class="cell-pct">100%</span></div>
+      <div class="heatmap-cell cell-green"><span class="cell-day">19</span><span class="cell-pct">99.96%</span></div>
+      <div class="heatmap-cell cell-green"><span class="cell-day">20</span><span class="cell-pct">100%</span></div>
+      <div class="heatmap-cell cell-green"><span class="cell-day">21</span><span class="cell-pct">100%</span></div>
+      <div class="heatmap-cell cell-green"><span class="cell-day">22</span><span class="cell-pct">99.99%</span></div>
+      <div class="heatmap-cell cell-green"><span class="cell-day">23</span><span class="cell-pct">100%</span></div>
+      <div class="heatmap-cell cell-green"><span class="cell-day">24</span><span class="cell-pct">100%</span></div>
+      <div class="heatmap-cell cell-green"><span class="cell-day">25</span><span class="cell-pct">99.98%</span></div>
+      <div class="heatmap-cell cell-green"><span class="cell-day">26</span><span class="cell-pct">100%</span></div>
+      <!-- Day 27: amber -->
+      <div class="heatmap-cell cell-amber" style="border:1px solid #fbbf24;"><span class="cell-day">27</span><span class="cell-pct">99.4%</span></div>
+      <div class="heatmap-cell cell-green"><span class="cell-day">28</span><span class="cell-pct">100%</span></div>
+      <div class="heatmap-cell cell-green"><span class="cell-day">29</span><span class="cell-pct">99.97%</span></div>
+      <!-- Day 30: partial -->
+      <div class="heatmap-cell cell-green" style="opacity:0.6;"><span class="cell-day">30</span><span class="cell-pct">---</span></div>
+    </div>
+    <div style="margin-top:12px;padding-top:12px;border-top:1px solid #f4f4f5;display:flex;gap:24px;font-size:12px;color:#71717a;">
+      <span>MTD Availability: <strong style="color:#16a34a;">99.91%</strong></span>
+      <span>Incidents: <strong style="color:#09090b;">2</strong></span>
+      <span>Longest Incident: <strong style="color:#09090b;">42 min</strong> (Jun 11)</span>
+      <span>MTTR: <strong style="color:#09090b;">24.3 min</strong></span>
+    </div>
+  </div>
+
+  <!-- Row: Retry Rate + MTTR -->
+  <div class="kpi-grid" style="grid-template-columns:repeat(2,1fr);margin-bottom:0;">
+    <!-- Retry Rate -->
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-label">Retry Rate</span>
+        <span class="kpi-help">?</span>
+      </div>
+      <div class="kpi-value-row">
+        <div class="status-dot" style="background:#d97706;box-shadow:0 0 0 3px #fde68a;"></div>
+        <div class="kpi-value">8.3%</div>
+      </div>
+      <span class="delta delta-amber">&#8593; +1.1pp vs last month</span>
+      <div class="kpi-sub" style="margin-top:6px;">Runs that triggered at least one retry</div>
+    </div>
+    <!-- MTTR -->
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-label">Mean Time to Recover (MTTR)</span>
+        <span class="kpi-help">?</span>
+      </div>
+      <div class="kpi-value-row">
+        <div class="status-dot" style="background:#16a34a;box-shadow:0 0 0 3px #bbf7d0;"></div>
+        <div class="kpi-value">24.3 <span style="font-size:15px;font-weight:500;color:#71717a;">min</span></div>
+      </div>
+      <span class="delta delta-green">&#8595; -8.1 min vs last month</span>
+      <div class="kpi-sub" style="margin-top:6px;">Avg time from incident start to resolution</div>
+    </div>
+  </div>
+
+</main>
+</body>
+</html>

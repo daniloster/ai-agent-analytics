@@ -220,7 +220,7 @@ export function KpiEntryCard({ kpi }: { kpi: KpiEntry }): JSX.Element
   - **Visualization:** `<p className="text-xs text-muted-foreground">{kpi.visualization}</p>`
 
 Used in `UnderstandingPage` inside the `#kpis` section, grouped by `kpi.section` into five subsections with a heading each:
-- "Section 1: Executive Overview" (14 cards)
+- "Section 1: Overview" (14 cards)
 - "Section 2: Team Breakdown" (11 cards)
 - "Section 3: Reliability" (10 cards)
 - "Section 4: Billing & Financial" (10 cards)
@@ -283,7 +283,7 @@ UnderstandingPage renders #kpis section:
   --> renders in order: overview, teams, reliability, billing, quality
 
 For each group:
-  --> <h3>{sectionLabel}</h3>   e.g. "Section 1: Executive Overview"
+  --> <h3>{sectionLabel}</h3>   e.g. "Section 1: Overview"
   --> <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {group.map(kpi => <KpiEntryCard key={kpi.id} kpi={kpi} />)}
       </div>
@@ -323,7 +323,7 @@ User clicks D-2 row ("Chart library")
 1. Navigating to `/understanding` renders `UnderstandingPage` with no console errors and no uncaught exceptions.
 2. Navigating to `/` from the "Back to Dashboard" link renders the full analytics dashboard with the default filter state.
 3. The KPI Catalog section renders exactly 49 `KpiEntryCard` components (verifiable by counting rendered cards or checking `KPI_CATALOG.length === 49`).
-4. KPI entries are grouped correctly: "Section 1: Executive Overview" group contains exactly 14 cards (KPI-01 through KPI-14).
+4. KPI entries are grouped correctly: "Section 1: Overview" group contains exactly 14 cards (KPI-01 through KPI-14).
 5. The Key Decisions section renders exactly 15 rows in `DecisionTable` (D-1 through D-15).
 6. All 15 decisions have `status: 'Resolved'`; the "Resolved" badge is shown in green for each row.
 7. The `#premise` section contains text explicitly naming "hybrid token + seat model" and labeling it as a premise for evaluators.

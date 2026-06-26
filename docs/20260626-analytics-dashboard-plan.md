@@ -144,7 +144,7 @@ Query params for all analytics endpoints: `from`, `to`, `team_id` (optional).
 
 ---
 
-## WP-05: Section 1 - Executive Overview
+## WP-05: Section 1 - Overview
 
 **What it delivers:** The top section of the dashboard with all 14 executive KPIs visible and wired to mock data. A CTO can open the page and read the org health at a glance.
 
@@ -152,7 +152,7 @@ Query params for all analytics endpoints: `from`, `to`, `team_id` (optional).
 
 **Deliverables:**
 - `src/components/kpis/KpiCard.tsx` - shared card: metric value, delta badge (green/red), sparkline slot, info tooltip with formula + example (used across all four sections)
-- `src/components/sections/ExecutiveOverview.tsx` - section container, TanStack Query hook for `/api/analytics/overview`
+- `src/components/sections/Overview.tsx` - section container, TanStack Query hook for `/api/analytics/overview`
 - Row 1: four KPI cards (KPI-01, KPI-02, KPI-03, KPI-05)
 - Row 2: four KPI cards (KPI-06, KPI-07, KPI-09, KPI-10)
 - `<AreaChart>` - Token consumption: input vs. output split over time (KPI-04)
@@ -248,7 +248,7 @@ Query params for all analytics endpoints: `from`, `to`, `team_id` (optional).
 - Skip-to-content link at the top of `DashboardLayout.tsx` (keyboard users bypass sticky nav)
 - Color contrast check: all chart colors verified against WCAG AA 4.5:1 ratio in both light and dark mode
 - "Insufficient data" states use `role="status"` and are announced to screen readers
-- Keyboard navigation test: Tab through filter bar -> section nav -> first KPI card data points in Executive Overview - no focus trap, no skipped elements
+- Keyboard navigation test: Tab through filter bar -> section nav -> first KPI card data points in Overview - no focus trap, no skipped elements
 - Axe-core integration in Vitest: `@axe-core/react` assertion on each section component render
 
 **Key notes:**
@@ -328,7 +328,7 @@ Query params for all analytics endpoints: `from`, `to`, `team_id` (optional).
 | [x] | WP-02 | TypeScript API Types & Mock Data Layer | WP-01 | Medium |
 | [x] | WP-03 | Visx Primitive Layer | WP-01 | Large |
 | [x] | WP-04 | Dashboard Shell & Filter Bar | WP-01, WP-02 | Medium |
-| [x] | WP-05 | Section 1 - Executive Overview | WP-02, WP-03, WP-04 | Large |
+| [x] | WP-05 | Section 1 - Overview | WP-02, WP-03, WP-04 | Large |
 | [x] | WP-06 | Section 2 - Team Breakdown | WP-02, WP-03, WP-04 | Large |
 | [x] | WP-07 | Section 3 - Reliability | WP-02, WP-03, WP-04 | Medium |
 | [x] | WP-08 | Section 4 - Billing & Financial | WP-02, WP-03, WP-04, WP-05 | Large |

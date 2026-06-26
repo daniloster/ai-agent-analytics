@@ -299,7 +299,7 @@ DashboardLayout renders:
 IntersectionObserver fires for 'overview' (above the fold on load):
   --> Section 'overview': mounted.value = true
   --> observer disconnected for this section
-  --> children render (ExecutiveOverview component mounts, triggers its useQuery)
+  --> children render (Overview component mounts, triggers its useQuery)
 
 User scrolls to 'teams' section:
   --> IntersectionObserver fires for 'teams' (threshold 0.1 = 10% visible)

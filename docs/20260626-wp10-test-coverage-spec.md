@@ -226,7 +226,7 @@ Requires vitest.setup.ts signal mock only:
 Requires MSW worker + TanStack QueryClient wrapper:
   src/lib/mock/handlers.test.ts
   src/components/sections/integration.test.ts
-  src/components/sections/ExecutiveOverview.test.ts
+  src/components/sections/Overview.test.ts
   src/components/sections/TeamBreakdown.test.ts
   src/components/sections/Reliability.test.ts
   src/components/sections/Billing.test.ts

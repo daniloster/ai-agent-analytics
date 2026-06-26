@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1440">
+<title>Billing - AgentCloud Analytics</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    background: #f4f4f5;
+    color: #09090b;
+    min-width: 1440px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .header { background:#fff;border-bottom:1px solid #e4e4e7;padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100; }
+  .header-left { display:flex;align-items:center;gap:8px; }
+  .logo-icon { width:28px;height:28px;background:#18181b;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700; }
+  .logo-text { font-size:15px;font-weight:600; }
+  .header-right { display:flex;align-items:center;gap:8px; }
+  .btn { display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid #e4e4e7;background:#fff;color:#09090b; }
+  .btn-primary { background:#18181b;color:#fff;border-color:#18181b; }
+  .nav-tabs { background:#fff;border-bottom:1px solid #e4e4e7;padding:0 32px;display:flex;align-items:flex-end; }
+  .tab { padding:12px 16px;font-size:13px;font-weight:500;color:#71717a;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px; }
+  .tab.active { color:#09090b;border-bottom-color:#18181b; }
+  .page-content { padding:28px 32px; }
+  .page-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:24px; }
+  .page-title { font-size:22px;font-weight:700;letter-spacing:-0.5px; }
+  .page-subtitle { font-size:13px;color:#71717a;margin-top:2px; }
+  .kpi-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px; }
+  .kpi-card { background:#fff;border:1px solid #e4e4e7;border-radius:8px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,0.08); }
+  .kpi-top { display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px; }
+  .kpi-label { font-size:12px;font-weight:500;color:#71717a; }
+  .kpi-help { width:18px;height:18px;border-radius:50%;border:1px solid #e4e4e7;background:#f4f4f5;display:flex;align-items:center;justify-content:center;font-size:10px;color:#71717a;font-weight:600; }
+  .kpi-value { font-size:26px;font-weight:700;letter-spacing:-0.8px;font-variant-numeric:tabular-nums;line-height:1;margin-bottom:6px; }
+  .delta { display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:20px;font-size:11px;font-weight:600; }
+  .delta-green { background:#f0fdf4;color:#16a34a; }
+  .delta-amber { background:#fffbeb;color:#d97706; }
+  .delta-red { background:#fef2f2;color:#dc2626; }
+  .kpi-sub { font-size:11px;color:#71717a;margin-top:4px; }
+  .progress-bg { height:6px;background:#f4f4f5;border-radius:3px;overflow:hidden;margin:8px 0; }
+  .progress-fill { height:100%;border-radius:3px; }
+  .chart-card-full { background:#fff;border:1px solid #e4e4e7;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.08);padding:24px;margin-bottom:16px; }
+  .chart-grid-2 { display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px; }
+  .chart-card { background:#fff;border:1px solid #e4e4e7;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.08);padding:24px; }
+  .chart-header { display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px; }
+  .chart-title { font-size:14px;font-weight:600; }
+  .chart-subtitle { font-size:12px;color:#71717a;margin-top:2px; }
+  /* Table */
+  .table-card { background:#fff;border:1px solid #e4e4e7;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.08);overflow:hidden;margin-bottom:16px; }
+  .table-header { padding:16px 20px;border-bottom:1px solid #e4e4e7;display:flex;align-items:center;justify-content:space-between; }
+  .table-title { font-size:14px;font-weight:600; }
+  table { width:100%;border-collapse:collapse; }
+  thead th { padding:10px 16px;text-align:left;font-size:11px;font-weight:600;color:#71717a;text-transform:uppercase;letter-spacing:0.05em;background:#fafafa;border-bottom:1px solid #e4e4e7;white-space:nowrap; }
+  tbody tr { border-bottom:1px solid #f4f4f5; }
+  tbody tr:last-child { border-bottom:none;font-weight:600;background:#fafafa; }
+  tbody tr:hover { background:#fafafa; }
+  tbody td { padding:12px 16px;font-size:13px;vertical-align:middle; }
+  .num { font-variant-numeric:tabular-nums; }
+  .team-dot { width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px; }
+  /* Heatmap calendar */
+  .heatmap-cell { width:38px;height:38px;border-radius:5px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:500; }
+  .cell-green { background:#dcfce7;color:#16a34a; }
+  .cell-amber { background:#fef3c7;color:#d97706; }
+  .cell-red { background:#fee2e2;color:#dc2626;border:2px solid #dc2626; }
+  .cell-light { background:#f4f4f5;color:#71717a; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <div class="logo-icon">&#x2B21;</div>
+    <span class="logo-text">AgentCloud Analytics</span>
+  </div>
+  <div class="header-right">
+    <button class="btn">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="12" height="8" rx="1"/><path d="M5 4V3M11 4V3"/></svg>
+      Last 30 days
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg>
+    </button>
+    <button class="btn">All Teams <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg></button>
+    <button class="btn btn-primary">Understanding &#8599;</button>
+  </div>
+</header>
+
+<nav class="nav-tabs">
+  <div class="tab">Overview</div>
+  <div class="tab">Teams</div>
+  <div class="tab">Reliability</div>
+  <div class="tab active">Billing</div>
+</nav>
+
+<main class="page-content">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Billing</div>
+      <div class="page-subtitle">Spend tracking, budget management, and chargeback</div>
+    </div>
+    <span style="font-size:13px;color:#71717a;">Jun 1 - Jun 30, 2026</span>
+  </div>
+
+  <!-- KPI Row -->
+  <div class="kpi-grid">
+    <!-- Month Spend -->
+    <div class="kpi-card">
+      <div class="kpi-top"><span class="kpi-label">Month-to-Date Spend</span><span class="kpi-help">?</span></div>
+      <div class="kpi-value">$9,800</div>
+      <span class="delta delta-amber">&#8593; +12% vs Jun 1-26 last mo.</span>
+      <div class="kpi-sub" style="margin-top:6px;">26 of 30 days elapsed</div>
+    </div>
+    <!-- Projected -->
+    <div class="kpi-card">
+      <div class="kpi-top"><span class="kpi-label">Projected Month-End</span><span class="kpi-help">?</span></div>
+      <div class="kpi-value">$11,308</div>
+      <span class="delta delta-green">&#8595; $3,692 under budget</span>
+      <div class="kpi-sub" style="margin-top:6px;">Linear extrapolation from MTD</div>
+    </div>
+    <!-- Budget utilization -->
+    <div class="kpi-card">
+      <div class="kpi-top"><span class="kpi-label">Budget Utilization</span><span class="kpi-help">?</span></div>
+      <div class="kpi-value">65.3%</div>
+      <div style="margin:6px 0 4px;">
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:#71717a;margin-bottom:3px;">
+          <span>$0</span><span>$15,000 ceiling</span>
+        </div>
+        <div class="progress-bg">
+          <div class="progress-fill" style="width:65.3%;background:#2563eb;"></div>
+        </div>
+      </div>
+      <span class="delta delta-green">On track for Jun</span>
+    </div>
+    <!-- Annual Run-Rate -->
+    <div class="kpi-card">
+      <div class="kpi-top"><span class="kpi-label">Annual Run-Rate</span><span class="kpi-help">?</span></div>
+      <div class="kpi-value">$157,300</div>
+      <span class="delta delta-amber">&#8593; +14.2% YoY</span>
+      <div class="kpi-sub" style="margin-top:6px;">Budget ceiling: $180,000 / yr</div>
+    </div>
+  </div>
+
+  <!-- Budget Area Chart (full width) -->
+  <div class="chart-card-full">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title">Cumulative Spend vs Budget</div>
+        <div class="chart-subtitle">Month-to-date actual, projected to EOM, $15,000 ceiling</div>
+      </div>
+      <div style="display:flex;gap:14px;align-items:center;font-size:11px;color:#71717a;">
+        <div style="display:flex;align-items:center;gap:5px;"><div style="width:16px;height:2px;background:#2563eb;border-radius:1px;"></div> Actual</div>
+        <div style="display:flex;align-items:center;gap:5px;"><div style="width:16px;height:0;border-top:2px dashed #2563eb;opacity:0.5;"></div> Projected</div>
+        <div style="display:flex;align-items:center;gap:5px;"><div style="width:16px;height:2px;background:#dc2626;border-radius:1px;"></div> Budget</div>
+      </div>
+    </div>
+    <svg width="100%" height="200" viewBox="0 0 1320 200">
+      <defs>
+        <linearGradient id="budgetGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#2563eb" stop-opacity="0.15"/>
+          <stop offset="100%" stop-color="#2563eb" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <!-- Grid lines -->
+      <line x1="60" y1="15" x2="1290" y2="15" stroke="#f4f4f5" stroke-width="1"/>
+      <line x1="60" y1="55" x2="1290" y2="55" stroke="#f4f4f5" stroke-width="1"/>
+      <line x1="60" y1="95" x2="1290" y2="95" stroke="#f4f4f5" stroke-width="1"/>
+      <line x1="60" y1="135" x2="1290" y2="135" stroke="#f4f4f5" stroke-width="1"/>
+      <line x1="60" y1="175" x2="1290" y2="175" stroke="#e4e4e7" stroke-width="1"/>
+      <!-- Budget ceiling -->
+      <line x1="60" y1="15" x2="1290" y2="15" stroke="#dc2626" stroke-width="1.5" opacity="0.6"/>
+      <text x="1294" y="19" font-size="9" fill="#dc2626" font-weight="600">$15k</text>
+      <!-- Y labels -->
+      <text x="54" y="19" text-anchor="end" font-size="10" fill="#71717a">$15k</text>
+      <text x="54" y="59" text-anchor="end" font-size="10" fill="#71717a">$11k</text>
+      <text x="54" y="99" text-anchor="end" font-size="10" fill="#71717a">$7.5k</text>
+      <text x="54" y="139" text-anchor="end" font-size="10" fill="#71717a">$3k</text>
+      <text x="54" y="179" text-anchor="end" font-size="10" fill="#71717a">$0</text>
+      <!-- Actual area -->
+      <path d="M60,175 L163,172 L266,162 L369,150 L472,138 L575,124 L678,112 L781,98 L884,85 L987,72 L1090,60 L1090,175 Z" fill="url(#budgetGrad)"/>
+      <polyline points="60,175 163,172 266,162 369,150 472,138 575,124 678,112 781,98 884,85 987,72 1090,60" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- Current day marker -->
+      <circle cx="1090" cy="60" r="5" fill="#2563eb" stroke="#fff" stroke-width="2.5"/>
+      <line x1="1090" y1="15" x2="1090" y2="175" stroke="#2563eb" stroke-width="1" stroke-dasharray="4,3" opacity="0.3"/>
+      <text x="1090" y="12" text-anchor="middle" font-size="9" fill="#2563eb" font-weight="600">Jun 26</text>
+      <!-- Projected dashed -->
+      <polyline points="1090,60 1163,50 1216,42 1290,32" fill="none" stroke="#2563eb" stroke-width="2" stroke-dasharray="6,4" stroke-linecap="round"/>
+      <!-- Projected end annotation -->
+      <rect x="1166" y="22" width="76" height="18" rx="3" fill="#f0fdf4" stroke="#16a34a" stroke-width="1"/>
+      <text x="1204" y="35" text-anchor="middle" font-size="9" fill="#16a34a" font-weight="600">&#8594; $11,308 EOM</text>
+      <!-- X labels -->
+      <text x="60" y="193" text-anchor="middle" font-size="10" fill="#71717a">Jun 1</text>
+      <text x="266" y="193" text-anchor="middle" font-size="10" fill="#71717a">Jun 6</text>
+      <text x="472" y="193" text-anchor="middle" font-size="10" fill="#71717a">Jun 11</text>
+      <text x="678" y="193" text-anchor="middle" font-size="10" fill="#71717a">Jun 16</text>
+      <text x="884" y="193" text-anchor="middle" font-size="10" fill="#71717a">Jun 21</text>
+      <text x="1090" y="193" text-anchor="middle" font-size="10" fill="#71717a">Jun 26</text>
+      <text x="1290" y="193" text-anchor="middle" font-size="10" fill="#71717a">Jun 30</text>
+    </svg>
+  </div>
+
+  <!-- Invoice History + Allocation -->
+  <div class="chart-grid-2">
+    <!-- Invoice History bar chart -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Invoice History</div>
+          <div class="chart-subtitle">Monthly spend - last 6 billing periods</div>
+        </div>
+      </div>
+      <svg width="100%" height="200" viewBox="0 0 560 200">
+        <!-- Grid -->
+        <line x1="44" y1="10" x2="544" y2="10" stroke="#f4f4f5" stroke-width="1"/>
+        <line x1="44" y1="55" x2="544" y2="55" stroke="#f4f4f5" stroke-width="1"/>
+        <line x1="44" y1="100" x2="544" y2="100" stroke="#f4f4f5" stroke-width="1"/>
+        <line x1="44" y1="145" x2="544" y2="145" stroke="#f4f4f5" stroke-width="1"/>
+        <line x1="44" y1="170" x2="544" y2="170" stroke="#e4e4e7" stroke-width="1"/>
+        <!-- Y labels -->
+        <text x="38" y="14" text-anchor="end" font-size="10" fill="#71717a">$15k</text>
+        <text x="38" y="59" text-anchor="end" font-size="10" fill="#71717a">$12k</text>
+        <text x="38" y="104" text-anchor="end" font-size="10" fill="#71717a">$8k</text>
+        <text x="38" y="149" text-anchor="end" font-size="10" fill="#71717a">$4k</text>
+        <!-- Bars -->
+        <rect x="60"  y="122" width="56" height="48" fill="#2563eb" rx="3" opacity="0.7"/>
+        <rect x="144" y="112" width="56" height="58" fill="#2563eb" rx="3" opacity="0.75"/>
+        <rect x="228" y="102" width="56" height="68" fill="#2563eb" rx="3" opacity="0.8"/>
+        <rect x="312" y="88" width="56" height="82" fill="#2563eb" rx="3" opacity="0.85"/>
+        <rect x="396" y="78" width="56" height="92" fill="#2563eb" rx="3" opacity="0.9"/>
+        <!-- Current month partial -->
+        <rect x="480" y="95" width="56" height="75" fill="#2563eb" rx="3"/>
+        <rect x="480" y="70" width="56" height="25" fill="#2563eb" rx="3" opacity="0.25" stroke="#2563eb" stroke-width="1" stroke-dasharray="3,2"/>
+        <!-- Value labels -->
+        <text x="88"  y="118" text-anchor="middle" font-size="10" fill="#71717a">$8.1k</text>
+        <text x="172" y="108" text-anchor="middle" font-size="10" fill="#71717a">$9.4k</text>
+        <text x="256" y="98" text-anchor="middle" font-size="10" fill="#71717a">$10.2k</text>
+        <text x="340" y="84" text-anchor="middle" font-size="10" fill="#71717a">$11.6k</text>
+        <text x="424" y="74" text-anchor="middle" font-size="10" fill="#71717a">$12.7k</text>
+        <text x="508" y="66" text-anchor="middle" font-size="10" fill="#2563eb" font-weight="600">~$11.3k</text>
+        <!-- X labels -->
+        <text x="88"  y="186" text-anchor="middle" font-size="10" fill="#71717a">Jan</text>
+        <text x="172" y="186" text-anchor="middle" font-size="10" fill="#71717a">Feb</text>
+        <text x="256" y="186" text-anchor="middle" font-size="10" fill="#71717a">Mar</text>
+        <text x="340" y="186" text-anchor="middle" font-size="10" fill="#71717a">Apr</text>
+        <text x="424" y="186" text-anchor="middle" font-size="10" fill="#71717a">May</text>
+        <text x="508" y="186" text-anchor="middle" font-size="10" fill="#71717a" font-weight="600">Jun*</text>
+      </svg>
+    </div>
+
+    <!-- Cost Allocation Donut -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Cost Allocation by Team</div>
+          <div class="chart-subtitle">MTD token + infrastructure by team</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:28px;padding:8px 0;">
+        <svg width="160" height="160" viewBox="0 0 160 160">
+          <!-- Platform: 39.4% -->
+          <circle cx="80" cy="80" r="58" fill="none" stroke="#2563eb" stroke-width="26"
+            stroke-dasharray="101 257" stroke-dashoffset="0" transform="rotate(-90 80 80)"/>
+          <!-- Backend: 26.9% -->
+          <circle cx="80" cy="80" r="58" fill="none" stroke="#0d9488" stroke-width="26"
+            stroke-dasharray="69 257" stroke-dashoffset="-101" transform="rotate(-90 80 80)"/>
+          <!-- Frontend: 22.1% -->
+          <circle cx="80" cy="80" r="58" fill="none" stroke="#7c3aed" stroke-width="26"
+            stroke-dasharray="57 257" stroke-dashoffset="-170" transform="rotate(-90 80 80)"/>
+          <!-- Data: 11.5% -->
+          <circle cx="80" cy="80" r="58" fill="none" stroke="#ea580c" stroke-width="26"
+            stroke-dasharray="30 257" stroke-dashoffset="-227" transform="rotate(-90 80 80)"/>
+          <text x="80" y="75" text-anchor="middle" font-size="16" font-weight="700" fill="#09090b">$10.4k</text>
+          <text x="80" y="92" text-anchor="middle" font-size="10" fill="#71717a">total</text>
+        </svg>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:12px;height:12px;border-radius:3px;background:#2563eb;"></div>
+            <div><div style="font-size:12px;font-weight:500;">Platform</div><div style="font-size:11px;color:#71717a;">$4,100 - 39.4%</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:12px;height:12px;border-radius:3px;background:#0d9488;"></div>
+            <div><div style="font-size:12px;font-weight:500;">Backend</div><div style="font-size:11px;color:#71717a;">$2,800 - 26.9%</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:12px;height:12px;border-radius:3px;background:#7c3aed;"></div>
+            <div><div style="font-size:12px;font-weight:500;">Frontend</div><div style="font-size:11px;color:#71717a;">$2,300 - 22.1%</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:12px;height:12px;border-radius:3px;background:#ea580c;"></div>
+            <div><div style="font-size:12px;font-weight:500;">Data</div><div style="font-size:11px;color:#71717a;">$1,200 - 11.5%</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chargeback Table -->
+  <div class="table-card" style="margin-bottom:16px;">
+    <div class="table-header">
+      <div class="table-title">Chargeback by Team</div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn" style="font-size:12px;padding:4px 10px;">Export CSV</button>
+        <button class="btn" style="font-size:12px;padding:4px 10px;">Download Invoice</button>
+      </div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Team</th>
+          <th>Seat Cost</th>
+          <th>Token Cost</th>
+          <th>Total</th>
+          <th>% of Org</th>
+          <th>MoM Change</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="team-dot" style="background:#2563eb;"></span>Platform</td>
+          <td class="num">$840</td>
+          <td class="num">$3,260</td>
+          <td class="num" style="font-weight:600;">$4,100</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="num">39.4%</span>
+              <div style="flex:1;height:5px;background:#f4f4f5;border-radius:3px;overflow:hidden;min-width:60px;">
+                <div style="width:100%;height:100%;background:#2563eb;border-radius:3px;"></div>
+              </div>
+            </div>
+          </td>
+          <td><span style="color:#16a34a;font-size:12px;font-weight:500;">&#8593; +8.2%</span></td>
+        </tr>
+        <tr>
+          <td><span class="team-dot" style="background:#0d9488;"></span>Backend</td>
+          <td class="num">$660</td>
+          <td class="num">$2,140</td>
+          <td class="num" style="font-weight:600;">$2,800</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="num">26.9%</span>
+              <div style="flex:1;height:5px;background:#f4f4f5;border-radius:3px;overflow:hidden;min-width:60px;">
+                <div style="width:68%;height:100%;background:#0d9488;border-radius:3px;"></div>
+              </div>
+            </div>
+          </td>
+          <td><span style="color:#16a34a;font-size:12px;font-weight:500;">&#8593; +5.1%</span></td>
+        </tr>
+        <tr>
+          <td><span class="team-dot" style="background:#7c3aed;"></span>Frontend</td>
+          <td class="num">$570</td>
+          <td class="num">$1,730</td>
+          <td class="num" style="font-weight:600;">$2,300</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="num">22.1%</span>
+              <div style="flex:1;height:5px;background:#f4f4f5;border-radius:3px;overflow:hidden;min-width:60px;">
+                <div style="width:56%;height:100%;background:#7c3aed;border-radius:3px;"></div>
+              </div>
+            </div>
+          </td>
+          <td><span style="color:#71717a;font-size:12px;font-weight:500;">-- 0.0%</span></td>
+        </tr>
+        <tr>
+          <td><span class="team-dot" style="background:#ea580c;"></span>Data</td>
+          <td class="num">$360</td>
+          <td class="num">$840</td>
+          <td class="num" style="font-weight:600;">$1,200</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="num">11.5%</span>
+              <div style="flex:1;height:5px;background:#f4f4f5;border-radius:3px;overflow:hidden;min-width:60px;">
+                <div style="width:29%;height:100%;background:#ea580c;border-radius:3px;"></div>
+              </div>
+            </div>
+          </td>
+          <td><span style="color:#dc2626;font-size:12px;font-weight:500;">&#8595; -18.4%</span></td>
+        </tr>
+        <!-- Total row -->
+        <tr style="background:#fafafa;">
+          <td style="font-weight:700;">Total</td>
+          <td class="num" style="font-weight:700;">$2,430</td>
+          <td class="num" style="font-weight:700;">$7,970</td>
+          <td class="num" style="font-weight:700;font-size:14px;">$10,400</td>
+          <td style="color:#71717a;font-size:12px;">MTD as of Jun 26</td>
+          <td><span style="color:#d97706;font-size:12px;font-weight:500;">&#8593; +12.0% MoM</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Cost Anomaly Heatmap -->
+  <div class="chart-card-full" style="margin-bottom:0;">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title">Cost Anomaly Calendar - June 2026</div>
+        <div class="chart-subtitle">Daily spend normalized to daily budget - red cells triggered anomaly alerts</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;font-size:11px;color:#71717a;">
+        <div style="display:flex;align-items:center;gap:4px;"><div style="width:12px;height:12px;border-radius:3px;background:#dcfce7;"></div> Normal</div>
+        <div style="display:flex;align-items:center;gap:4px;"><div style="width:12px;height:12px;border-radius:3px;background:#fef3c7;"></div> +20-50%</div>
+        <div style="display:flex;align-items:center;gap:4px;"><div style="width:12px;height:12px;border-radius:3px;background:#fee2e2;border:2px solid #dc2626;"></div> &gt;+50% anomaly</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:4px;flex-wrap:wrap;">
+      <div class="heatmap-cell cell-green"><span style="font-size:9px;color:rgba(0,0,0,0.4);">1</span><span style="font-size:9px;font-weight:600;">$318</span></div>
+      <div class="heatmap-cell cell-green"><span style="font-size:9px;color:rgba(0,0,0,0.4);">2</span><span style="font-size:9px;font-weight:600;">$341</span></div>
+      <div class="heatmap-cell cell-green"><span style="font-size:9px;color:rgba(0,0,0,0.4);">3</span><span style="font-size:9px;font-weight:600;">$295</span></div>
+      <div class="heatmap-cell cell-green"><span style="font-size:9px;color:rgba(0,0,0,0.4);">4</span><span style="font-size:9px;font-weight:600;">$328</span></div>
+      <div class="heatmap-cell cell-green"><span style="font-size:9px;color:rgba(0,0,0,0.4);">5</span><span style="font-size:9px;font-weight:600;">$302</span></div>
+      <div class="heatmap-cell cell-green"><span style="font-size:9px;color:rgba(0,0,0,0.4);">6</span><span style="font-size:9px;font-weight:600;">$287</span></div>
+      <div class="heatmap-cell cell-green"><span style="font-size:9px;color:rgba(0,0,0,0.4);">7</span><span style="font-size:9px;font-weight:600;">$334</span></div>
+      <div class="heatmap-cell cell-green"><span style="font-size:9px;color:rgba(0,0,0,0.4);">8</span><span style="font-size:9px;font-weight:600;">$319</span></div>
+      <div class="heatmap-cell cell-green"><span style="font-size:9px;color:rgba(0,0,0,0.4);">9</span><span style="font-size:9px;font-weight:600;">$344</span></div>
+      <div class="heatmap-cell cell-green"><span style="font-size:9px;color:rgba(0,0,0,0.4);">10</span><span style="font-size:9px;font-weight:600;">$311</span></div>
+      <div class="heatmap-cell cell-green"><span style="font-size:9px;color:rgba(0,0,0,0.4);">11</span><span style="font-size:9px;font-weight:600;">$355</span></div>
+      <!-- Day 12: anomaly -->
+      <div class="heatmap-cell cell-red" style="border:2px solid #dc2626;">
+        <span style="font-size:9px;color:#dc2626;">12</span>
+        <span style="font-size:9px;font-weight:700;color:#dc2626;">$612</span>
+      </div>
+      <div class="heatmap-cell cell-green"><span style="font-size:9px;color:rgba(0,0,0,0.4);">13</span><span style="font-size:9px;font-weight:600;">$308</span></div>
+      <div class="heatmap-cell cell-green"><span style="font-size:9px;color:rgba(0,0,0,0.4);">14</span><span style="font-size:9px;font-weight:600;">$322</span></div>
+      <div class="heatmap-cell cell-green"><span style="font-size:9px;color:rgba(0,0,0,0.4);">15</span><span style="font-size:9px;font-weight:600;">$298</span></div>
+      <div class="heatmap-cell cell-amber"><span style="font-size:9px;">16</span><span style="font-size:9px;font-weight:600;">$420</span></div>
+      <div class="heatmap-cell cell-green"><span style="font-size:9px;color:rgba(0,0,0,0.4);">17</span><span style="font-size:9px;font-weight:600;">$315</span></div>
+      <div class="heatmap-cell cell-green"><span style="font-size:9px;color:rgba(0,0,0,0.4);">18</span><span style="font-size:9px;font-weight:600;">$289</span></div>
+      <!-- Day 19: anomaly -->
+      <div class="heatmap-cell cell-red" style="border:2px solid #dc2626;">
+        <span style="font-size:9px;color:#dc2626;">19</span>
+        <span style="font-size:9px;font-weight:700;color:#dc2626;">$578</span>
+      </div>
+      <div class="heatmap-cell cell-green"><span style="font-size:9px;color:rgba(0,0,0,0.4);">20</span><span style="font-size:9px;font-weight:600;">$333</span></div>
+      <div class="heatmap-cell cell-green"><span style="font-size:9px;color:rgba(0,0,0,0.4);">21</span><span style="font-size:9px;font-weight:600;">$307</span></div>
+      <div class="heatmap-cell cell-green"><span style="font-size:9px;color:rgba(0,0,0,0.4);">22</span><span style="font-size:9px;font-weight:600;">$342</span></div>
+      <div class="heatmap-cell cell-green"><span style="font-size:9px;color:rgba(0,0,0,0.4);">23</span><span style="font-size:9px;font-weight:600;">$318</span></div>
+      <div class="heatmap-cell cell-green"><span style="font-size:9px;color:rgba(0,0,0,0.4);">24</span><span style="font-size:9px;font-weight:600;">$329</span></div>
+      <div class="heatmap-cell cell-green"><span style="font-size:9px;color:rgba(0,0,0,0.4);">25</span><span style="font-size:9px;font-weight:600;">$295</span></div>
+      <div class="heatmap-cell cell-green"><span style="font-size:9px;color:rgba(0,0,0,0.4);">26</span><span style="font-size:9px;font-weight:600;">$311</span></div>
+      <!-- Remaining days projected -->
+      <div class="heatmap-cell" style="background:#f9f9fb;border:1px dashed #e4e4e7;color:#71717a;"><span style="font-size:9px;">27</span><span style="font-size:9px;">~$320</span></div>
+      <div class="heatmap-cell" style="background:#f9f9fb;border:1px dashed #e4e4e7;color:#71717a;"><span style="font-size:9px;">28</span><span style="font-size:9px;">~$320</span></div>
+      <div class="heatmap-cell" style="background:#f9f9fb;border:1px dashed #e4e4e7;color:#71717a;"><span style="font-size:9px;">29</span><span style="font-size:9px;">~$320</span></div>
+      <div class="heatmap-cell" style="background:#f9f9fb;border:1px dashed #e4e4e7;color:#71717a;"><span style="font-size:9px;">30</span><span style="font-size:9px;">~$320</span></div>
+    </div>
+    <div style="margin-top:12px;padding-top:12px;border-top:1px solid #f4f4f5;display:flex;gap:24px;font-size:12px;color:#71717a;">
+      <span>2 anomaly alerts this month</span>
+      <span>Jun 12: <strong style="color:#dc2626;">$612</strong> - Platform batch job spike</span>
+      <span>Jun 19: <strong style="color:#dc2626;">$578</strong> - Data team migration run</span>
+    </div>
+  </div>
+
+</main>
+</body>
+</html>

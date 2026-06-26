@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1440">
+<title>Team Breakdown - AgentCloud Analytics</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    background: #f4f4f5;
+    color: #09090b;
+    min-width: 1440px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .header {
+    background: #ffffff;
+    border-bottom: 1px solid #e4e4e7;
+    padding: 0 32px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-left { display: flex; align-items: center; gap: 8px; }
+  .logo-icon {
+    width: 28px; height: 28px;
+    background: #18181b;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 14px; font-weight: 700;
+  }
+  .logo-text { font-size: 15px; font-weight: 600; color: #09090b; }
+  .header-right { display: flex; align-items: center; gap: 8px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 500;
+    cursor: pointer; border: 1px solid #e4e4e7; background: #fff; color: #09090b;
+    white-space: nowrap;
+  }
+  .btn-primary { background: #18181b; color: #fff; border-color: #18181b; }
+  .nav-tabs {
+    background: #ffffff;
+    border-bottom: 1px solid #e4e4e7;
+    padding: 0 32px;
+    display: flex;
+    align-items: flex-end;
+  }
+  .tab {
+    padding: 12px 16px;
+    font-size: 13px; font-weight: 500; color: #71717a;
+    cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
+  }
+  .tab.active { color: #09090b; border-bottom-color: #18181b; }
+  .page-content { padding: 28px 32px; }
+  .page-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .page-title { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+  .page-subtitle { font-size: 13px; color: #71717a; margin-top: 2px; }
+  /* Table card */
+  .table-card {
+    background: #fff;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .table-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #e4e4e7;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .table-title { font-size: 14px; font-weight: 600; }
+  .table-controls { display: flex; gap: 8px; }
+  table {
+    width: 100%; border-collapse: collapse;
+  }
+  thead th {
+    padding: 10px 16px; text-align: left; font-size: 11px; font-weight: 600;
+    color: #71717a; text-transform: uppercase; letter-spacing: 0.05em;
+    background: #fafafa; border-bottom: 1px solid #e4e4e7;
+    white-space: nowrap; cursor: pointer; user-select: none;
+  }
+  thead th:hover { color: #09090b; }
+  .sort-icon { display: inline-block; margin-left: 4px; opacity: 0.5; }
+  tbody tr { border-bottom: 1px solid #f4f4f5; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #fafafa; }
+  tbody td { padding: 12px 16px; font-size: 13px; vertical-align: middle; }
+  .team-name-cell { display: flex; align-items: center; gap: 8px; }
+  .team-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .team-name { font-weight: 500; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 2px 7px; border-radius: 20px; font-size: 11px; font-weight: 500;
+    white-space: nowrap;
+  }
+  .badge-amber { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+  .badge-red { background: #fef2f2; color: #dc2626; }
+  .badge-green { background: #f0fdf4; color: #16a34a; }
+  .num { font-variant-numeric: tabular-nums; font-size: 13px; }
+  .num-muted { color: #71717a; }
+  /* Progress bar in table */
+  .adoption-cell { display: flex; align-items: center; gap: 8px; }
+  .mini-progress { flex: 1; height: 5px; background: #f4f4f5; border-radius: 3px; overflow: hidden; min-width: 60px; }
+  .mini-progress-fill { height: 100%; border-radius: 3px; }
+  .stars { color: #f59e0b; letter-spacing: -1px; font-size: 13px; }
+  .stars-empty { color: #d4d4d8; }
+  /* Fail cell */
+  .fail-good { color: #16a34a; font-weight: 500; }
+  .fail-warn { color: #d97706; font-weight: 500; }
+  .fail-bad { color: #dc2626; font-weight: 500; }
+  /* Charts grid */
+  .charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .chart-card {
+    background: #fff;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    padding: 20px;
+  }
+  .chart-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .chart-subtitle { font-size: 12px; color: #71717a; margin-bottom: 16px; }
+  .bar-chart-row {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+  }
+  .bar-label { font-size: 12px; color: #09090b; width: 80px; flex-shrink: 0; font-weight: 500; }
+  .bar-track { flex: 1; height: 24px; background: #f4f4f5; border-radius: 4px; overflow: hidden; position: relative; }
+  .bar-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 8px; }
+  .bar-value { font-size: 11px; font-weight: 600; color: #fff; }
+  .bar-value-out { font-size: 11px; font-weight: 600; color: #71717a; margin-left: 6px; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <div class="logo-icon">&#x2B21;</div>
+    <span class="logo-text">AgentCloud Analytics</span>
+  </div>
+  <div class="header-right">
+    <button class="btn">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="12" height="8" rx="1"/><path d="M5 4V3M11 4V3"/></svg>
+      Last 30 days
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg>
+    </button>
+    <button class="btn">All Teams <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg></button>
+    <button class="btn btn-primary">Understanding &#8599;</button>
+  </div>
+</header>
+
+<nav class="nav-tabs">
+  <div class="tab">Overview</div>
+  <div class="tab active">Teams</div>
+  <div class="tab">Reliability</div>
+  <div class="tab">Billing</div>
+</nav>
+
+<main class="page-content">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Team Breakdown</div>
+      <div class="page-subtitle">Per-team usage, costs, and quality metrics</div>
+    </div>
+    <span style="font-size:13px;color:#71717a;">Jun 1 - Jun 30, 2026</span>
+  </div>
+
+  <!-- Data Table -->
+  <div class="table-card">
+    <div class="table-header">
+      <div class="table-title">Team Performance</div>
+      <div class="table-controls">
+        <button class="btn" style="font-size:12px;padding:4px 10px;">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12M4 8h8M6 12h4" stroke-linecap="round"/></svg>
+          Filter
+        </button>
+        <button class="btn" style="font-size:12px;padding:4px 10px;">Export CSV</button>
+      </div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Team <span class="sort-icon">&#8597;</span></th>
+          <th>Runs <span class="sort-icon">&#8595;</span></th>
+          <th>Cost <span class="sort-icon">&#8597;</span></th>
+          <th>Users <span class="sort-icon">&#8597;</span></th>
+          <th>Adoption <span class="sort-icon">&#8597;</span></th>
+          <th>Quality <span class="sort-icon">&#8597;</span></th>
+          <th>Failure Rate <span class="sort-icon">&#8597;</span></th>
+          <th>WoW Trend</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Platform -->
+        <tr>
+          <td>
+            <div class="team-name-cell">
+              <div class="team-dot" style="background:#2563eb;"></div>
+              <span class="team-name">Platform</span>
+            </div>
+          </td>
+          <td><span class="num">3,200</span></td>
+          <td><span class="num">$4,100</span></td>
+          <td><span class="num">28</span></td>
+          <td>
+            <div class="adoption-cell">
+              <span class="num" style="width:30px;">78%</span>
+              <div class="mini-progress">
+                <div class="mini-progress-fill" style="width:78%;background:#2563eb;"></div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="stars">&#9733;&#9733;&#9733;&#9733;</span><span class="stars-empty">&#9733;</span>
+            <span class="num-muted" style="font-size:11px;margin-left:4px;">4.2</span>
+          </td>
+          <td><span class="fail-good">3.1%</span></td>
+          <td>
+            <svg width="80" height="28" viewBox="0 0 80 28">
+              <polyline points="0,22 13,18 26,20 39,15 52,12 65,9 80,7" fill="none" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </td>
+        </tr>
+        <!-- Backend -->
+        <tr>
+          <td>
+            <div class="team-name-cell">
+              <div class="team-dot" style="background:#0d9488;"></div>
+              <span class="team-name">Backend</span>
+            </div>
+          </td>
+          <td><span class="num">2,100</span></td>
+          <td><span class="num">$2,800</span></td>
+          <td><span class="num">22</span></td>
+          <td>
+            <div class="adoption-cell">
+              <span class="num" style="width:30px;">81%</span>
+              <div class="mini-progress">
+                <div class="mini-progress-fill" style="width:81%;background:#0d9488;"></div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="stars">&#9733;&#9733;&#9733;&#9733;</span><span class="stars-empty">&#9733;</span>
+            <span class="num-muted" style="font-size:11px;margin-left:4px;">4.0</span>
+          </td>
+          <td><span class="fail-good">4.2%</span></td>
+          <td>
+            <svg width="80" height="28" viewBox="0 0 80 28">
+              <polyline points="0,18 13,20 26,16 39,14 52,12 65,11 80,10" fill="none" stroke="#0d9488" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </td>
+        </tr>
+        <!-- Frontend -->
+        <tr>
+          <td>
+            <div class="team-name-cell">
+              <div class="team-dot" style="background:#7c3aed;"></div>
+              <span class="team-name">Frontend</span>
+            </div>
+          </td>
+          <td><span class="num">1,800</span></td>
+          <td><span class="num">$2,300</span></td>
+          <td><span class="num">19</span></td>
+          <td>
+            <div class="adoption-cell">
+              <span class="num" style="width:30px;">68%</span>
+              <div class="mini-progress">
+                <div class="mini-progress-fill" style="width:68%;background:#7c3aed;"></div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="stars">&#9733;&#9733;&#9733;&#9733;</span><span class="stars-empty">&#9733;</span>
+            <span class="num-muted" style="font-size:11px;margin-left:4px;">3.9</span>
+          </td>
+          <td><span class="fail-warn">5.8%</span></td>
+          <td>
+            <svg width="80" height="28" viewBox="0 0 80 28">
+              <polyline points="0,14 13,12 26,14 39,16 52,14 65,15 80,13" fill="none" stroke="#7c3aed" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </td>
+        </tr>
+        <!-- Data (churn warning) -->
+        <tr style="background:#fffbeb08;">
+          <td>
+            <div class="team-name-cell">
+              <div class="team-dot" style="background:#ea580c;"></div>
+              <div>
+                <span class="team-name">Data</span>
+                <div style="margin-top:2px;">
+                  <span class="badge badge-amber">&#9888; Churn Risk</span>
+                </div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="num">950</span>
+            <div style="font-size:11px;color:#d97706;margin-top:1px;">&#8595; -12% WoW</div>
+          </td>
+          <td><span class="num">$1,200</span></td>
+          <td>
+            <span class="num">12</span>
+            <div style="font-size:11px;color:#d97706;margin-top:1px;">was 18</div>
+          </td>
+          <td>
+            <div class="adoption-cell">
+              <span class="num" style="width:30px;color:#d97706;">44%</span>
+              <div class="mini-progress">
+                <div class="mini-progress-fill" style="width:44%;background:#d97706;"></div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="stars">&#9733;&#9733;&#9733;</span><span class="stars-empty">&#9733;&#9733;</span>
+            <span class="num-muted" style="font-size:11px;margin-left:4px;">3.4</span>
+          </td>
+          <td><span class="fail-bad">11.2%</span></td>
+          <td>
+            <svg width="80" height="28" viewBox="0 0 80 28">
+              <polyline points="0,8 13,9 26,10 39,14 52,16 65,20 80,23" fill="none" stroke="#dc2626" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <!-- Table footer -->
+    <div style="padding:12px 16px;border-top:1px solid #f4f4f5;display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:12px;color:#71717a;">Showing 4 teams</span>
+      <div style="display:flex;gap:4px;">
+        <button class="btn" style="padding:4px 10px;font-size:12px;opacity:0.4;" disabled>&#8592; Prev</button>
+        <button class="btn" style="padding:4px 10px;font-size:12px;background:#18181b;color:#fff;border-color:#18181b;">1</button>
+        <button class="btn" style="padding:4px 10px;font-size:12px;" disabled>Next &#8594;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts 2x2 -->
+  <div class="charts-grid">
+    <!-- Runs per Team -->
+    <div class="chart-card">
+      <div class="chart-title">Runs per Team</div>
+      <div class="chart-subtitle">Total agent runs this period</div>
+      <div class="bar-chart-row">
+        <span class="bar-label">Platform</span>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:100%;background:#2563eb;">
+            <span class="bar-value">3,200</span>
+          </div>
+        </div>
+      </div>
+      <div class="bar-chart-row">
+        <span class="bar-label">Backend</span>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:65.6%;background:#0d9488;">
+            <span class="bar-value">2,100</span>
+          </div>
+        </div>
+      </div>
+      <div class="bar-chart-row">
+        <span class="bar-label">Frontend</span>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:56.3%;background:#7c3aed;">
+            <span class="bar-value">1,800</span>
+          </div>
+        </div>
+      </div>
+      <div class="bar-chart-row">
+        <span class="bar-label">Data</span>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:29.7%;background:#ea580c;">
+            <span class="bar-value">950</span>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid #f4f4f5;display:flex;justify-content:space-between;font-size:11px;color:#71717a;">
+        <span>Total</span><span style="font-weight:600;color:#09090b;">8,050 runs</span>
+      </div>
+    </div>
+
+    <!-- Cost per Team -->
+    <div class="chart-card">
+      <div class="chart-title">Cost per Team</div>
+      <div class="chart-subtitle">Total token + infrastructure costs</div>
+      <div class="bar-chart-row">
+        <span class="bar-label">Platform</span>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:100%;background:#2563eb;">
+            <span class="bar-value">$4,100</span>
+          </div>
+        </div>
+      </div>
+      <div class="bar-chart-row">
+        <span class="bar-label">Backend</span>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:68.3%;background:#0d9488;">
+            <span class="bar-value">$2,800</span>
+          </div>
+        </div>
+      </div>
+      <div class="bar-chart-row">
+        <span class="bar-label">Frontend</span>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:56.1%;background:#7c3aed;">
+            <span class="bar-value">$2,300</span>
+          </div>
+        </div>
+      </div>
+      <div class="bar-chart-row">
+        <span class="bar-label">Data</span>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:29.3%;background:#ea580c;">
+            <span class="bar-value">$1,200</span>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid #f4f4f5;display:flex;justify-content:space-between;font-size:11px;color:#71717a;">
+        <span>Total</span><span style="font-weight:600;color:#09090b;">$10,400</span>
+      </div>
+    </div>
+
+    <!-- Quality Score per Team -->
+    <div class="chart-card">
+      <div class="chart-title">Quality Score by Team</div>
+      <div class="chart-subtitle">Average human-rated quality (1-5 scale)</div>
+      <div class="bar-chart-row">
+        <span class="bar-label">Platform</span>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:84%;background:#2563eb;">
+            <span class="bar-value">4.2</span>
+          </div>
+        </div>
+      </div>
+      <div class="bar-chart-row">
+        <span class="bar-label">Backend</span>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:80%;background:#0d9488;">
+            <span class="bar-value">4.0</span>
+          </div>
+        </div>
+      </div>
+      <div class="bar-chart-row">
+        <span class="bar-label">Frontend</span>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:78%;background:#7c3aed;">
+            <span class="bar-value">3.9</span>
+          </div>
+        </div>
+      </div>
+      <div class="bar-chart-row">
+        <span class="bar-label">Data</span>
+        <div class="bar-track" style="background:#fef2f2;">
+          <div class="bar-fill" style="width:68%;background:#dc2626;">
+            <span class="bar-value">3.4</span>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid #f4f4f5;display:flex;justify-content:space-between;font-size:11px;color:#71717a;">
+        <span>Org avg</span><span style="font-weight:600;color:#09090b;">4.1 / 5.0</span>
+      </div>
+    </div>
+
+    <!-- Cost per Quality Pt -->
+    <div class="chart-card">
+      <div class="chart-title">Cost per Quality Point</div>
+      <div class="chart-subtitle">Lower is better - efficiency metric</div>
+      <div class="bar-chart-row">
+        <span class="bar-label">Platform</span>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:62%;background:#2563eb;">
+            <span class="bar-value">$0.31</span>
+          </div>
+        </div>
+      </div>
+      <div class="bar-chart-row">
+        <span class="bar-label">Backend</span>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:67%;background:#0d9488;">
+            <span class="bar-value">$0.33</span>
+          </div>
+        </div>
+      </div>
+      <div class="bar-chart-row">
+        <span class="bar-label">Frontend</span>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:82%;background:#7c3aed;">
+            <span class="bar-value">$0.41</span>
+          </div>
+        </div>
+      </div>
+      <div class="bar-chart-row">
+        <span class="bar-label">Data</span>
+        <div class="bar-track" style="background:#fef2f2;">
+          <div class="bar-fill" style="width:100%;background:#dc2626;">
+            <span class="bar-value">$0.50</span>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid #f4f4f5;display:flex;justify-content:space-between;font-size:11px;color:#71717a;">
+        <span>Org avg</span><span style="font-weight:600;color:#09090b;">$0.42 / quality pt</span>
+      </div>
+    </div>
+  </div>
+
+</main>
+</body>
+</html>

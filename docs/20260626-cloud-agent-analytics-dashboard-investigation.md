@@ -82,7 +82,7 @@ The product prompt defines this as the deliverable. Additionally, as AI coding t
 
 - Org-level analytics dashboard (single-page, multi-section layout)
 - All KPI definitions and their computation logic (see Appendix A)
-- Four dashboard sections: Executive Overview, Team Breakdown, Reliability, Billing
+- Four dashboard sections: Overview, Team Breakdown, Reliability, Billing
 - Date range filter (last 7 days, 30 days, 90 days, custom)
 - Team filter (view one team or all teams)
 - Mocked API layer with realistic generated data
@@ -119,7 +119,7 @@ The product prompt defines this as the deliverable. Additionally, as AI coding t
 
 ### Option A: Single-page progressive dashboard (recommended)
 
-**Description:** One long scrollable page divided into four named sections. The user lands at the top (Executive Overview) and scrolls down through progressively more detailed views. A sticky section navigation bar lets users jump to any section. All sections share the same date range and team filters, which are pinned to the top of the page.
+**Description:** One long scrollable page divided into four named sections. The user lands at the top (Overview) and scrolls down through progressively more detailed views. A sticky section navigation bar lets users jump to any section. All sections share the same date range and team filters, which are pinned to the top of the page.
 
 **Pros:**
 - Zero context switching - all information is in one URL, shareable with a single link.
@@ -184,15 +184,15 @@ The product prompt defines this as the deliverable. Additionally, as AI coding t
 | D-4 | Mock API strategy | MSW (Mock Service Worker), hardcoded fixtures, faker-generated in-memory | Resolved | MSW + faker | MSW intercepts real fetch calls so the mock is transparent to the app; faker produces realistic variance; switching to real API = delete the handler file | Yes - handlers are deleted at API switchover |
 | D-5 | Quality signal input | Post-run 1-5 star prompt, thumbs up/down, no rating | Resolved (assumed) | 1-5 star quality prompt already in product | Required for quality-cost KPIs; if not present, quality KPIs must be dropped or deferred | No - removing it breaks ~8 KPIs |
 | D-6 | Date range granularity | Last 7/30/90 days + custom, rolling windows, calendar month | Resolved | Last 7/30/90 + custom | Covers all personas: 7d for SRE, 30d for manager, 90d for CTO; simple to implement | Yes |
-| D-7 | Team filter scope | Single team only, multi-select, "All teams" default | Resolved | "All teams" default + single-team drill-down | Executive view needs all teams; lead needs their team; the filter switches between these | Yes |
+| D-7 | Team filter scope | Single team only, multi-select, "All teams" default | Resolved | "All teams" default + single-team drill-down | Overview needs all teams; lead needs their team; the filter switches between these | Yes |
 | D-8 | Real-time updates | WebSocket streaming, polling, none | Resolved (v1 scope) | 30-second polling via TanStack Query `refetchInterval` | Live streaming is v2; polling achieves near-real-time at low complexity | Yes - swap to WebSocket in v2 |
 | D-9 | Responsive breakpoints | Desktop-only, desktop+tablet, full responsive | Resolved | Desktop primary, tablet secondary (no mobile) | Analytics dashboards are a desktop use case; tablet support for managers on iPads | Yes |
-| D-10 | State management for filters | URL params, Zustand/signals, local useState | Resolved | URL search params | Filters must be shareable (paste URL to CTO); URL is the simplest sharable state | Yes |
+| D-10 | State management for filters | URL params, signals | Resolved | URL search params | Filters must be shareable (paste URL to CTO); URL is the simplest sharable state | Yes |
 | D-11 | Testing framework | Vitest, Jest | Resolved | Vitest | Vite-native; zero config duplication with `vite.config.ts`; 3-5x faster than Jest for this project size | No - deep Vite integration |
 | D-12 | Mock data generation | Static JSON fixtures, Faker.js seeded, MSW inline | Resolved | MSW handlers + Faker.js with fixed seed | Faker.js produces realistic variance; fixed seed makes tests deterministic and prevents polling flicker | Yes |
 | D-13 | Accessibility target | None, WCAG 2.1 AA, WCAG 2.1 AAA | Resolved | WCAG 2.1 AA | Minimum bar for customer-facing enterprise software; charts get `<figure>` + `<figcaption>` + `aria-label` | Yes |
 | D-14 | Source folder structure | Feature-based, section-based, type-based | Resolved | Section-based: `src/components/sections/`, `src/components/kpis/`, `src/components/charts/`, `src/lib/mock/` | Aligns with ARCHITECTURE.md atomic design hierarchy; each dashboard section = one organism; chart wrappers are atoms/molecules | Yes |
-| D-15 | UI state management | Preact Signals, Zustand, useState | Resolved | Preact Signals (`@preact/signals-react`) | Per ARCHITECTURE.md: signals for all mutable UI state; fine-grained reactivity means only the KPI cards subscribed to a changed filter signal re-render - chart siblings are untouched; `lib/babel-signals-transformer` injects `useSignals()` at build time so no manual calls needed | No - architecture mandate |
+| D-15 | UI state management | Preact Signals | Resolved | Preact Signals (`@preact/signals-react`) | Per ARCHITECTURE.md: signals for all mutable state including local component state - `useState` is banned; fine-grained reactivity means only the KPI cards subscribed to a changed filter signal re-render - chart siblings are untouched; `lib/babel-signals-transformer` injects `useSignals()` at build time so no manual calls needed | No - architecture mandate |
 
 ### D-2 Detail: Chart Library Selection (Resolved - Visx)
 
@@ -365,7 +365,7 @@ Once `primitives/` exists, each named chart (AreaChart, BarChart, etc.) is 40-80
 | Visx `<ParentSize>` inside CSS grid renders at 0-width on first paint | Med | Low | `@visx/responsive` `<ParentSize>` uses a ResizeObserver internally - cleaner than Recharts `ResponsiveContainer`, but still requires an explicit `min-h-[200px]` on the chart wrapper to give the observer a non-zero initial rect. |
 | Seeded Faker.js without a fixed seed causes chart flicker on every 30s poll refetch | High | Med | Seed Faker.js with a hash of the current date-range string: same filter inputs = same generated data. Only changes when user adjusts the filter. |
 | 15+ chart SVG instances mounted simultaneously on initial render | Med | Med | Lazy-mount charts below the fold using Intersection Observer; replace with skeleton placeholders until the section scrolls into view. Works identically with Visx and Recharts. |
-| Visx primitive layer takes longer to build than anticipated (first 3 charts) | Med | Med | Scope the first implementation sprint to build the primitive layer + Section 1 (Executive Overview) only. Do not attempt all four sections in one sprint. The primitive layer is the foundation - getting it right is worth the time. |
+| Visx primitive layer takes longer to build than anticipated (first 3 charts) | Med | Med | Scope the first implementation sprint to build the primitive layer + Section 1 (Overview) only. Do not attempt all four sections in one sprint. The primitive layer is the foundation - getting it right is worth the time. |
 | D3 scale math errors produce silent incorrect visualizations (axis tick miscalculation, domain clamping) | Low | High | Every chart must have a unit test that asserts the scale domain and range with known input data. Visx scales are pure functions - they are easy to unit test in isolation without rendering. |
 
 ---
@@ -502,7 +502,7 @@ Phase 4 (quality):
 
 All KPIs are enumerated below with their section, formula, example, and data dependencies. This catalog is the authoritative source of truth for what the dashboard must display.
 
-### Section 1: Executive Overview (CTO / VP Engineering view)
+### Section 1: Overview (CTO / VP Engineering view)
 
 The first section users see. Shows org-wide health at a glance. Answers: "Is the org getting value? Is usage growing? What does it cost us per productive engineer?"
 
@@ -933,7 +933,7 @@ Focused on spend, budget, and financial projections. The billing admin / finance
 
 ### Section 5: Quality & Efficiency (cross-cutting, embedded in Sections 1-2)
 
-These KPIs appear as a dedicated sub-group within the Executive and Team sections rather than a separate section.
+These KPIs appear as a dedicated sub-group within the Overview and Team sections rather than a separate section.
 
 ---
 
@@ -970,7 +970,7 @@ These KPIs appear as a dedicated sub-group within the Executive and Team section
 - **Formula:** `MOVING_AVERAGE(daily_avg_quality_score, 30_days)`
 - **Example:** Quality score rose from 3.7 in January to 4.1 in June - users are improving.
 - **Why it matters:** Rising quality trend = healthy adoption. Flat or declining = the tool is not improving user skill, or user expectations are rising faster than output quality.
-- **Visualization:** Line chart in the Executive section.
+- **Visualization:** Line chart in the Overview section.
 
 ---
 

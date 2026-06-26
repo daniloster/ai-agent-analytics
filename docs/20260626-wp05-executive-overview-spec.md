@@ -1,4 +1,4 @@
-# SPEC: WP-05 - Section 1 Executive Overview
+# SPEC: WP-05 - Section 1 Overview
 
 **Date:** 2026-06-26
 **Status:** Ready
@@ -25,7 +25,7 @@ Implements WP-05 from `docs/20260626-analytics-dashboard-plan.md`. Corresponds t
 
 **Files touched:**
 - `src/components/kpis/` - new directory; owns KpiCard atom
-- `src/components/sections/ExecutiveOverview.tsx` - new organism
+- `src/components/sections/Overview.tsx` - new organism
 - `src/lib/kpi/formulas.ts` - new; pure KPI computation functions
 - `src/lib/kpi/formatters.ts` - new; pure display formatting functions
 
@@ -138,7 +138,7 @@ export function formatNumber(n: number): string
 - `insufficientData=true`: renders "Insufficient data" text with `role="status"` in place of `value`. `insufficientDataReason` shown below in muted text when provided.
 - Loading skeleton variant: when `value` is undefined, renders `<Skeleton className="h-8 w-24" />` in the value slot (caller passes undefined during query loading).
 
-**`src/components/sections/ExecutiveOverview.tsx`** (new)
+**`src/components/sections/Overview.tsx`** (new)
 - Organism-level component.
 - Two TanStack Query `useQuery` calls:
   - `['overview', filterQueryParams.value]` -> `/api/analytics/overview`
@@ -158,8 +158,8 @@ export function formatNumber(n: number): string
 // src/components/kpis/KpiCard.tsx
 export function KpiCard(props: KpiCardProps): JSX.Element
 
-// src/components/sections/ExecutiveOverview.tsx
-export function ExecutiveOverview(): JSX.Element
+// src/components/sections/Overview.tsx
+export function Overview(): JSX.Element
 ```
 
 ---
@@ -169,7 +169,7 @@ export function ExecutiveOverview(): JSX.Element
 ### Data flow
 
 ```
-ExecutiveOverview mounts (inside Section lazy-mount wrapper from WP-04)
+Overview mounts (inside Section lazy-mount wrapper from WP-04)
   --> useQuery(['overview', filterQueryParams.value])
   --> useQuery(['timeseries', filterQueryParams.value])
   --> while isLoading: each KpiCard slot renders Skeleton placeholder
@@ -223,7 +223,7 @@ delta prop received (number):
 
 ## 5. Acceptance criteria
 
-1. `ExecutiveOverview` renders exactly 14 KpiCard instances when the API returns a complete `OverviewResponse`.
+1. `Overview` renders exactly 14 KpiCard instances when the API returns a complete `OverviewResponse`.
 2. KPI-09 (Quality Score) and KPI-10 (Cost/Quality Point) show "Insufficient data" text with `role="status"` when `avg_quality_score` is `null` in the API response.
 3. KPI-05 (Total Cost) renders a green delta badge when `total_cost_delta` is negative (cost decreased) and red when positive.
 4. The token area chart (KPI-04) renders two visually distinct `<AreaClosed>` paths - one for `input_tokens` series and one for `output_tokens` series.
@@ -258,4 +258,4 @@ delta prop received (number):
 | `src/lib/kpi/formulas.test.ts` (new) | `computeRetentionCost` happy path and mau=0 guard; `computeCostPerQualityPoint` returns null when avgQualityScore null; returns null when ratedRunCount < 10; returns correct value for known inputs; `computeDeltaPercent` positive, negative, zero, prior=0 cases; `computeProjectedMonthEnd` proportional projection correctness |
 | `src/lib/kpi/formatters.test.ts` (new) | `formatCurrency` sub-dollar ($0.42), thousands ($14,200), millions ($1.4M); `formatTokens` thousands (842K), millions (241M), billions (2.41B); `formatDuration` seconds (47s), minutes (2m 3s); `formatPercent` default and custom decimals; `formatNumber` thousands separator |
 | `src/components/kpis/KpiCard.test.ts` (new) | renders label and value; positive delta shows green badge; negative delta shows red badge; undefined delta renders no badge; `insufficientData=true` renders "Insufficient data" with `role="status"`; info icon click opens popover with formula and example text; popover closes on Escape |
-| `src/components/sections/ExecutiveOverview.test.ts` (new) | renders 14 KpiCard instances with mocked API response; shows Skeleton while query loading; KPI-09 shows insufficientData when `avg_quality_score` is null; token area chart renders when timeseries data present; filter change triggers query refetch (verify query key update) |
+| `src/components/sections/Overview.test.ts` (new) | renders 14 KpiCard instances with mocked API response; shows Skeleton while query loading; KPI-09 shows insufficientData when `avg_quality_score` is null; token area chart renders when timeseries data present; filter change triggers query refetch (verify query key update) |

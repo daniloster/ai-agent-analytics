@@ -140,11 +140,11 @@ Before writing a helper function inside a module, check whether an equivalent al
 ### 3.1 State Management Philosophy
 
 - **Server state:** Use a dedicated library (TanStack Query, SWR, etc.)
-- **Domain state:** Use signals or a model pattern for complex state
-- **UI state:** Use signal also for ephemeral, isolated state
+- **Domain state:** Use signals for complex state
+- **UI state:** Use signals for all mutable state, including ephemeral and component-local state. Never use `useState`.
 - **No global state:** Avoid global state management libraries (Redux, Zustand)
 
-### 3.2 Signal Architecture (if using signals)
+### 3.2 Signal Architecture
 
 **Core principles:**
 1. All mutable state lives in model classes
@@ -444,7 +444,7 @@ export function LapList({ laps }: Props) {
 }
 ```
 
-Functions that close over component-scoped values (props, signals, `useState`, `useRef`) must stay inside the component or be expressed as `useCallback`/`useMemo` - hoisting them would break the closure.
+Functions that close over component-scoped values (props, signals, `useRef`) must stay inside the component or be expressed as `useCallback`/`useMemo` - hoisting them would break the closure.
 
 ### 4.5 Flatter React Tree
 

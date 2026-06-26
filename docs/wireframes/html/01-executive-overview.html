@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1440">
+<title>Overview - AgentCloud Analytics</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    background: #f4f4f5;
+    color: #09090b;
+    min-width: 1440px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  /* Header */
+  .header {
+    background: #ffffff;
+    border-bottom: 1px solid #e4e4e7;
+    padding: 0 32px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-left { display: flex; align-items: center; gap: 8px; }
+  .logo-icon {
+    width: 28px; height: 28px;
+    background: #18181b;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 14px; font-weight: 700;
+  }
+  .logo-text { font-size: 15px; font-weight: 600; color: #09090b; letter-spacing: -0.3px; }
+  .header-right { display: flex; align-items: center; gap: 8px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 500;
+    cursor: pointer; border: 1px solid #e4e4e7; background: #fff; color: #09090b;
+    white-space: nowrap;
+  }
+  .btn-ghost { border-color: transparent; background: transparent; }
+  .btn-primary { background: #18181b; color: #fff; border-color: #18181b; }
+  .btn svg { width: 14px; height: 14px; }
+  /* Nav tabs */
+  .nav-tabs {
+    background: #ffffff;
+    border-bottom: 1px solid #e4e4e7;
+    padding: 0 32px;
+    display: flex;
+    align-items: flex-end;
+    gap: 0;
+  }
+  .tab {
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #71717a;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    white-space: nowrap;
+  }
+  .tab.active { color: #09090b; border-bottom-color: #18181b; }
+  /* Page content */
+  .page-content { padding: 28px 32px; max-width: 1440px; margin: 0 auto; }
+  .page-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .page-title { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; color: #09090b; }
+  .page-subtitle { font-size: 13px; color: #71717a; margin-top: 2px; }
+  .date-range { font-size: 13px; color: #71717a; }
+  /* KPI grid */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .kpi-card {
+    background: #ffffff;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi-top {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .kpi-label { font-size: 12px; font-weight: 500; color: #71717a; text-transform: none; letter-spacing: 0; }
+  .kpi-help {
+    width: 18px; height: 18px; border-radius: 50%;
+    border: 1px solid #e4e4e7; background: #f4f4f5;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; color: #71717a; cursor: pointer; font-weight: 600;
+    flex-shrink: 0;
+  }
+  .kpi-value { font-size: 28px; font-weight: 700; letter-spacing: -1px; color: #09090b; font-variant-numeric: tabular-nums; line-height: 1; margin-bottom: 8px; }
+  .kpi-delta-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .delta {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 2px 7px; border-radius: 20px; font-size: 11px; font-weight: 600;
+  }
+  .delta-up-good { background: #f0fdf4; color: #16a34a; }
+  .delta-up-bad { background: #fef2f2; color: #dc2626; }
+  .delta-down-good { background: #f0fdf4; color: #16a34a; }
+  .delta-neutral { background: #f4f4f5; color: #71717a; }
+  .kpi-sub { font-size: 11px; color: #71717a; }
+  .sparkline-wrap { margin-top: 4px; }
+  /* Chart grid */
+  .chart-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .chart-card {
+    background: #ffffff;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .chart-card-full {
+    background: #ffffff;
+    border: 1px solid #e4e4e7;
+    border-radius: 8px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  .chart-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .chart-title { font-size: 14px; font-weight: 600; color: #09090b; }
+  .chart-subtitle { font-size: 12px; color: #71717a; margin-top: 2px; }
+  .chart-legend { display: flex; gap: 16px; align-items: center; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #71717a; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .legend-line { width: 16px; height: 2px; border-radius: 1px; }
+  .legend-dashed { width: 16px; height: 0; border-top: 2px dashed #71717a; }
+  /* Progress bar */
+  .progress-wrap { margin-top: 8px; }
+  .progress-bar-bg { height: 4px; background: #f4f4f5; border-radius: 2px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; border-radius: 2px; }
+  /* Section divider */
+  .section-divider { height: 1px; background: #e4e4e7; margin: 8px 0 24px; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <div class="header-left">
+    <div class="logo-icon">&#x2B21;</div>
+    <span class="logo-text">AgentCloud Analytics</span>
+  </div>
+  <div class="header-right">
+    <button class="btn">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="12" height="8" rx="1"/><path d="M5 4V3M11 4V3"/></svg>
+      Last 30 days
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </button>
+    <button class="btn">
+      All Teams
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </button>
+    <button class="btn btn-primary" style="gap:5px;">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="13" height="13"><circle cx="8" cy="8" r="6"/><path d="M8 7v4M8 5.5v.5"/></svg>
+      Understanding
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" width="11" height="11"><path d="M4 12L12 4M7 4h5v5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- Nav Tabs -->
+<nav class="nav-tabs">
+  <div class="tab active">Overview</div>
+  <div class="tab">Teams</div>
+  <div class="tab">Reliability</div>
+  <div class="tab">Billing</div>
+</nav>
+
+<!-- Page Content -->
+<main class="page-content">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Overview</div>
+      <div class="page-subtitle">Platform-wide agent performance and cost summary</div>
+    </div>
+    <div class="date-range">Jun 1 - Jun 30, 2026</div>
+  </div>
+
+  <!-- Row 1: KPI Cards -->
+  <div class="kpi-grid">
+    <!-- Total Runs -->
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-label">Total Runs</span>
+        <span class="kpi-help">?</span>
+      </div>
+      <div class="kpi-value">12,450</div>
+      <div class="kpi-delta-row">
+        <span class="delta delta-up-good">&#8593; +18.4%</span>
+        <span class="kpi-sub">vs last month</span>
+      </div>
+      <div class="sparkline-wrap">
+        <svg width="100%" height="40" viewBox="0 0 200 40" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="sp1" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#2563eb" stop-opacity="0.15"/>
+              <stop offset="100%" stop-color="#2563eb" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path d="M0,35 L20,30 L40,28 L60,22 L80,20 L100,16 L120,18 L140,12 L160,9 L180,6 L200,4 L200,40 L0,40 Z" fill="url(#sp1)"/>
+          <polyline points="0,35 20,30 40,28 60,22 80,20 100,16 120,18 140,12 160,9 180,6 200,4" fill="none" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+    <!-- Active Users -->
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-label">Active Users (MAU)</span>
+        <span class="kpi-help">?</span>
+      </div>
+      <div class="kpi-value">87</div>
+      <div class="kpi-delta-row">
+        <span class="delta delta-up-good">&#8593; +5.2%</span>
+        <span class="kpi-sub">of 120 seats</span>
+      </div>
+      <div class="sparkline-wrap">
+        <svg width="100%" height="40" viewBox="0 0 200 40" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="sp2" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#0d9488" stop-opacity="0.15"/>
+              <stop offset="100%" stop-color="#0d9488" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path d="M0,38 L20,35 L40,32 L60,30 L80,26 L100,24 L120,22 L140,20 L160,18 L180,15 L200,12 L200,40 L0,40 Z" fill="url(#sp2)"/>
+          <polyline points="0,38 20,35 40,32 60,30 80,26 100,24 120,22 140,20 160,18 180,15 200,12" fill="none" stroke="#0d9488" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+    <!-- Seat Adoption -->
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-label">Seat Adoption</span>
+        <span class="kpi-help">?</span>
+      </div>
+      <div class="kpi-value">72.5%</div>
+      <div class="kpi-delta-row">
+        <span class="delta delta-up-good">&#8593; +3.1pp</span>
+        <span class="kpi-sub">87 / 120 seats</span>
+      </div>
+      <div class="progress-wrap" style="margin-bottom: 8px;">
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:#71717a;margin-bottom:4px;">
+          <span>0%</span><span>100%</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" style="width:72.5%;background:#2563eb;"></div>
+        </div>
+      </div>
+      <div class="sparkline-wrap">
+        <svg width="100%" height="28" viewBox="0 0 200 28" preserveAspectRatio="none">
+          <polyline points="0,26 20,24 40,22 60,21 80,19 100,18 120,16 140,15 160,13 180,11 200,9" fill="none" stroke="#7c3aed" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+    <!-- Total Cost -->
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-label">Total Cost (MTD)</span>
+        <span class="kpi-help">?</span>
+      </div>
+      <div class="kpi-value">$14,200</div>
+      <div class="kpi-delta-row">
+        <span class="delta delta-up-bad">&#8593; +12.0%</span>
+        <span class="kpi-sub">budget $15,000</span>
+      </div>
+      <div class="progress-wrap" style="margin-bottom: 8px;">
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:#71717a;margin-bottom:4px;">
+          <span>$0</span><span style="color:#dc2626;font-weight:600;">$15k limit</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" style="width:94.7%;background:#d97706;"></div>
+        </div>
+      </div>
+      <div class="sparkline-wrap">
+        <svg width="100%" height="28" viewBox="0 0 200 28" preserveAspectRatio="none">
+          <polyline points="0,26 20,23 40,20 60,18 80,16 100,14 120,13 140,11 160,9 180,7 200,5" fill="none" stroke="#ea580c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 2: KPI Cards -->
+  <div class="kpi-grid">
+    <!-- Retention Cost -->
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-label">Retention Cost</span>
+        <span class="kpi-help">?</span>
+      </div>
+      <div class="kpi-value">$163<span style="font-size:16px;font-weight:500;color:#71717a;">/user</span></div>
+      <div class="kpi-delta-row">
+        <span class="delta delta-down-good">&#8595; -6.3%</span>
+        <span class="kpi-sub">improving efficiency</span>
+      </div>
+      <div class="sparkline-wrap">
+        <svg width="100%" height="40" viewBox="0 0 200 40" preserveAspectRatio="none">
+          <polyline points="0,10 20,12 40,14 60,16 80,18 100,20 120,22 140,24 160,26 180,28 200,30" fill="none" stroke="#0d9488" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="none"/>
+        </svg>
+      </div>
+    </div>
+    <!-- Success Rate -->
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-label">Success Rate</span>
+        <span class="kpi-help">?</span>
+      </div>
+      <div class="kpi-value">94.2%</div>
+      <div class="kpi-delta-row">
+        <span class="delta delta-down-good">&#8595; -0.3pp</span>
+        <span class="kpi-sub">watching errors</span>
+      </div>
+      <div class="sparkline-wrap">
+        <svg width="100%" height="40" viewBox="0 0 200 40" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="sp3" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#16a34a" stop-opacity="0.12"/>
+              <stop offset="100%" stop-color="#16a34a" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path d="M0,8 L20,7 L40,6 L60,8 L80,7 L100,9 L120,8 L140,10 L160,12 L180,11 L200,13 L200,40 L0,40 Z" fill="url(#sp3)"/>
+          <polyline points="0,8 20,7 40,6 60,8 80,7 100,9 120,8 140,10 160,12 180,11 200,13" fill="none" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+    <!-- Avg Quality -->
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-label">Avg Quality Score</span>
+        <span class="kpi-help">?</span>
+      </div>
+      <div class="kpi-value">4.1<span style="font-size:14px;font-weight:500;color:#71717a;">/5.0</span></div>
+      <div class="kpi-delta-row">
+        <span class="delta delta-up-good">&#8593; +0.2</span>
+        <span class="kpi-sub">8,200 rated runs</span>
+      </div>
+      <div style="display:flex;gap:2px;margin:6px 0 6px;">
+        <span style="color:#f59e0b;font-size:18px;">&#9733;</span>
+        <span style="color:#f59e0b;font-size:18px;">&#9733;</span>
+        <span style="color:#f59e0b;font-size:18px;">&#9733;</span>
+        <span style="color:#f59e0b;font-size:18px;">&#9733;</span>
+        <span style="color:#d4d4d8;font-size:18px;">&#9733;</span>
+      </div>
+      <div class="kpi-sub">Based on 8,200 human-rated runs</div>
+    </div>
+    <!-- Cost/Quality -->
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <span class="kpi-label">Cost per Quality Pt</span>
+        <span class="kpi-help">?</span>
+      </div>
+      <div class="kpi-value">$0.42</div>
+      <div class="kpi-delta-row">
+        <span class="delta delta-down-good">&#8595; -8.7%</span>
+        <span class="kpi-sub">efficiency improving</span>
+      </div>
+      <div class="sparkline-wrap">
+        <svg width="100%" height="40" viewBox="0 0 200 40" preserveAspectRatio="none">
+          <polyline points="0,12 20,14 40,16 60,18 80,20 100,22 120,24 140,26 160,28 180,30 200,32" fill="none" stroke="#7c3aed" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 3: Charts -->
+  <div class="chart-grid-2">
+    <!-- Token Consumption -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Token Consumption</div>
+          <div class="chart-subtitle">2.41B total - 70% output, 30% input</div>
+        </div>
+        <div class="chart-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#2563eb;"></div> Output</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#0d9488;"></div> Input</div>
+        </div>
+      </div>
+      <svg width="100%" height="220" viewBox="0 0 580 220">
+        <defs>
+          <linearGradient id="outputGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#2563eb" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#2563eb" stop-opacity="0.05"/>
+          </linearGradient>
+          <linearGradient id="inputGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0d9488" stop-opacity="0.4"/>
+            <stop offset="100%" stop-color="#0d9488" stop-opacity="0.05"/>
+          </linearGradient>
+        </defs>
+        <!-- Grid lines -->
+        <line x1="48" y1="10" x2="568" y2="10" stroke="#f4f4f5" stroke-width="1"/>
+        <line x1="48" y1="55" x2="568" y2="55" stroke="#f4f4f5" stroke-width="1"/>
+        <line x1="48" y1="100" x2="568" y2="100" stroke="#f4f4f5" stroke-width="1"/>
+        <line x1="48" y1="145" x2="568" y2="145" stroke="#f4f4f5" stroke-width="1"/>
+        <line x1="48" y1="190" x2="568" y2="190" stroke="#e4e4e7" stroke-width="1"/>
+        <!-- Y axis labels -->
+        <text x="42" y="14" text-anchor="end" font-size="10" fill="#71717a">120B</text>
+        <text x="42" y="59" text-anchor="end" font-size="10" fill="#71717a">90B</text>
+        <text x="42" y="104" text-anchor="end" font-size="10" fill="#71717a">60B</text>
+        <text x="42" y="149" text-anchor="end" font-size="10" fill="#71717a">30B</text>
+        <text x="42" y="194" text-anchor="end" font-size="10" fill="#71717a">0</text>
+        <!-- Output area (stacked on top of input) -->
+        <path d="M48,120 L130,110 L212,95 L294,85 L376,72 L458,60 L540,48 L540,145 L458,138 L376,132 L294,128 L212,135 L130,140 L48,145 Z" fill="url(#outputGrad)"/>
+        <polyline points="48,120 130,110 212,95 294,85 376,72 458,60 540,48" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Input area -->
+        <path d="M48,145 L130,140 L212,135 L294,128 L376,132 L458,138 L540,145 L540,190 L48,190 Z" fill="url(#inputGrad)"/>
+        <polyline points="48,145 130,140 212,135 294,128 376,132 458,138 540,145" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- X axis labels -->
+        <text x="48" y="208" text-anchor="middle" font-size="10" fill="#71717a">Jun 1</text>
+        <text x="130" y="208" text-anchor="middle" font-size="10" fill="#71717a">Jun 6</text>
+        <text x="212" y="208" text-anchor="middle" font-size="10" fill="#71717a">Jun 11</text>
+        <text x="294" y="208" text-anchor="middle" font-size="10" fill="#71717a">Jun 16</text>
+        <text x="376" y="208" text-anchor="middle" font-size="10" fill="#71717a">Jun 21</text>
+        <text x="458" y="208" text-anchor="middle" font-size="10" fill="#71717a">Jun 26</text>
+        <text x="540" y="208" text-anchor="middle" font-size="10" fill="#71717a">Jun 30</text>
+      </svg>
+    </div>
+
+    <!-- Cost vs Budget -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Cost vs Budget</div>
+          <div class="chart-subtitle">MTD actual, projected, $15,000 ceiling</div>
+        </div>
+        <div class="chart-legend">
+          <div class="legend-item"><div class="legend-line" style="background:#2563eb;"></div> Actual</div>
+          <div class="legend-item"><div class="legend-dashed"></div> Projected</div>
+          <div class="legend-item"><div class="legend-line" style="background:#dc2626;"></div> Budget</div>
+        </div>
+      </div>
+      <svg width="100%" height="220" viewBox="0 0 580 220">
+        <defs>
+          <linearGradient id="costGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#2563eb" stop-opacity="0.15"/>
+            <stop offset="100%" stop-color="#2563eb" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <!-- Grid lines -->
+        <line x1="48" y1="10" x2="568" y2="10" stroke="#f4f4f5" stroke-width="1"/>
+        <line x1="48" y1="55" x2="568" y2="55" stroke="#f4f4f5" stroke-width="1"/>
+        <line x1="48" y1="100" x2="568" y2="100" stroke="#f4f4f5" stroke-width="1"/>
+        <line x1="48" y1="145" x2="568" y2="145" stroke="#f4f4f5" stroke-width="1"/>
+        <!-- Budget line -->
+        <line x1="48" y1="22" x2="568" y2="22" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.7"/>
+        <text x="572" y="26" font-size="9" fill="#dc2626" font-weight="600">$15k</text>
+        <!-- Y axis labels -->
+        <text x="42" y="14" text-anchor="end" font-size="10" fill="#71717a">$15k</text>
+        <text x="42" y="59" text-anchor="end" font-size="10" fill="#71717a">$11k</text>
+        <text x="42" y="104" text-anchor="end" font-size="10" fill="#71717a">$7.5k</text>
+        <text x="42" y="149" text-anchor="end" font-size="10" fill="#71717a">$3k</text>
+        <text x="42" y="194" text-anchor="end" font-size="10" fill="#71717a">$0</text>
+        <!-- Actual cost area -->
+        <path d="M48,190 L130,168 L212,145 L294,120 L376,95 L438,78 L438,190 Z" fill="url(#costGrad)"/>
+        <polyline points="48,190 130,168 212,145 294,120 376,95 438,78" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Current marker -->
+        <circle cx="438" cy="78" r="4" fill="#2563eb" stroke="#fff" stroke-width="2"/>
+        <!-- Projected line (dashed) -->
+        <polyline points="438,78 480,62 510,50 540,40" fill="none" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="5,3" stroke-linecap="round"/>
+        <!-- X axis labels -->
+        <text x="48" y="208" text-anchor="middle" font-size="10" fill="#71717a">Jun 1</text>
+        <text x="130" y="208" text-anchor="middle" font-size="10" fill="#71717a">Jun 6</text>
+        <text x="212" y="208" text-anchor="middle" font-size="10" fill="#71717a">Jun 11</text>
+        <text x="294" y="208" text-anchor="middle" font-size="10" fill="#71717a">Jun 16</text>
+        <text x="376" y="208" text-anchor="middle" font-size="10" fill="#71717a">Jun 21</text>
+        <text x="438" y="208" text-anchor="middle" font-size="10" fill="#71717a">Today</text>
+        <text x="540" y="208" text-anchor="middle" font-size="10" fill="#71717a">Jun 30</text>
+        <!-- Annotation -->
+        <rect x="345" y="68" width="86" height="22" rx="4" fill="#fffbeb" stroke="#d97706" stroke-width="1"/>
+        <text x="388" y="83" text-anchor="middle" font-size="10" fill="#d97706" font-weight="600">94.7% of budget</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Row 4: Quality Trend -->
+  <div class="chart-card-full">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title">Quality Score Trend</div>
+        <div class="chart-subtitle">6-month trajectory of human-rated output quality (1-5 scale)</div>
+      </div>
+      <div class="chart-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#7c3aed;"></div> Avg Quality Score</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#2563eb;opacity:0.4;"></div> Rating Volume</div>
+      </div>
+    </div>
+    <svg width="100%" height="200" viewBox="0 0 1320 200">
+      <defs>
+        <linearGradient id="qualGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.2"/>
+          <stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <!-- Grid -->
+      <line x1="60" y1="20" x2="1300" y2="20" stroke="#f4f4f5" stroke-width="1"/>
+      <line x1="60" y1="60" x2="1300" y2="60" stroke="#f4f4f5" stroke-width="1"/>
+      <line x1="60" y1="100" x2="1300" y2="100" stroke="#f4f4f5" stroke-width="1"/>
+      <line x1="60" y1="140" x2="1300" y2="140" stroke="#f4f4f5" stroke-width="1"/>
+      <line x1="60" y1="180" x2="1300" y2="180" stroke="#e4e4e7" stroke-width="1"/>
+      <!-- Y labels -->
+      <text x="54" y="24" text-anchor="end" font-size="10" fill="#71717a">5.0</text>
+      <text x="54" y="64" text-anchor="end" font-size="10" fill="#71717a">4.5</text>
+      <text x="54" y="104" text-anchor="end" font-size="10" fill="#71717a">4.0</text>
+      <text x="54" y="144" text-anchor="end" font-size="10" fill="#71717a">3.5</text>
+      <text x="54" y="184" text-anchor="end" font-size="10" fill="#71717a">3.0</text>
+      <!-- Volume bars (background) -->
+      <rect x="160" y="100" width="60" height="80" fill="#2563eb" opacity="0.08" rx="3"/>
+      <rect x="368" y="90" width="60" height="90" fill="#2563eb" opacity="0.08" rx="3"/>
+      <rect x="576" y="80" width="60" height="100" fill="#2563eb" opacity="0.08" rx="3"/>
+      <rect x="784" y="70" width="60" height="110" fill="#2563eb" opacity="0.08" rx="3"/>
+      <rect x="992" y="55" width="60" height="125" fill="#2563eb" opacity="0.08" rx="3"/>
+      <rect x="1168" y="45" width="60" height="135" fill="#2563eb" opacity="0.08" rx="3"/>
+      <!-- Quality line area -->
+      <path d="M60,155 L190,148 L398,135 L606,120 L814,105 L1022,95 L1198,88 L1198,180 L60,180 Z" fill="url(#qualGrad)"/>
+      <polyline points="60,155 190,148 398,135 606,120 814,105 1022,95 1198,88" fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- Data point dots -->
+      <circle cx="60" cy="155" r="4" fill="#7c3aed" stroke="#fff" stroke-width="2"/>
+      <circle cx="190" cy="148" r="4" fill="#7c3aed" stroke="#fff" stroke-width="2"/>
+      <circle cx="398" cy="135" r="4" fill="#7c3aed" stroke="#fff" stroke-width="2"/>
+      <circle cx="606" cy="120" r="4" fill="#7c3aed" stroke="#fff" stroke-width="2"/>
+      <circle cx="814" cy="105" r="4" fill="#7c3aed" stroke="#fff" stroke-width="2"/>
+      <circle cx="1022" cy="95" r="4" fill="#7c3aed" stroke="#fff" stroke-width="2"/>
+      <circle cx="1198" cy="88" r="4.5" fill="#7c3aed" stroke="#fff" stroke-width="2.5"/>
+      <!-- Value labels -->
+      <text x="60" y="148" text-anchor="middle" font-size="10" fill="#7c3aed" font-weight="600">3.7</text>
+      <text x="190" y="141" text-anchor="middle" font-size="10" fill="#7c3aed" font-weight="600">3.8</text>
+      <text x="398" y="128" text-anchor="middle" font-size="10" fill="#7c3aed" font-weight="600">3.9</text>
+      <text x="606" y="113" text-anchor="middle" font-size="10" fill="#7c3aed" font-weight="600">4.0</text>
+      <text x="814" y="98" text-anchor="middle" font-size="10" fill="#7c3aed" font-weight="600">4.0</text>
+      <text x="1022" y="88" text-anchor="middle" font-size="10" fill="#7c3aed" font-weight="600">4.0</text>
+      <text x="1198" y="81" text-anchor="middle" font-size="10" fill="#7c3aed" font-weight="600">4.1</text>
+      <!-- X labels -->
+      <text x="60" y="198" text-anchor="middle" font-size="11" fill="#71717a">Jan</text>
+      <text x="190" y="198" text-anchor="middle" font-size="11" fill="#71717a">Feb</text>
+      <text x="398" y="198" text-anchor="middle" font-size="11" fill="#71717a">Mar</text>
+      <text x="606" y="198" text-anchor="middle" font-size="11" fill="#71717a">Apr</text>
+      <text x="814" y="198" text-anchor="middle" font-size="11" fill="#71717a">May</text>
+      <text x="1022" y="198" text-anchor="middle" font-size="11" fill="#71717a">Jun (partial)</text>
+      <text x="1198" y="198" text-anchor="middle" font-size="11" fill="#71717a" font-weight="600">Now</text>
+    </svg>
+  </div>
+
+</main>
+</body>
+</html>

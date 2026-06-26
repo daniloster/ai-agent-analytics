@@ -373,7 +373,7 @@ User navigates to http://localhost:5173
   --> MSW registers Service Worker at /mockServiceWorker.js
   --> MSW intercepts all fetch() calls in the browser
 
-Component (e.g. ExecutiveOverview) calls:
+Component (e.g. Overview) calls:
   useQuery({
     queryKey: ['overview', { from, to, team_id }],
     queryFn: () => fetch('/api/analytics/overview?from=...&to=...&team_id=...')
