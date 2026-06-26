@@ -847,7 +847,7 @@ describe('GET /api/analytics/overview', () => {
 | [x]  | 2        | T-2: Seed utilities | - | Small |
 | [x]  | 3        | T-3: Org generators | T-1 | Small |
 | [x]  | 4        | T-4: Overview generator | T-1, T-2 | Medium |
-| [ ]  | 5        | T-5: Teams generator | T-1, T-2 | Medium |
+| [x]  | 5        | T-5: Teams generator | T-1, T-2 | Medium |
 | [ ]  | 6        | T-6: Reliability generator | T-1, T-2 | Medium |
 | [ ]  | 7        | T-7: Billing generator | T-1, T-2 | Medium |
 | [ ]  | 8        | T-8: Timeseries generator | T-1, T-2 | Small |
