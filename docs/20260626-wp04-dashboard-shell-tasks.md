@@ -704,7 +704,7 @@ export const router = createBrowserRouter([
 | [x]  | 1        | T-1: UI component prerequisites | - | Medium |
 | [x]  | 2        | T-2: Filter signals module | - | Small |
 | [x]  | 3        | T-3: Section and SectionSkeleton | - | Small |
-| [ ]  | 4        | T-4: SectionNav | - | Small |
+| [x]  | 4        | T-4: SectionNav | - | Small |
 | [ ]  | 5        | T-5: DateRangePicker | T-1, T-2 | Medium |
 | [ ]  | 6        | T-6: TeamSelector | T-1, T-2 | Medium |
 | [ ]  | 7        | T-7: FilterBar | T-5, T-6 | Small |
