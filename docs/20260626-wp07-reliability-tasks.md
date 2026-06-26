@@ -456,7 +456,7 @@ export function Reliability(): JSX.Element
 
 | Done | Priority | Task | Depends on | Effort |
 |------|----------|------|------------|--------|
-| [ ]  | 1        | T-1: Heatmap chart wrapper | - | Medium |
+| [x]  | 1        | T-1: Heatmap chart wrapper | - | Medium |
 | [ ]  | 2        | T-2: computeErrorRateSeverity + statusDot | - | Small |
 | [ ]  | 3        | T-3: IncidentTable component | WP-06 T-1, T-2 | Small |
 | [ ]  | 4        | T-4: Reliability section | T-1, T-2, T-3, WP-05 T-4, WP-05 T-5 | Large |
