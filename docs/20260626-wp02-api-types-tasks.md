@@ -846,7 +846,7 @@ describe('GET /api/analytics/overview', () => {
 | [x]  | 1        | T-1: TypeScript API types | - | Small |
 | [x]  | 2        | T-2: Seed utilities | - | Small |
 | [x]  | 3        | T-3: Org generators | T-1 | Small |
-| [ ]  | 4        | T-4: Overview generator | T-1, T-2 | Medium |
+| [x]  | 4        | T-4: Overview generator | T-1, T-2 | Medium |
 | [ ]  | 5        | T-5: Teams generator | T-1, T-2 | Medium |
 | [ ]  | 6        | T-6: Reliability generator | T-1, T-2 | Medium |
 | [ ]  | 7        | T-7: Billing generator | T-1, T-2 | Medium |
