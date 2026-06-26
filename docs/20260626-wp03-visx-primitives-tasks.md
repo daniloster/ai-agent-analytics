@@ -1205,4 +1205,4 @@ export function Annotation(props: AnnotationProps): JSX.Element | null {
 | [x]  | 9        | T-9: Gauge mark | T-5 | Small |
 | [x]  | 10       | T-10: HeatmapMark | T-5 | Medium |
 | [x]  | 11       | T-11: SeriesTooltip overlay | T-5 | Medium |
-| [ ]  | 12       | T-12: MouseTooltip + Annotation overlays | T-5 | Small |
+| [x]  | 12       | T-12: MouseTooltip + Annotation overlays | T-5 | Small |
