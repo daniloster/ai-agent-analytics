@@ -851,4 +851,4 @@ describe('GET /api/analytics/overview', () => {
 | [x]  | 6        | T-6: Reliability generator | T-1, T-2 | Medium |
 | [x]  | 7        | T-7: Billing generator | T-1, T-2 | Medium |
 | [x]  | 8        | T-8: Timeseries generator | T-1, T-2 | Small |
-| [ ]  | 9        | T-9: MSW handlers, browser, main.tsx | T-1, T-2, T-3, T-4, T-5, T-6, T-7, T-8 | Medium |
+| [x]  | 9        | T-9: MSW handlers, browser, main.tsx | T-1, T-2, T-3, T-4, T-5, T-6, T-7, T-8 | Medium |
