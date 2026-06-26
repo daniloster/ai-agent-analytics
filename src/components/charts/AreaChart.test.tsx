@@ -61,3 +61,23 @@ it('no referenceLine renders no line element', () => {
 it('empty series array does not throw', () => {
   expect(() => render(<AreaChart series={[]} />)).not.toThrow()
 })
+
+it('series with dashed:true produces a path with stroke-dasharray="4 2"', () => {
+  const dashedSeries = [
+    { id: 'actual', label: 'Actual', data: [{ date: '2026-06-01', value: 100 }] },
+    { id: 'projected', label: 'Projected', data: [{ date: '2026-06-02', value: 200 }], dashed: true },
+  ]
+  const { container } = render(<AreaChart series={dashedSeries} />)
+  const paths = container.querySelectorAll('path')
+  const dashedPath = Array.from(paths).find(
+    (p) => p.getAttribute('stroke-dasharray') === '4 2',
+  )
+  expect(dashedPath).not.toBeUndefined()
+})
+
+it('series without dashed prop produces a path with no stroke-dasharray', () => {
+  const { container } = render(<AreaChart series={SERIES_ONE} />)
+  const paths = container.querySelectorAll('path')
+  const hasDash = Array.from(paths).some((p) => p.getAttribute('stroke-dasharray') !== null)
+  expect(hasDash).toBe(false)
+})

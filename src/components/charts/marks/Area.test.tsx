@@ -117,4 +117,20 @@ describe('Area mark', () => {
       expect(c.getAttribute('role')).toBe('listitem')
     })
   })
+
+  it('dashed={true} renders AreaClosed with strokeDasharray="4 2"', () => {
+    const { container } = renderArea({ dashed: true })
+    const paths = container.querySelectorAll('path')
+    const dashedPath = Array.from(paths).find(
+      (p) => p.getAttribute('stroke-dasharray') === '4 2',
+    )
+    expect(dashedPath).not.toBeUndefined()
+  })
+
+  it('dashed={false} renders no strokeDasharray attribute', () => {
+    const { container } = renderArea({ dashed: false })
+    const paths = container.querySelectorAll('path')
+    const hasDash = Array.from(paths).some((p) => p.getAttribute('stroke-dasharray') !== null)
+    expect(hasDash).toBe(false)
+  })
 })

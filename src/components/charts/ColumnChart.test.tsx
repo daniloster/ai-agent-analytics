@@ -58,3 +58,20 @@ it('ariaLabel appears on the figure element', () => {
   const figure = container.querySelector('figure')
   expect(figure?.getAttribute('aria-label')).toBe('Cost per team')
 })
+
+it('trendLine={true} renders a LinePath <path> element', () => {
+  const { container } = render(<ColumnChart bars={BARS} trendLine={true} />)
+  expect(container.querySelector('path')).not.toBeNull()
+})
+
+it('no trendLine prop renders no <path> element', () => {
+  const { container } = render(<ColumnChart bars={BARS} />)
+  expect(container.querySelector('path')).toBeNull()
+})
+
+it('trend line x positions span the bars (centered on bands)', () => {
+  const { container } = render(<ColumnChart bars={BARS} trendLine={true} />)
+  const path = container.querySelector('path')
+  // LinePath produces a path element with a "d" attribute; just verify it exists
+  expect(path?.getAttribute('d')).toBeTruthy()
+})

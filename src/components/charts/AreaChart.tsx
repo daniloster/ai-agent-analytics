@@ -8,6 +8,7 @@ export interface AreaChartSeries {
   label: string
   data: Array<{ date: string; value: number }>
   color?: string
+  dashed?: boolean
 }
 
 export interface AreaChartProps {
@@ -42,7 +43,7 @@ export function AreaChart({ series, referenceLine, height, ariaLabel }: AreaChar
       {() => (
         <>
           {series.map((s) => (
-            <Area key={s.id} series={s.id} axis="y" color={s.color} />
+            <Area key={s.id} series={s.id} axis="y" color={s.color} dashed={s.dashed} />
           ))}
           {referenceLine && (
             <Annotation

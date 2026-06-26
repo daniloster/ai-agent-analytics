@@ -6,6 +6,7 @@ import type { LineProps } from './Line'
 
 export interface AreaProps<TSeries extends string = string, TAxisId extends string = string> extends LineProps<TSeries, TAxisId> {
   fillOpacity?: number
+  dashed?: boolean
 }
 
 function makeActivePoint(
@@ -72,6 +73,7 @@ export function Area(props: AreaProps): JSX.Element | null {
         fill={`url(#${gradientId})`}
         stroke={color}
         strokeWidth={props.strokeWidth ?? 2}
+        strokeDasharray={props.dashed ? '4 2' : undefined}
       />
       {data.map((datum, i) => {
         const cx = xScaleFn(accessor(datum))
