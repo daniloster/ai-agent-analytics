@@ -455,7 +455,7 @@ export function TeamBreakdown(): JSX.Element
 
 | Done | Priority | Task | Depends on | Effort |
 |------|----------|------|------------|--------|
-| [ ]  | 1        | T-1: Table, Badge, Progress UI | - | Medium |
+| [x]  | 1        | T-1: Table, Badge, Progress UI | - | Medium |
 | [ ]  | 2        | T-2: ColumnChart component | - | Medium |
 | [ ]  | 3        | T-3: TeamTable component | T-1, WP-05 T-4, WP-05 T-2 | Large |
 | [ ]  | 4        | T-4: TeamBreakdown organism | T-2, T-3, WP-05 T-4, WP-05 T-5, WP-05 T-7 | Large |
