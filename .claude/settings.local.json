@@ -8,7 +8,11 @@
       "Bash(docker-compose --version)",
       "Bash(docker *)",
       "Bash(python3 -m json.tool)",
-      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173)"
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173)",
+      "Bash(npx --yes shot-scraper --version)",
+      "Bash(npm install *)",
+      "Bash(node *)",
+      "Bash(git *)"
     ]
   }
 }
