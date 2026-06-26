@@ -51,6 +51,14 @@ describe('AxisLeft', () => {
       render(<svg><AxisLeft scale={scale} tokens={tokens} /></svg>)
     ).not.toThrow()
   })
+
+  it('hides axis line and tick marks', () => {
+    render(<svg><AxisLeft scale={scale} tokens={tokens} /></svg>)
+    expect(vi.mocked(VxAxis.AxisLeft)).toHaveBeenCalledWith(
+      expect.objectContaining({ hideAxisLine: true, hideTicks: true }),
+      expect.anything(),
+    )
+  })
 })
 
 describe('AxisRight', () => {

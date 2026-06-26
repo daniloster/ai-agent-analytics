@@ -16,8 +16,8 @@ export function GridRows({ scale, width, numTicks, tokens }: GridProps): JSX.Ele
       scale={scale as Parameters<typeof VxGridRows>[0]['scale']}
       width={width}
       numTicks={numTicks}
-      stroke={tokens.border}
-      strokeOpacity={0.5}
+      stroke={tokens.background}
+      strokeOpacity={1}
     />
   )
 }

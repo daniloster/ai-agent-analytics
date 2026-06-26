@@ -79,11 +79,13 @@ export function Overview(): JSX.Element {
         {
           id: "input_tokens",
           label: "Input Tokens",
+          color: "#0d9488",
           data: ts.points.map((p) => ({ date: p.date, value: p.input_tokens })),
         },
         {
           id: "output_tokens",
           label: "Output Tokens",
+          color: "#2563eb",
           data: ts.points.map((p) => ({
             date: p.date,
             value: p.output_tokens,
@@ -246,13 +248,23 @@ export function Overview(): JSX.Element {
           className="rounded-lg border bg-card shadow-sm p-6"
           aria-label="Token usage over time"
         >
-          <div className="mb-4">
-            <p className="text-[14px] font-semibold text-foreground">
-              Token usage over time
-            </p>
-            <p className="text-[12px] text-muted-foreground mt-0.5">
-              Input and output tokens per day
-            </p>
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <p className="text-[14px] font-semibold text-foreground">
+                Token usage over time
+              </p>
+              <p className="text-[12px] text-muted-foreground mt-0.5">
+                Input and output tokens per day
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              {tokenSeries.map((s) => (
+                <span key={s.id} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                  <span className="inline-block h-2 w-2 rounded-full" style={{ background: s.color }} />
+                  {s.label}
+                </span>
+              ))}
+            </div>
           </div>
           {loading ? (
             <Skeleton className="h-48 w-full" />

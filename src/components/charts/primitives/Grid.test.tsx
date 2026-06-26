@@ -31,10 +31,10 @@ describe('GridRows', () => {
     ).not.toThrow()
   })
 
-  it('forwards tokens.border as stroke color', () => {
+  it('forwards tokens.background as stroke color at full opacity', () => {
     render(<svg><GridRows scale={scale} width={400} height={200} tokens={tokens} /></svg>)
     expect(vi.mocked(VxGrid.GridRows)).toHaveBeenCalledWith(
-      expect.objectContaining({ stroke: tokens.border }),
+      expect.objectContaining({ stroke: tokens.background, strokeOpacity: 1 }),
       expect.anything(),
     )
   })

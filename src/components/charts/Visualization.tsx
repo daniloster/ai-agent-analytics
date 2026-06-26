@@ -23,7 +23,7 @@ import type { SeriesTooltipProps } from "./overlays/SeriesTooltip";
 import { SeriesTooltip } from "./overlays/SeriesTooltip";
 import { AxisBottom, AxisLeft, AxisRight } from "./primitives/Axis";
 import { ChartSVG } from "./primitives/ChartSVG";
-import { GridColumns, GridRows } from "./primitives/Grid";
+import { GridRows } from "./primitives/Grid";
 import { buildScale } from "./primitives/scales";
 import { useChartTokens } from "./primitives/useChartTokens";
 import { VisualizationContext } from "./VisualizationContext";
@@ -293,16 +293,6 @@ function VisualizationInner({
             }
             return null;
           })}
-          {baseAxisCfg && !baseAxisCfg.hidden && (
-            <Group left={margin.left} top={margin.top}>
-              <GridColumns
-                scale={scales[baseAxisCfg.id]}
-                width={innerWidth}
-                height={innerHeight}
-                tokens={tokens}
-              />
-            </Group>
-          )}
           <Group left={margin.left} top={margin.top}>
             {children}
           </Group>

@@ -24,6 +24,8 @@ export function AxisBottom({ scale, top, left, tickFormat, numTicks, label, toke
       tickLabelProps={{ fill: tokens.muted, fontSize: 10 }}
       stroke={tokens.muted}
       tickStroke={tokens.muted}
+      hideAxisLine={true}
+      hideTicks={true}
     />
   )
 }
@@ -40,6 +42,8 @@ export function AxisLeft({ scale, top, left, tickFormat, numTicks, label, tokens
       tickLabelProps={{ fill: tokens.muted, fontSize: 10 }}
       stroke={tokens.muted}
       tickStroke={tokens.muted}
+      hideAxisLine={true}
+      hideTicks={true}
     />
   )
 }

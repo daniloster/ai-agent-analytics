@@ -1,6 +1,7 @@
 import { it, expect, vi, describe, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { signal } from '@preact/signals-react'
+import * as VxGrid from '@visx/grid'
 import { Visualization } from './Visualization'
 import { useVisualizationContext } from './VisualizationContext'
 import type { AxisConfig } from '../../types/charts'
@@ -109,6 +110,18 @@ describe('all-hidden axes margin', () => {
     const consumer = screen.getByTestId('consumer')
     // fullWidth from mock is 400, no margin subtracted -> innerWidth = 400
     expect(Number(consumer.getAttribute('data-inner-width'))).toBe(400)
+  })
+})
+
+describe('GridColumns not rendered', () => {
+  it('never calls GridColumns', () => {
+    const data = signal({ y: [{ v: 50 }] })
+    render(
+      <Visualization data={data} axes={linearAxes}>
+        {() => null}
+      </Visualization>
+    )
+    expect(vi.mocked(VxGrid.GridColumns)).not.toHaveBeenCalled()
   })
 })
 
