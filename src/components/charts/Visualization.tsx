@@ -115,6 +115,7 @@ function VisualizationInner<TData extends Record<string, unknown>>({
         tokens,
         scales: scales.value,
         baseScale,
+        baseAxisAccessor: baseAxisConfig?.accessor ?? null,
         activePoint,
         mousePosition,
       }}

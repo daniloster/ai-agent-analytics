@@ -10,6 +10,8 @@ export interface VisualizationContextValue {
   tokens: ChartTokens
   scales: Record<string, AnyD3Scale>
   baseScale: AnyD3Scale | null
+  // accessor from the base (position:'bottom') AxisConfig so marks can compute x pixel positions
+  baseAxisAccessor: ((d: Record<string, unknown>) => unknown) | null
   activePoint: Signal<ActivePoint | null>
   mousePosition: Signal<{ x: number; y: number } | null>
 }

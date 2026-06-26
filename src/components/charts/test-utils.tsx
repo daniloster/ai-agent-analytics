@@ -26,6 +26,7 @@ export function buildMockContext(
     tokens: DEFAULT_TOKENS,
     scales: {},
     baseScale: null,
+    baseAxisAccessor: null,
     activePoint: signal(null),
     mousePosition: signal(null),
     ...overrides,
