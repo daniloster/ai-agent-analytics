@@ -212,7 +212,7 @@ msw
 @faker-js/faker
 react-fast-compare@^3.2.0   # powers useDeepComputed - see ARCHITECTURE.md §3.2.1
 @visx/scale @visx/shape @visx/axis @visx/grid @visx/tooltip
-@visx/heatmap @visx/responsive @visx/group @visx/gradient @visx/annotation
+@visx/heatmap @visx/responsive @visx/group @visx/gradient @visx/annotation @visx/event
 ```
 
 ### Packages to install (dev dependencies)
