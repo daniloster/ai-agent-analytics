@@ -851,7 +851,7 @@ export function Overview(): JSX.Element
 | Done | Priority | Task | Depends on | Effort |
 |------|----------|------|------------|--------|
 | [x]  | 1        | T-1: KPI formula functions | - | Small |
-| [ ]  | 2        | T-2: KPI formatter functions | - | Small |
+| [x]  | 2        | T-2: KPI formatter functions | - | Small |
 | [ ]  | 3        | T-3: Card UI component | - | Small |
 | [ ]  | 4        | T-4: Sparkline chart component | - | Small |
 | [ ]  | 5        | T-5: KpiCard atom | T-2, T-3, T-4 | Medium |
