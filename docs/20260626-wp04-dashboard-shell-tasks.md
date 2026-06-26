@@ -701,7 +701,7 @@ export const router = createBrowserRouter([
 
 | Done | Priority | Task | Depends on | Effort |
 |------|----------|------|------------|--------|
-| [ ]  | 1        | T-1: UI component prerequisites | - | Medium |
+| [x]  | 1        | T-1: UI component prerequisites | - | Medium |
 | [ ]  | 2        | T-2: Filter signals module | - | Small |
 | [ ]  | 3        | T-3: Section and SectionSkeleton | - | Small |
 | [ ]  | 4        | T-4: SectionNav | - | Small |
