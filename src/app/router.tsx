@@ -4,6 +4,7 @@ import { createBrowserRouter } from 'react-router-dom'
 import { initFiltersFromUrl, syncFiltersToUrl } from '../lib/filters/filterSignals'
 import { DashboardLayout } from '../components/layout/DashboardLayout'
 import { Section } from '../components/layout/Section'
+import { Overview } from '../components/sections/Overview'
 
 function DashboardRoute(): JSX.Element {
   useEffect(() => { initFiltersFromUrl() }, [])
@@ -11,10 +12,7 @@ function DashboardRoute(): JSX.Element {
 
   return (
     <DashboardLayout>
-      <Section id="overview" labelledBy="overview-heading">
-        <h2 id="overview-heading">Overview</h2>
-        <p>Content coming in WP-05</p>
-      </Section>
+      <Overview />
       <Section id="teams" labelledBy="teams-heading">
         <h2 id="teams-heading">Teams</h2>
         <p>Content coming in WP-06</p>
