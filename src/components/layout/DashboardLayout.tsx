@@ -22,12 +22,16 @@ export function DashboardLayout({
     <QueryClientProvider client={queryClient}>
       <div className="sticky top-0 z-50">
         <header className="bg-card border-b border-border h-14 px-8 flex items-center justify-between">
-          <span className="text-sm font-semibold text-foreground">AI Agent Analytics</span>
+          <span className="text-sm font-semibold text-foreground">
+            AI Agent Analytics
+          </span>
           <FilterBar />
         </header>
         <SectionNav />
       </div>
-      <main className="px-8 py-7 max-w-[1440px] mx-auto">{children}</main>
+      <main className="px-8 py-7 max-w-[1440px] mx-auto flex flex-col gap-8">
+        {children}
+      </main>
     </QueryClientProvider>
   );
 }

@@ -74,6 +74,8 @@ export function Overview(): JSX.Element {
       )
     : null;
 
+  const todayStr = new Date().toISOString().slice(0, 10);
+
   const tokenSeries = ts
     ? [
         {
@@ -86,23 +88,63 @@ export function Overview(): JSX.Element {
           id: "output_tokens",
           label: "Output Tokens",
           color: "#2563eb",
-          data: ts.points.map((p) => ({
-            date: p.date,
-            value: p.output_tokens,
-          })),
+          data: ts.points.map((p) => ({ date: p.date, value: p.output_tokens })),
         },
       ]
     : [];
 
-  const costSeries = ts
-    ? [
-        {
-          id: "cost",
-          label: "Daily Cost",
-          data: ts.points.map((p) => ({ date: p.date, value: p.cost })),
-        },
-      ]
-    : [];
+  const { costSeries, projectedCostData, budgetPct } = (() => {
+    if (!ts)
+      return { costSeries: [], projectedCostData: [] as Array<{ date: string; value: number }>, budgetPct: null };
+
+    let cumCost = 0;
+    const actualData: Array<{ date: string; value: number }> = [];
+
+    for (const p of ts.points) {
+      cumCost += p.cost;
+      if (p.date <= todayStr) {
+        actualData.push({ date: p.date, value: cumCost });
+      }
+    }
+
+    const daysActual = Math.max(1, actualData.length);
+    const dailyAvg = cumCost / daysActual;
+    let projCum = actualData.length > 0 ? actualData[actualData.length - 1]!.value : 0;
+    const futurePoints = ts.points.filter((p) => p.date > todayStr);
+    const projected: Array<{ date: string; value: number }> = [];
+
+    if (futurePoints.length > 0 && actualData.length > 0) {
+      projected.push(actualData[actualData.length - 1]!);
+      for (const p of futurePoints) {
+        projCum += dailyAvg;
+        projected.push({ date: p.date, value: projCum });
+      }
+    }
+
+    const lastActualCost = actualData.length > 0 ? actualData[actualData.length - 1]!.value : cumCost;
+    const pct =
+      orgConfig && orgConfig.monthly_budget > 0
+        ? (lastActualCost / orgConfig.monthly_budget) * 100
+        : null;
+
+    const series = [
+      { id: "cost", label: "Actual", color: "#2563eb" as const, data: actualData },
+      ...(projected.length > 1
+        ? [
+            {
+              id: "cost_projected",
+              label: "Projected",
+              color: "#2563eb" as const,
+              dashed: true,
+              fillOpacity: 0.05,
+              data: projected,
+            },
+          ]
+        : []),
+    ];
+
+    return { costSeries: series, projectedCostData: projected, budgetPct: pct };
+  })();
 
   const qualitySeries = ts
     ? [
@@ -276,13 +318,41 @@ export function Overview(): JSX.Element {
           className="rounded-lg border bg-card shadow-sm p-6"
           aria-label="Cost vs budget"
         >
-          <div className="mb-4">
-            <p className="text-[14px] font-semibold text-foreground">
-              Cost vs. budget
-            </p>
-            <p className="text-[12px] text-muted-foreground mt-0.5">
-              Daily API spend against monthly budget
-            </p>
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <p className="text-[14px] font-semibold text-foreground">
+                Cost vs. budget
+              </p>
+              <p className="text-[12px] text-muted-foreground mt-0.5">
+                MTD actual
+                {budgetPct !== null
+                  ? `, projected, ${budgetPct.toFixed(1)}% of budget`
+                  : ""}
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                <span className="inline-block h-[2px] w-4 rounded-sm bg-[#2563eb]" />
+                Actual
+              </span>
+              {projectedCostData.length > 1 && (
+                <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                  <span
+                    className="inline-block w-4"
+                    style={{
+                      height: "2px",
+                      background:
+                        "repeating-linear-gradient(90deg,#71717a 0,#71717a 4px,transparent 4px,transparent 7px)",
+                    }}
+                  />
+                  Projected
+                </span>
+              )}
+              <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                <span className="inline-block h-[2px] w-4 rounded-sm bg-red-500" />
+                Budget
+              </span>
+            </div>
           </div>
           {loading ? (
             <Skeleton className="h-48 w-full" />
@@ -291,7 +361,11 @@ export function Overview(): JSX.Element {
               series={costSeries}
               referenceLine={
                 orgConfig
-                  ? { value: orgConfig.monthly_budget, label: "Budget" }
+                  ? {
+                      value: orgConfig.monthly_budget,
+                      label: `$${(orgConfig.monthly_budget / 1000).toFixed(0)}k`,
+                      variant: "destructive",
+                    }
                   : undefined
               }
               ariaLabel="Cost vs. budget"

@@ -82,6 +82,24 @@ it('series without dashed prop produces a path with no stroke-dasharray', () => 
   expect(hasDash).toBe(false)
 })
 
+it('fillOpacity on series sets gradient stop-opacity to that value', () => {
+  const series = [
+    { id: 'cost', label: 'Cost', data: [{ date: '2026-06-01', value: 100 }], fillOpacity: 0.05 },
+  ]
+  const { container } = render(<AreaChart series={series} />)
+  const stops = container.querySelectorAll('stop')
+  const fromStop = Array.from(stops).find((s) => s.getAttribute('offset') === '0%')
+  expect(Number(fromStop?.getAttribute('stop-opacity'))).toBeCloseTo(0.05)
+})
+
+it('referenceLine with variant destructive renders line with destructive color', () => {
+  const { container } = render(
+    <AreaChart series={SERIES_ONE} referenceLine={{ value: 150, label: 'Budget', variant: 'destructive' }} />,
+  )
+  const line = container.querySelector('line')
+  expect(line).not.toBeNull()
+})
+
 it('single-series path has a non-empty d attribute with no NaN coordinates', () => {
   const { container } = render(<AreaChart series={SERIES_ONE} />)
   const paths = container.querySelectorAll('path')

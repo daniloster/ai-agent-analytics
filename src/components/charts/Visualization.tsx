@@ -229,8 +229,6 @@ function VisualizationInner({
   const scales = scalesSig.value;
   const innerWidth = innerWidthSig.value;
   const innerHeight = innerHeightSig.value;
-  const baseAxisCfg = baseAxisConfigSig.value;
-
   return (
     <VisualizationContext.Provider value={contextValue}>
       <figure aria-label={ariaLabel}>

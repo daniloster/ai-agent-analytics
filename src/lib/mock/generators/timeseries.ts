@@ -6,8 +6,8 @@ function clamp(value: number, min: number, max: number): number {
 }
 
 function buildPoint(faker: Faker, date: string): TimeseriesPoint {
-  const inputTokens = faker.number.int({ min: 10000, max: 500000 })
-  const outputTokens = faker.number.int({ min: 5000, max: 200000 })
+  const inputTokens = faker.number.int({ min: 10000, max: 150000 })
+  const outputTokens = faker.number.int({ min: 200000, max: 500000 })
   const isNull = faker.number.int({ min: 0, max: 4 }) === 0
   return {
     date,

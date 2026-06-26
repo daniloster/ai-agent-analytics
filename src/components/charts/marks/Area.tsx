@@ -1,4 +1,4 @@
-import { AreaClosed } from '@visx/shape'
+import { AreaClosed, LinePath } from '@visx/shape'
 import { LinearGradient } from '@visx/gradient'
 import { useVisualizationContext } from '../VisualizationContext'
 import type { ActivePoint, AnyD3Scale } from '../../../types/charts'
@@ -71,9 +71,16 @@ export function Area(props: AreaProps): JSX.Element | null {
         y={(d) => yScaleFn(d[props.series])}
         yScale={yScale as Parameters<typeof AreaClosed>[0]['yScale']}
         fill={`url(#${gradientId})`}
+        stroke="none"
+      />
+      <LinePath
+        data={data}
+        x={(d) => xScaleFn(accessor(d))}
+        y={(d) => yScaleFn(d[props.series])}
         stroke={color}
         strokeWidth={props.strokeWidth ?? 2}
         strokeDasharray={props.dashed ? '4 2' : undefined}
+        fill="none"
       />
       {data.map((datum, i) => {
         const cx = xScaleFn(accessor(datum))
