@@ -56,3 +56,14 @@ it('custom height prop is forwarded to the SVG container', () => {
   const wrapper = container.firstElementChild as HTMLElement
   expect(wrapper.style.height).toBe('60px')
 })
+
+it('path has a non-empty d attribute with no NaN coordinates', () => {
+  const { container } = render(<Sparkline data={DATA} />)
+  const paths = container.querySelectorAll('path')
+  expect(paths.length).toBeGreaterThan(0)
+  paths.forEach((p) => {
+    const d = p.getAttribute('d') ?? ''
+    expect(d.length).toBeGreaterThan(0)
+    expect(d).not.toContain('NaN')
+  })
+})

@@ -2,7 +2,6 @@ import { useSignalEffect } from "@preact/signals-react";
 import { useEffect } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import { DashboardLayout } from "../components/layout/DashboardLayout";
-import { Section } from "../components/layout/Section";
 import { Overview } from "../components/sections/Overview";
 import { TeamBreakdown } from "../components/sections/TeamBreakdown";
 import { Reliability } from "../components/sections/Reliability";

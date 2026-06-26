@@ -36,7 +36,12 @@ const AREA_CHART_AXES = defineAxes([
 
 export function AreaChart({ series, referenceLine, height, ariaLabel }: AreaChartProps): JSX.Element {
   const dataSig = useDeepComputed(() =>
-    Object.fromEntries(series.map((s) => [s.id, s.data])),
+    Object.fromEntries(
+      series.map((s) => [
+        s.id,
+        s.data.map((d) => ({ ...d, [s.id]: d.value })),
+      ]),
+    ),
   )
   return (
     <Visualization data={dataSig} axes={AREA_CHART_AXES} height={height} ariaLabel={ariaLabel}>

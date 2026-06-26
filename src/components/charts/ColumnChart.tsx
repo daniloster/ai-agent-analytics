@@ -46,7 +46,7 @@ function ColumnTrendLine({ series, axis }: { series: string; axis: string }): JS
 }
 
 export function ColumnChart({ bars, annotation, trendLine, height, ariaLabel }: ColumnChartProps): JSX.Element {
-  const dataSig = useDeepComputed(() => ({ bars }))
+  const dataSig = useDeepComputed(() => ({ bars: bars.map((b) => ({ ...b, bars: b.value })) }))
   const axes = useMemo(
     () => [
       {

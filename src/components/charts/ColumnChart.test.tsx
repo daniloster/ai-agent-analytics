@@ -75,3 +75,14 @@ it('trend line x positions span the bars (centered on bands)', () => {
   // LinePath produces a path element with a "d" attribute; just verify it exists
   expect(path?.getAttribute('d')).toBeTruthy()
 })
+
+it('bar rects have finite, positive height values', () => {
+  const { container } = render(<ColumnChart bars={BARS} />)
+  const rects = container.querySelectorAll('rect')
+  expect(rects.length).toBeGreaterThanOrEqual(2)
+  rects.forEach((rect) => {
+    const h = parseFloat(rect.getAttribute('height') ?? 'NaN')
+    expect(isFinite(h)).toBe(true)
+    expect(h).toBeGreaterThanOrEqual(0)
+  })
+})

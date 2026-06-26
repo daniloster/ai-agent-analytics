@@ -26,7 +26,7 @@ const SPARKLINE_AXES = defineAxes([
 ])
 
 export function Sparkline({ data, color, height = 40 }: SparklineProps): JSX.Element {
-  const dataSig = useDeepComputed(() => ({ trend: data }))
+  const dataSig = useDeepComputed(() => ({ trend: data.map((d) => ({ ...d, trend: d.value })) }))
   return (
     <Visualization data={dataSig} axes={SPARKLINE_AXES} height={height}>
       {() => <Area series="trend" axis="y" color={color} fillOpacity={0.15} />}

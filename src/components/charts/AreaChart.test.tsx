@@ -81,3 +81,15 @@ it('series without dashed prop produces a path with no stroke-dasharray', () => 
   const hasDash = Array.from(paths).some((p) => p.getAttribute('stroke-dasharray') !== null)
   expect(hasDash).toBe(false)
 })
+
+it('single-series path has a non-empty d attribute with no NaN coordinates', () => {
+  const { container } = render(<AreaChart series={SERIES_ONE} />)
+  const paths = container.querySelectorAll('path')
+  const strokePaths = Array.from(paths).filter((p) => p.getAttribute('stroke') !== null)
+  expect(strokePaths.length).toBeGreaterThan(0)
+  strokePaths.forEach((p) => {
+    const d = p.getAttribute('d') ?? ''
+    expect(d.length).toBeGreaterThan(0)
+    expect(d).not.toContain('NaN')
+  })
+})
