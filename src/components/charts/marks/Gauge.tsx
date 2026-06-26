@@ -11,7 +11,10 @@ export interface GaugeProps<TSeries extends string = string> {
 export function Gauge(props: GaugeProps): JSX.Element | null {
   const { dataSignal, innerWidth, innerHeight, tokens } = useVisualizationContext()
 
-  if (innerWidth === 0) return null
+  const width = innerWidth.value
+  const height = innerHeight.value
+
+  if (width === 0) return null
 
   const data = (dataSignal.value[props.series] ?? []) as Record<string, unknown>[]
   if (data.length === 0) return null
@@ -21,9 +24,9 @@ export function Gauge(props: GaugeProps): JSX.Element | null {
   const threshold = props.criticalThreshold ?? 90
   const progressColor = value > threshold ? tokens.destructive : tokens.primary
 
-  const cx = innerWidth / 2
-  const cy = innerHeight
-  const radius = Math.min(innerWidth / 2, innerHeight) * 0.9
+  const cx = width / 2
+  const cy = height
+  const radius = Math.min(width / 2, height) * 0.9
   const innerRadius = radius * 0.6
 
   const pieData = [value, Math.max(0, domainMax - value)]

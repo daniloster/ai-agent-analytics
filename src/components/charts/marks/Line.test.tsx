@@ -20,11 +20,11 @@ function renderLine(props?: Partial<Parameters<typeof Line>[0]>, extraCtx?: Reco
     <Line series="v" axis="y" {...props} />,
     {
       dataSignal: data,
-      innerWidth: 400,
-      innerHeight: 200,
-      scales: { y: yScale },
-      baseScale: xScale,
-      baseAxisAccessor: (d: Record<string, unknown>) => d.date,
+      innerWidth: signal(400),
+      innerHeight: signal(200),
+      scales: signal({ y: yScale }),
+      baseScale: signal(xScale),
+      baseAxisAccessor: signal((d: Record<string, unknown>) => d.date),
       ...extraCtx,
     },
   )
@@ -37,7 +37,7 @@ describe('Line mark', () => {
   })
 
   it('returns nothing (no path) when innerWidth === 0', () => {
-    const { container } = renderLine({}, { innerWidth: 0 })
+    const { container } = renderLine({}, { innerWidth: signal(0) })
     expect(container.querySelector('path')).toBeNull()
   })
 
@@ -50,6 +50,6 @@ describe('Line mark', () => {
   it('no color prop defaults stroke to tokens.primary', () => {
     const { container } = renderLine()
     const path = container.querySelector('path')
-    expect(path?.getAttribute('stroke')).toBe('hsl(var(--primary))')
+    expect(path?.getAttribute('stroke')).toBe('#2563eb')
   })
 })

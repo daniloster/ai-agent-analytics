@@ -33,10 +33,13 @@ export function Bar(props: BarProps): JSX.Element | null {
     activePoint,
   } = useVisualizationContext()
 
-  if (innerWidth === 0) return null
+  if (innerWidth.value === 0) return null
 
   const data = (dataSignal.value[props.series] ?? []) as Record<string, unknown>[]
   const color = props.color ?? tokens.primary
+  const allScales = scales.value
+  const accessor = baseAxisAccessor.value
+  const height = innerHeight.value
 
   const sorted = props.sortBy
     ? [...data].sort((a, b) =>
@@ -46,15 +49,15 @@ export function Bar(props: BarProps): JSX.Element | null {
       )
     : data
 
-  const xScale = scales['x'] as ScaleBand<string>
-  const yScale = scales[props.axis] as unknown as AnyD3Scale
+  const xScale = allScales['x'] as ScaleBand<string>
+  const yScale = allScales[props.axis] as unknown as AnyD3Scale
   const yScaleFn = yScale as unknown as (v: unknown) => number
 
   const getX = (datum: Record<string, unknown>, i: number): number => {
     if (props.sortBy) {
       return i * xScale.step()
     }
-    const cat = baseAxisAccessor ? (baseAxisAccessor(datum) as string) : String(i)
+    const cat = accessor ? (accessor(datum) as string) : String(i)
     return xScale(cat) ?? 0
   }
 
@@ -66,7 +69,7 @@ export function Bar(props: BarProps): JSX.Element | null {
         data={sorted as Record<string, number>[]}
         keys={[props.series]}
         x={(d) => {
-          const cat = baseAxisAccessor ? (baseAxisAccessor(d as Record<string, unknown>) as string) : ''
+          const cat = accessor ? (accessor(d as Record<string, unknown>) as string) : ''
           return cat
         }}
         xScale={stackedXScale}
@@ -115,7 +118,7 @@ export function Bar(props: BarProps): JSX.Element | null {
         const x = getX(datum, i)
         const y = yScaleFn(datum[props.series])
         const barWidth = xScale.bandwidth()
-        const barHeight = innerHeight - y
+        const barHeight = height - y
         const handleActivate = () => {
           activePoint.value = computeActivePoint(props.series, props.axis, datum, x, y)
         }

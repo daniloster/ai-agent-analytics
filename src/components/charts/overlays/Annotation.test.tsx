@@ -1,4 +1,5 @@
 import { it, expect, describe } from 'vitest'
+import { signal } from '@preact/signals-react'
 import { scaleLinear } from '@visx/scale'
 import { Annotation } from './Annotation'
 import { renderWithVisualizationContext } from '../test-utils'
@@ -10,9 +11,9 @@ function renderAnnotation(props?: Partial<Parameters<typeof Annotation>[0]>, ext
   return renderWithVisualizationContext(
     <Annotation axis="y" value={5} label="Threshold" {...props} />,
     {
-      innerWidth: 400,
-      innerHeight: 200,
-      scales: { y: yScale },
+      innerWidth: signal(400),
+      innerHeight: signal(200),
+      scales: signal({ y: yScale }),
       ...extraCtx,
     },
   )
@@ -28,7 +29,7 @@ describe('Annotation', () => {
   it('default variant applies tokens.warning stroke', () => {
     const { container } = renderAnnotation()
     const line = container.querySelector('line')
-    expect(line?.getAttribute('stroke')).toBe('#f59e0b')
+    expect(line?.getAttribute('stroke')).toBe('#d97706')
   })
 
   it('line y-coordinate matches scale(value) output', () => {
@@ -45,7 +46,7 @@ describe('Annotation', () => {
   })
 
   it('innerWidth === 0 renders null', () => {
-    const { container } = renderAnnotation({}, { innerWidth: 0 })
+    const { container } = renderAnnotation({}, { innerWidth: signal(0) })
     expect(container.querySelector('g')).toBeNull()
   })
 })

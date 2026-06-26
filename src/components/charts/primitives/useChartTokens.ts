@@ -14,14 +14,14 @@ export function useChartTokens(): ChartTokens {
   const get = (name: string) => `hsl(var(${name}))`
 
   return {
-    primary: get('--primary'),
-    primaryFaded: 'hsl(var(--primary) / 0.2)',
-    secondary: get('--secondary'),
+    primary: '#2563eb',
+    primaryFaded: 'rgba(37, 99, 235, 0.15)',
+    secondary: '#0d9488',
     muted: get('--muted-foreground'),
     border: get('--border'),
     background: get('--background'),
     destructive: get('--destructive'),
     success: '#22c55e',
-    warning: '#f59e0b',
+    warning: '#d97706',
   }
 }

@@ -1,22 +1,22 @@
-import ParentSize from '@visx/responsive/lib/components/ParentSize'
+import type { ReadonlySignal } from '@preact/signals-react'
+import { ParentSizeComputed } from './ParentSizeComputed'
 
 interface ChartSVGProps {
   height?: number
   className?: string
-  children: (innerWidth: number, innerHeight: number) => React.ReactNode
+  children: (innerWidth: ReadonlySignal<number>, innerHeight: ReadonlySignal<number>) => React.ReactNode
 }
 
 export function ChartSVG({ height, className, children }: ChartSVGProps): JSX.Element {
   const outerClass = ['min-h-[200px]', className].filter(Boolean).join(' ')
   return (
-    <ParentSize
+    <ParentSizeComputed
       className={outerClass}
       initialSize={height !== undefined ? { height } : undefined}
       style={height !== undefined ? { height } : undefined}
+      heightOverride={height}
     >
-      {({ width, height: measuredHeight }) =>
-        width > 0 ? children(width, height ?? measuredHeight) : null
-      }
-    </ParentSize>
+      {(widthSig, heightSig) => widthSig.value > 0 ? children(widthSig, heightSig) : null}
+    </ParentSizeComputed>
   )
 }

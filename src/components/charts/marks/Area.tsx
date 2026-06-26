@@ -36,20 +36,21 @@ export function Area(props: AreaProps): JSX.Element | null {
     activePoint,
   } = useVisualizationContext()
 
-  if (innerWidth === 0) return null
+  if (innerWidth.value === 0) return null
 
   const data = (dataSignal.value[props.series] ?? []) as Record<string, unknown>[]
   const color = props.color ?? tokens.primary
   const gradientId = `area-gradient-${props.series}`
 
-  const yScale = scales[props.axis] as unknown as AnyD3Scale
-  const xScaleFn = baseScale as ((v: unknown) => number) | null
+  const yScale = scales.value[props.axis] as unknown as AnyD3Scale
+  const xScaleFn = baseScale.value as ((v: unknown) => number) | null
   const yScaleFn = yScale as unknown as (v: unknown) => number
+  const accessor = baseAxisAccessor.value
 
-  if (!xScaleFn || !baseAxisAccessor) return null
+  if (!xScaleFn || !accessor) return null
 
   const buildPoint = (datum: Record<string, unknown>) =>
-    makeActivePoint(props.series, props.axis, datum, xScaleFn, yScaleFn, baseAxisAccessor)
+    makeActivePoint(props.series, props.axis, datum, xScaleFn, yScaleFn, accessor)
 
   return (
     <>
@@ -65,7 +66,7 @@ export function Area(props: AreaProps): JSX.Element | null {
       </defs>
       <AreaClosed
         data={data}
-        x={(d) => xScaleFn(baseAxisAccessor(d))}
+        x={(d) => xScaleFn(accessor(d))}
         y={(d) => yScaleFn(d[props.series])}
         yScale={yScale as Parameters<typeof AreaClosed>[0]['yScale']}
         fill={`url(#${gradientId})`}
@@ -73,7 +74,7 @@ export function Area(props: AreaProps): JSX.Element | null {
         strokeWidth={props.strokeWidth ?? 2}
       />
       {data.map((datum, i) => {
-        const cx = xScaleFn(baseAxisAccessor(datum))
+        const cx = xScaleFn(accessor(datum))
         const cy = yScaleFn(datum[props.series])
         const handleActivate = () => {
           activePoint.value = buildPoint(datum)

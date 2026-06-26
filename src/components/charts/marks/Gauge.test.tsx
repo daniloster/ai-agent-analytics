@@ -12,8 +12,8 @@ function renderGauge(
   const data: Signal<Record<string, unknown[]>> = dataSig ?? signal<Record<string, unknown[]>>({ pct: [{ pct: 50 }] })
   return renderWithVisualizationContext(<Gauge series="pct" {...props} />, {
     dataSignal: data,
-    innerWidth: 400,
-    innerHeight: 200,
+    innerWidth: signal(400),
+    innerHeight: signal(200),
     ...extraCtx,
   })
 }
@@ -36,7 +36,7 @@ describe('Gauge mark', () => {
     )
     const paths = container.querySelectorAll('path')
     const progressPath = paths[0]
-    expect(progressPath?.getAttribute('fill')).toBe('hsl(var(--primary))')
+    expect(progressPath?.getAttribute('fill')).toBe('#2563eb')
   })
 
   it('label prop renders a text element with that text', () => {
@@ -46,7 +46,7 @@ describe('Gauge mark', () => {
   })
 
   it('innerWidth === 0 renders null', () => {
-    const { container } = renderGauge({}, undefined, { innerWidth: 0 })
+    const { container } = renderGauge({}, undefined, { innerWidth: signal(0) })
     expect(container.querySelector('g')).toBeNull()
   })
 

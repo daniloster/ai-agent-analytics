@@ -1,6 +1,7 @@
 import { it, expect, describe } from 'vitest'
 import { renderHook } from '@testing-library/react'
 import React from 'react'
+import { signal } from '@preact/signals-react'
 import { VisualizationContext, useVisualizationContext } from './VisualizationContext'
 import { buildMockContext, renderWithVisualizationContext } from './test-utils'
 
@@ -14,12 +15,12 @@ describe('useVisualizationContext outside provider', () => {
 
 describe('useVisualizationContext inside provider', () => {
   it('returns the provided context value', () => {
-    const mockValue = buildMockContext({ innerWidth: 800 })
+    const mockValue = buildMockContext({ innerWidth: signal(800) })
     const wrapper = ({ children }: { children: React.ReactNode }) =>
       React.createElement(VisualizationContext.Provider, { value: mockValue }, children)
 
     const { result } = renderHook(() => useVisualizationContext(), { wrapper })
-    expect(result.current.innerWidth).toBe(800)
+    expect(result.current.innerWidth.value).toBe(800)
     expect(result.current.tokens.success).toBe('#22c55e')
   })
 })
@@ -28,7 +29,7 @@ describe('renderWithVisualizationContext from test-utils', () => {
   it('renders a component that uses useVisualizationContext without throwing', () => {
     function Consumer() {
       const ctx = useVisualizationContext()
-      return React.createElement('div', { 'data-testid': 'width' }, String(ctx.innerWidth))
+      return React.createElement('div', { 'data-testid': 'width' }, String(ctx.innerWidth.value))
     }
 
     expect(() =>

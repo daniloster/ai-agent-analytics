@@ -1,9 +1,11 @@
 import type { ReadonlySignal } from "@preact/signals-react";
-import { useSignal } from "@preact/signals-react";
+import { useComputed, useSignal } from "@preact/signals-react";
 import { localPoint } from "@visx/event";
 import { Group } from "@visx/group";
 import { bisectCenter } from "d3-array";
 import { useMemo, useRef } from "react";
+import { useDeepComputed } from "../../hooks/useDeepComputed";
+import { useLiveSignal } from "../../hooks/useLiveSignal";
 import type { ActivePoint, AnyD3Scale, AxisConfig } from "../../types/charts";
 import type { AreaProps } from "./marks/Area";
 import { Area } from "./marks/Area";
@@ -68,16 +70,17 @@ export interface VisualizationProps<
   children: (marks: VisMark<TData, TAxes[number]["id"]>) => React.ReactNode;
 }
 
-const DEFAULT_MARGIN = { top: 10, right: 20, bottom: 40, left: 50 };
 const ZERO_MARGIN = { top: 0, right: 0, bottom: 0, left: 0 };
 
-// InnerProps uses Record<string, unknown[]> directly - the type boundary is enforced at Visualization.
+type AxesValue = AxisConfig[] | ((data: Record<string, unknown[]>) => AxisConfig[]);
+
+// InnerProps uses signals for all dimension/layout inputs.
 interface InnerProps {
   data: ReadonlySignal<Record<string, unknown[]>>;
-  axes: AxisConfig[] | ((data: Record<string, unknown[]>) => AxisConfig[]);
+  axes: ReadonlySignal<AxesValue>;
   ariaLabel?: string;
-  fullWidth: number;
-  fullHeight: number;
+  fullWidth: ReadonlySignal<number>;
+  fullHeight: ReadonlySignal<number>;
   children: React.ReactNode;
 }
 
@@ -94,33 +97,74 @@ function VisualizationInner({
   const mousePosition = useSignal<{ x: number; y: number } | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
 
-  // Read signal in render body so the component re-renders when data changes.
-  const dataValue = data.value;
-  const resolvedAxes =
-    typeof axes === "function" ? axes(dataValue) : axes;
+  // Resolve axes - if a function, call with current data; deep-equal to suppress spurious updates.
+  const resolvedAxes = useDeepComputed(() => {
+    const axesVal = axes.value;
+    return typeof axesVal === "function" ? axesVal(data.value) : axesVal;
+  });
 
-  const allHidden = resolvedAxes.every((a) => a.hidden);
-  const margin = allHidden ? ZERO_MARGIN : DEFAULT_MARGIN;
-  const innerWidth = fullWidth - margin.left - margin.right;
-  const innerHeight = fullHeight - margin.top - margin.bottom;
+  const allHiddenSig = useComputed(() =>
+    resolvedAxes.value.every((a) => a.hidden),
+  );
+  const marginSig = useComputed(() => {
+    if (allHiddenSig.value) return ZERO_MARGIN;
+    const hasRight = resolvedAxes.value.some(
+      (a) => a.position === 'right' && !a.hidden,
+    );
+    return { top: 10, right: hasRight ? 55 : 20, bottom: 40, left: 72 };
+  });
 
-  // useMemo with innerWidth/innerHeight as explicit deps fixes the race where
-  // scales were built with innerWidth=0 before ParentSize measured the container.
-  const scales = useMemo<Record<string, AnyD3Scale>>(() => {
-    const flat = Object.values(dataValue).flat() as Record<string, unknown>[];
+  // Inner dimensions are derived from outer signal dims and margin.
+  const innerWidthSig = useComputed(
+    () => fullWidth.value - marginSig.value.left - marginSig.value.right,
+  );
+  const innerHeightSig = useComputed(
+    () => fullHeight.value - marginSig.value.top - marginSig.value.bottom,
+  );
+
+  // Scales - deep-equal check suppresses downstream updates when domain/range didn't change.
+  const scalesSig = useDeepComputed<Record<string, AnyD3Scale>>(() => {
+    const flat = Object.values(data.value).flat() as Record<string, unknown>[];
     const result: Record<string, AnyD3Scale> = {};
-    for (const axis of resolvedAxes) {
-      result[axis.id] = buildScale(axis, flat, innerWidth, innerHeight);
+    for (const axis of resolvedAxes.value) {
+      result[axis.id] = buildScale(
+        axis,
+        flat,
+        innerWidthSig.value,
+        innerHeightSig.value,
+      );
     }
     return result;
-  // resolvedAxes identity is stable for constant axes; fine to depend on it.
-  }, [dataValue, resolvedAxes, innerWidth, innerHeight]);
+  });
 
-  const baseAxisConfig =
-    resolvedAxes.find((a) => a.position === "bottom") ?? null;
-  const baseScale = baseAxisConfig ? scales[baseAxisConfig.id] : null;
+  const baseAxisConfigSig = useDeepComputed(
+    () => resolvedAxes.value.find((a) => a.position === "bottom") ?? null,
+  );
+  const baseScaleSig = useComputed(() => {
+    const cfg = baseAxisConfigSig.value;
+    return cfg ? (scalesSig.value[cfg.id] ?? null) : null;
+  });
+  const baseAxisAccessorSig = useComputed(
+    () => baseAxisConfigSig.value?.accessor ?? null,
+  );
 
-  const rawData = (Object.values(dataValue)[0] ?? []) as Record<string, unknown>[];
+  // Stable context value - all deps are signal object refs (never recreated), so this memo
+  // fires once per mount and the context reference never changes. Consumers react via signals.
+  const contextValue = useMemo(
+    () => ({
+      dataSignal: data,
+      innerWidth: innerWidthSig,
+      innerHeight: innerHeightSig,
+      tokens,
+      scales: scalesSig,
+      baseScale: baseScaleSig,
+      baseAxisAccessor: baseAxisAccessorSig,
+      activePoint,
+      mousePosition,
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
 
   const handlePointerMove = (event: React.PointerEvent<SVGSVGElement>) => {
     if (!svgRef.current) return;
@@ -128,10 +172,18 @@ function VisualizationInner({
     if (!point) return;
     mousePosition.value = { x: point.x, y: point.y };
 
-    if (baseScale && "invert" in baseScale && baseAxisConfig) {
-      const invertFn = (baseScale as { invert: (v: number) => unknown }).invert;
-      const x0 = invertFn.call(baseScale, point.x - margin.left);
-      const domainValues = rawData.map((d) => baseAxisConfig.accessor(d));
+    const baseAxisCfg = baseAxisConfigSig.value;
+    const bScale = baseScaleSig.value;
+    const margin = marginSig.value;
+
+    if (bScale && "invert" in bScale && baseAxisCfg) {
+      const invertFn = (bScale as { invert: (v: number) => unknown }).invert;
+      const x0 = invertFn.call(bScale, point.x - margin.left);
+      const rawData = (Object.values(data.value)[0] ?? []) as Record<
+        string,
+        unknown
+      >[];
+      const domainValues = rawData.map((d) => baseAxisCfg.accessor(d));
 
       let idx: number;
       if (x0 instanceof Date) {
@@ -151,12 +203,12 @@ function VisualizationInner({
       const clampedIdx = Math.max(0, Math.min(idx, rawData.length - 1));
       const datum = rawData[clampedIdx];
       if (datum) {
-        const xPx = (baseScale as (v: unknown) => number)(
-          baseAxisConfig.accessor(datum),
+        const xPx = (bScale as (v: unknown) => number)(
+          baseAxisCfg.accessor(datum),
         );
         activePoint.value = {
           series: "",
-          axis: baseAxisConfig.id,
+          axis: baseAxisCfg.id,
           datum,
           x: xPx + margin.left,
           y: point.y,
@@ -170,29 +222,26 @@ function VisualizationInner({
     mousePosition.value = null;
   };
 
+  // Read signal values for render. The Babel signals transform tracks these reads and
+  // re-renders VisualizationInner when any of the underlying signals change.
+  const axes_ = resolvedAxes.value;
+  const margin = marginSig.value;
+  const scales = scalesSig.value;
+  const innerWidth = innerWidthSig.value;
+  const innerHeight = innerHeightSig.value;
+  const baseAxisCfg = baseAxisConfigSig.value;
+
   return (
-    <VisualizationContext.Provider
-      value={{
-        dataSignal: data,
-        innerWidth,
-        innerHeight,
-        tokens,
-        scales,
-        baseScale,
-        baseAxisAccessor: baseAxisConfig?.accessor ?? null,
-        activePoint,
-        mousePosition,
-      }}
-    >
+    <VisualizationContext.Provider value={contextValue}>
       <figure aria-label={ariaLabel}>
         <svg
           ref={svgRef}
-          width={fullWidth}
-          height={fullHeight}
+          width={innerWidth + margin.left + margin.right}
+          height={innerHeight + margin.top + margin.bottom}
           onPointerMove={handlePointerMove}
           onPointerLeave={handlePointerLeave}
         >
-          {resolvedAxes.map((axis) => {
+          {axes_.map((axis) => {
             const scale = scales[axis.id];
             if (axis.hidden || !scale) return null;
             if (axis.position === "bottom") {
@@ -244,10 +293,10 @@ function VisualizationInner({
             }
             return null;
           })}
-          {baseAxisConfig && !baseAxisConfig.hidden && (
+          {baseAxisCfg && !baseAxisCfg.hidden && (
             <Group left={margin.left} top={margin.top}>
               <GridColumns
-                scale={scales[baseAxisConfig.id]}
+                scale={scales[baseAxisCfg.id]}
                 width={innerWidth}
                 height={innerHeight}
                 tokens={tokens}
@@ -277,15 +326,18 @@ export function Visualization<
 >(
   props: VisualizationProps<TKey, TPoint, TData, TAxes>,
 ): JSX.Element {
+  // Convert the axes prop to a stable signal so VisualizationInner can track it via useDeepComputed.
+  const axesSig = useLiveSignal(props.axes as AxesValue);
+
   return (
     <ChartSVG height={props.height} className={props.className}>
-      {(fullWidth, fullHeight) => (
+      {(fullWidthSig, fullHeightSig) => (
         <VisualizationInner
           data={props.data as unknown as ReadonlySignal<Record<string, unknown[]>>}
-          axes={props.axes as unknown as InnerProps["axes"]}
+          axes={axesSig}
           ariaLabel={props.ariaLabel}
-          fullWidth={fullWidth}
-          fullHeight={fullHeight}
+          fullWidth={fullWidthSig}
+          fullHeight={fullHeightSig}
         >
           {props.children(
             VIS_MARKS as unknown as VisMark<TData, TAxes[number]["id"]>,

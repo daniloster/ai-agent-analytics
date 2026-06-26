@@ -154,7 +154,7 @@ function CostChart() {
           <Vis.Line
             series="cost"
             axis="cost"
-            color="hsl(var(--destructive))"
+            color="#ea580c"
             strokeWidth={1.5}
           />
           <Vis.Annotation

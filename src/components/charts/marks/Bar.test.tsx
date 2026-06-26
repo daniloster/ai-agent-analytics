@@ -34,10 +34,10 @@ function renderBar(
   const data = signal({ runs: mockData })
   return renderWithVisualizationContext(<Bar series="runs" axis="y" {...props} />, {
     dataSignal: data,
-    innerWidth: 400,
-    innerHeight: 200,
-    scales: { x: xScale, y: yScale },
-    baseAxisAccessor: (d: Record<string, unknown>) => d.cat,
+    innerWidth: signal(400),
+    innerHeight: signal(200),
+    scales: signal({ x: xScale, y: yScale }),
+    baseAxisAccessor: signal((d: Record<string, unknown>) => d.cat),
     ...extraCtx,
   })
 }
@@ -83,7 +83,7 @@ describe('Bar mark', () => {
   })
 
   it('innerWidth === 0 renders nothing', () => {
-    const { container } = renderBar({}, { innerWidth: 0 })
+    const { container } = renderBar({}, { innerWidth: signal(0) })
     expect(container.querySelector('rect')).toBeNull()
   })
 

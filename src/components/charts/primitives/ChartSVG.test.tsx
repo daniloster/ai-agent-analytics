@@ -1,6 +1,7 @@
 import { it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { ChartSVG } from './ChartSVG'
+import type { ReadonlySignal } from '@preact/signals-react'
 
 // Mock ParentSize to synchronously call children with controlled dimensions
 vi.mock('@visx/responsive/lib/components/ParentSize', () => ({
@@ -25,17 +26,33 @@ it('outer div has class min-h-[200px]', () => {
   expect(wrapper.className).toContain('min-h-[200px]')
 })
 
-it('children render-prop is called with dimensions', () => {
-  const spy = vi.fn(() => <div />)
-  render(<ChartSVG>{spy}</ChartSVG>)
-  expect(spy).toHaveBeenCalledWith(400, 300)
+it('children render-prop is called with width and height signals', () => {
+  let capturedWidth: ReadonlySignal<number> | undefined
+  let capturedHeight: ReadonlySignal<number> | undefined
+  render(
+    <ChartSVG>
+      {(w, h) => {
+        capturedWidth = w
+        capturedHeight = h
+        return <div />
+      }}
+    </ChartSVG>,
+  )
+  expect(capturedWidth?.value).toBe(400)
+  expect(capturedHeight?.value).toBe(300)
 })
 
-it('height prop overrides measured height in render-prop', () => {
-  const spy = vi.fn(() => <div />)
-  render(<ChartSVG height={80}>{spy}</ChartSVG>)
-  // Second argument should be the fixed height, not measured 300
-  expect(spy).toHaveBeenCalledWith(400, 80)
+it('height prop overrides measured height in the height signal', () => {
+  let capturedHeight: ReadonlySignal<number> | undefined
+  render(
+    <ChartSVG height={80}>
+      {(_, h) => {
+        capturedHeight = h
+        return <div />
+      }}
+    </ChartSVG>,
+  )
+  expect(capturedHeight?.value).toBe(80)
 })
 
 it('className prop is merged onto the wrapper', () => {

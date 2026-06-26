@@ -30,14 +30,17 @@ function buildColorScale(
 export function HeatmapMark(props: HeatmapMarkProps): JSX.Element | null {
   const { dataSignal, innerWidth, innerHeight, tokens, activePoint } = useVisualizationContext()
 
-  if (innerWidth === 0) return null
+  const width = innerWidth.value
+  const height = innerHeight.value
+
+  if (width === 0) return null
 
   const data = (dataSignal.value[props.series] ?? []) as Record<string, unknown>[]
   if (data.length === 0) return null
 
   const numWeeks = Math.ceil(data.length / 7)
-  const cellWidth = innerWidth / numWeeks
-  const cellHeight = innerHeight / 7
+  const cellWidth = width / numWeeks
+  const cellHeight = height / 7
 
   const weeks: WeekColumn[] = []
   for (let w = 0; w < numWeeks; w++) {

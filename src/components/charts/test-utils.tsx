@@ -5,15 +5,15 @@ import { VisualizationContext } from './VisualizationContext'
 import type { VisualizationContextValue } from './VisualizationContext'
 
 const DEFAULT_TOKENS = {
-  primary: 'hsl(var(--primary))',
-  primaryFaded: 'hsl(var(--primary) / 0.2)',
-  secondary: 'hsl(var(--secondary))',
+  primary: '#2563eb',
+  primaryFaded: 'rgba(37, 99, 235, 0.15)',
+  secondary: '#0d9488',
   muted: 'hsl(var(--muted-foreground))',
   border: 'hsl(var(--border))',
   background: 'hsl(var(--background))',
   destructive: 'hsl(var(--destructive))',
   success: '#22c55e',
-  warning: '#f59e0b',
+  warning: '#d97706',
 }
 
 export function buildMockContext(
@@ -21,12 +21,12 @@ export function buildMockContext(
 ): VisualizationContextValue {
   return {
     dataSignal: signal<Record<string, unknown[]>>({}),
-    innerWidth: 400,
-    innerHeight: 200,
+    innerWidth: signal(400),
+    innerHeight: signal(200),
     tokens: DEFAULT_TOKENS,
-    scales: {},
-    baseScale: null,
-    baseAxisAccessor: null,
+    scales: signal({}),
+    baseScale: signal(null),
+    baseAxisAccessor: signal(null),
     activePoint: signal(null),
     mousePosition: signal(null),
     ...overrides,

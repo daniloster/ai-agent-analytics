@@ -27,11 +27,11 @@ function renderArea(
   const data = signal({ v: mockData })
   return renderWithVisualizationContext(<Area series="v" axis="y" {...props} />, {
     dataSignal: data,
-    innerWidth: 400,
-    innerHeight: 200,
-    scales: { y: yScale },
-    baseScale: xScale,
-    baseAxisAccessor: (d: Record<string, unknown>) => d.date,
+    innerWidth: signal(400),
+    innerHeight: signal(200),
+    scales: signal({ y: yScale }),
+    baseScale: signal(xScale),
+    baseAxisAccessor: signal((d: Record<string, unknown>) => d.date),
     ...extraCtx,
   })
 }
@@ -49,11 +49,11 @@ describe('Area mark', () => {
     const data = signal({ a: mockData, b: mockData })
     const ctx = buildMockContext({
       dataSignal: data,
-      innerWidth: 400,
-      innerHeight: 200,
-      scales: { y: yScale },
-      baseScale: xScale,
-      baseAxisAccessor: (d: Record<string, unknown>) => d.date,
+      innerWidth: signal(400),
+      innerHeight: signal(200),
+      scales: signal({ y: yScale }),
+      baseScale: signal(xScale),
+      baseAxisAccessor: signal((d: Record<string, unknown>) => d.date),
     })
     const { container } = render(
       <VisualizationContext.Provider value={ctx}>
@@ -72,7 +72,7 @@ describe('Area mark', () => {
   })
 
   it('returns null when innerWidth === 0', () => {
-    const { container } = renderArea({}, { innerWidth: 0 })
+    const { container } = renderArea({}, { innerWidth: signal(0) })
     expect(container.querySelector('circle')).toBeNull()
     expect(container.querySelector('path')).toBeNull()
   })

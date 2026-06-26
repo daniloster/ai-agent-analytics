@@ -22,8 +22,8 @@ function renderHeatmap(
     <HeatmapMark series="uptime" dateKey="date" colorScale="availability" {...props} />,
     {
       dataSignal: data,
-      innerWidth: 400,
-      innerHeight: 200,
+      innerWidth: signal(400),
+      innerHeight: signal(200),
       ...extraCtx,
     },
   )
@@ -71,8 +71,8 @@ describe('HeatmapMark', () => {
       <HeatmapMark series="uptime" dateKey="date" colorScale="availability" />,
       {
         dataSignal: dataSig,
-        innerWidth: 400,
-        innerHeight: 200,
+        innerWidth: signal(400),
+        innerHeight: signal(200),
         activePoint: ap,
       },
     )
@@ -83,7 +83,7 @@ describe('HeatmapMark', () => {
   })
 
   it('innerWidth === 0 renders null', () => {
-    const { container } = renderHeatmap(7, {}, { innerWidth: 0 })
+    const { container } = renderHeatmap(7, {}, { innerWidth: signal(0) })
     expect(container.querySelector('rect')).toBeNull()
   })
 })

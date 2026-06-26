@@ -49,8 +49,8 @@ function ContextConsumer() {
   return (
     <div
       data-testid="consumer"
-      data-inner-width={ctx.innerWidth}
-      data-has-scales={String(Object.keys(ctx.scales).length > 0)}
+      data-inner-width={ctx.innerWidth.value}
+      data-has-scales={String(Object.keys(ctx.scales.value).length > 0)}
     />
   )
 }

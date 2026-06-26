@@ -5,13 +5,13 @@ import type { ChartTokens } from './primitives/useChartTokens'
 
 export interface VisualizationContextValue {
   dataSignal: ReadonlySignal<Record<string, unknown[]>>
-  innerWidth: number
-  innerHeight: number
+  innerWidth: ReadonlySignal<number>
+  innerHeight: ReadonlySignal<number>
   tokens: ChartTokens
-  scales: Record<string, AnyD3Scale>
-  baseScale: AnyD3Scale | null
+  scales: ReadonlySignal<Record<string, AnyD3Scale>>
+  baseScale: ReadonlySignal<AnyD3Scale | null>
   // accessor from the base (position:'bottom') AxisConfig so marks can compute x pixel positions
-  baseAxisAccessor: ((d: Record<string, unknown>) => unknown) | null
+  baseAxisAccessor: ReadonlySignal<((d: Record<string, unknown>) => unknown) | null>
   activePoint: Signal<ActivePoint | null>
   mousePosition: Signal<{ x: number; y: number } | null>
 }
