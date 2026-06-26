@@ -45,7 +45,7 @@ export function buildScale(
     return scaleLinear<number>({ domain: [0, 1], range })
   }
   const values = data.map((d) => Number(config.accessor(d)))
-  const min = Math.min(...values)
+  const min = Math.min(0, ...values)
   const max = Math.max(...values)
-  return scaleLinear<number>({ domain: [min, max], range })
+  return scaleLinear<number>({ domain: [min, max], range }).nice()
 }

@@ -17,11 +17,12 @@ describe('scaleLinear', () => {
     expect((scale as (v: number) => number)(50)).toBe(100)
   })
 
-  it('auto domain uses min/max of accessor values', () => {
+  it('auto domain includes 0 as baseline and uses max of accessor values', () => {
     const config: AxisConfig = { ...linearLeft, domain: 'auto' }
     const data = [{ v: 10 }, { v: 20 }, { v: 30 }]
     const scale = buildScale(config, data, 400, 200) as (v: number) => number
-    expect(scale(10)).toBeCloseTo(200)
+    // domain is [0, 30] (0 included), range [200, 0]
+    expect(scale(0)).toBeCloseTo(200)
     expect(scale(30)).toBeCloseTo(0)
   })
 

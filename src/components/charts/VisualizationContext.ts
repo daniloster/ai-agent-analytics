@@ -4,7 +4,7 @@ import type { ActivePoint, AnyD3Scale } from '../../types/charts'
 import type { ChartTokens } from './primitives/useChartTokens'
 
 export interface VisualizationContextValue {
-  dataSignal: ReadonlySignal<Record<string, unknown>[]>
+  dataSignal: ReadonlySignal<Record<string, unknown[]>>
   innerWidth: number
   innerHeight: number
   tokens: ChartTokens

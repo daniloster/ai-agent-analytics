@@ -4,7 +4,7 @@ import { useVisualizationContext } from '../VisualizationContext'
 import type { ActivePoint, AnyD3Scale } from '../../../types/charts'
 import type { LineProps } from './Line'
 
-export interface AreaProps extends LineProps {
+export interface AreaProps<TSeries extends string = string, TAxisId extends string = string> extends LineProps<TSeries, TAxisId> {
   fillOpacity?: number
 }
 
@@ -38,7 +38,7 @@ export function Area(props: AreaProps): JSX.Element | null {
 
   if (innerWidth === 0) return null
 
-  const data = dataSignal.value
+  const data = (dataSignal.value[props.series] ?? []) as Record<string, unknown>[]
   const color = props.color ?? tokens.primary
   const gradientId = `area-gradient-${props.series}`
 
@@ -58,8 +58,8 @@ export function Area(props: AreaProps): JSX.Element | null {
           id={gradientId}
           from={color}
           to={color}
-          fromOpacity={1}
-          toOpacity={props.fillOpacity ?? 0.2}
+          fromOpacity={props.fillOpacity ?? 0.3}
+          toOpacity={0}
           vertical
         />
       </defs>

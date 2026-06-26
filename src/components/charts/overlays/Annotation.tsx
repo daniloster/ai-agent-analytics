@@ -1,7 +1,7 @@
 import { useVisualizationContext } from '../VisualizationContext'
 
-export interface AnnotationProps {
-  axis: string
+export interface AnnotationProps<TAxisId extends string = string> {
+  axis: TAxisId
   value: number
   label: string
   variant?: 'warning' | 'destructive'

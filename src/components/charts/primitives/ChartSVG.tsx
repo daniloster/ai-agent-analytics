@@ -15,7 +15,7 @@ export function ChartSVG({ height, className, children }: ChartSVGProps): JSX.El
       style={height !== undefined ? { height } : undefined}
     >
       {({ width, height: measuredHeight }) =>
-        children(width, height ?? measuredHeight)
+        width > 0 ? children(width, height ?? measuredHeight) : null
       }
     </ParentSize>
   )

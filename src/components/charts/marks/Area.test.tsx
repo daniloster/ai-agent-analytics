@@ -24,7 +24,7 @@ function renderArea(
   props?: Partial<Parameters<typeof Area>[0]>,
   extraCtx?: Record<string, unknown>,
 ) {
-  const data = signal(mockData)
+  const data = signal({ v: mockData })
   return renderWithVisualizationContext(<Area series="v" axis="y" {...props} />, {
     dataSignal: data,
     innerWidth: 400,
@@ -46,7 +46,7 @@ describe('Area mark', () => {
   })
 
   it('two sibling Area components produce distinct gradient IDs', () => {
-    const data = signal(mockData)
+    const data = signal({ a: mockData, b: mockData })
     const ctx = buildMockContext({
       dataSignal: data,
       innerWidth: 400,

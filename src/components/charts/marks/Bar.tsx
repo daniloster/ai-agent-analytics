@@ -3,9 +3,9 @@ import { useVisualizationContext } from '../VisualizationContext'
 import type { ScaleBand } from 'd3-scale'
 import type { ActivePoint, AnyD3Scale } from '../../../types/charts'
 
-export interface BarProps {
-  series: string
-  axis: string
+export interface BarProps<TSeries extends string = string, TAxisId extends string = string> {
+  series: TSeries
+  axis: TAxisId
   grouped?: boolean   // TODO: grouped mode (BarGroup) — not yet implemented, renders as simple
   stacked?: boolean
   color?: string
@@ -35,7 +35,7 @@ export function Bar(props: BarProps): JSX.Element | null {
 
   if (innerWidth === 0) return null
 
-  const data = dataSignal.value
+  const data = (dataSignal.value[props.series] ?? []) as Record<string, unknown>[]
   const color = props.color ?? tokens.primary
 
   const sorted = props.sortBy

@@ -1,13 +1,13 @@
 import { TooltipWithBounds } from '@visx/tooltip'
 import { useVisualizationContext } from '../VisualizationContext'
 
-export interface SeriesTooltipProps<TData extends Record<string, unknown>> {
-  series: string
+export interface SeriesTooltipProps<TData extends Record<string, unknown>, TSeries extends string = string> {
+  series: TSeries
   children: (point: { datum: TData; x: number; y: number }) => React.ReactNode
 }
 
-export function SeriesTooltip<TData extends Record<string, unknown>>(
-  props: SeriesTooltipProps<TData>,
+export function SeriesTooltip<TData extends Record<string, unknown>, TSeries extends string = string>(
+  props: SeriesTooltipProps<TData, TSeries>,
 ): JSX.Element | null {
   const { activePoint } = useVisualizationContext()
   const ap = activePoint.value

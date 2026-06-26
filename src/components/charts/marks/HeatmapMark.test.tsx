@@ -17,7 +17,7 @@ function renderHeatmap(
   props?: Partial<Parameters<typeof HeatmapMark>[0]>,
   extraCtx?: Record<string, unknown>,
 ) {
-  const data = signal<Record<string, unknown>[]>(makeData(count))
+  const data = signal<Record<string, unknown[]>>({ uptime: makeData(count) })
   return renderWithVisualizationContext(
     <HeatmapMark series="uptime" dateKey="date" colorScale="availability" {...props} />,
     {
@@ -66,7 +66,7 @@ describe('HeatmapMark', () => {
   it('pointerenter on a cell sets activePoint.value with correct datum', () => {
     const ap = signal<ActivePoint | null>(null)
     const data = makeData(7)
-    const dataSig = signal<Record<string, unknown>[]>(data)
+    const dataSig = signal<Record<string, unknown[]>>({ uptime: data })
     renderWithVisualizationContext(
       <HeatmapMark series="uptime" dateKey="date" colorScale="availability" />,
       {

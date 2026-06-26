@@ -1,8 +1,8 @@
 import { Pie } from '@visx/shape'
 import { useVisualizationContext } from '../VisualizationContext'
 
-export interface GaugeProps {
-  series: string
+export interface GaugeProps<TSeries extends string = string> {
+  series: TSeries
   domain?: [number, number]
   criticalThreshold?: number
   label?: string
@@ -13,7 +13,7 @@ export function Gauge(props: GaugeProps): JSX.Element | null {
 
   if (innerWidth === 0) return null
 
-  const data = dataSignal.value
+  const data = (dataSignal.value[props.series] ?? []) as Record<string, unknown>[]
   if (data.length === 0) return null
 
   const value = data[0][props.series] as number

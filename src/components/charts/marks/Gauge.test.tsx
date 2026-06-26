@@ -6,10 +6,10 @@ import { renderWithVisualizationContext } from '../test-utils'
 
 function renderGauge(
   props?: Partial<Parameters<typeof Gauge>[0]>,
-  dataSig?: Signal<Record<string, unknown>[]>,
+  dataSig?: Signal<Record<string, unknown[]>>,
   extraCtx?: Record<string, unknown>,
 ) {
-  const data: Signal<Record<string, unknown>[]> = dataSig ?? signal([{ pct: 50 }])
+  const data: Signal<Record<string, unknown[]>> = dataSig ?? signal<Record<string, unknown[]>>({ pct: [{ pct: 50 }] })
   return renderWithVisualizationContext(<Gauge series="pct" {...props} />, {
     dataSignal: data,
     innerWidth: 400,
@@ -22,7 +22,7 @@ describe('Gauge mark', () => {
   it('value above criticalThreshold uses tokens.destructive on progress arc', () => {
     const { container } = renderGauge(
       { criticalThreshold: 90 },
-      signal<Record<string, unknown>[]>([{ pct: 95 }]),
+      signal<Record<string, unknown[]>>({ pct: [{ pct: 95 }] }),
     )
     const paths = container.querySelectorAll('path')
     const progressPath = paths[0]
@@ -32,7 +32,7 @@ describe('Gauge mark', () => {
   it('value below criticalThreshold uses tokens.primary on progress arc', () => {
     const { container } = renderGauge(
       { criticalThreshold: 90 },
-      signal<Record<string, unknown>[]>([{ pct: 50 }]),
+      signal<Record<string, unknown[]>>({ pct: [{ pct: 50 }] }),
     )
     const paths = container.querySelectorAll('path')
     const progressPath = paths[0]
@@ -51,7 +51,7 @@ describe('Gauge mark', () => {
   })
 
   it('empty data array renders null without throwing', () => {
-    const emptyData = signal<Record<string, unknown>[]>([])
+    const emptyData = signal<Record<string, unknown[]>>({ pct: [] })
     expect(() => renderGauge({}, emptyData)).not.toThrow()
     const { container } = renderGauge({}, emptyData)
     expect(container.querySelector('g')).toBeNull()

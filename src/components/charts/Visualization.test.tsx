@@ -57,10 +57,10 @@ function ContextConsumer() {
 
 describe('Visualization children and context', () => {
   it('renders children and provides context', () => {
-    const data = signal([{ v: 50 }])
+    const data = signal({ y: [{ v: 50 }] })
     render(
       <Visualization data={data} axes={linearAxes}>
-        <ContextConsumer />
+        {() => <ContextConsumer />}
       </Visualization>
     )
     const consumer = screen.getByTestId('consumer')
@@ -69,10 +69,10 @@ describe('Visualization children and context', () => {
   })
 
   it('provides non-zero innerWidth when fullWidth > 0', () => {
-    const data = signal([{ v: 50 }])
+    const data = signal({ y: [{ v: 50 }] })
     render(
       <Visualization data={data} axes={linearAxes}>
-        <ContextConsumer />
+        {() => <ContextConsumer />}
       </Visualization>
     )
     const consumer = screen.getByTestId('consumer')
@@ -81,15 +81,15 @@ describe('Visualization children and context', () => {
 })
 
 describe('axes as function', () => {
-  it('function receives data.value array and produces scales', () => {
-    const data = signal([{ v: 10 }, { v: 20 }])
-    const axesFn = vi.fn((_d: unknown[]) => linearAxes)
+  it('function receives data.value and produces scales', () => {
+    const data = signal({ y: [{ v: 10 }, { v: 20 }] })
+    const axesFn = vi.fn((_d: unknown) => linearAxes)
     render(
       <Visualization data={data} axes={axesFn}>
-        <ContextConsumer />
+        {() => <ContextConsumer />}
       </Visualization>
     )
-    expect(axesFn).toHaveBeenCalledWith([{ v: 10 }, { v: 20 }])
+    expect(axesFn).toHaveBeenCalledWith({ y: [{ v: 10 }, { v: 20 }] })
     expect(screen.getByTestId('consumer').getAttribute('data-has-scales')).toBe('true')
   })
 })
@@ -100,10 +100,10 @@ describe('all-hidden axes margin', () => {
       { id: 'x', type: 'time', position: 'bottom', accessor: (d) => d.date as string, hidden: true },
       { id: 'y', type: 'linear', position: 'left', accessor: (d) => d.v as number, hidden: true },
     ]
-    const data = signal([{ date: '2026-01-01', v: 1 }])
+    const data = signal({ y: [{ date: '2026-01-01', v: 1 }] })
     render(
       <Visualization data={data} axes={hiddenAxes}>
-        <ContextConsumer />
+        {() => <ContextConsumer />}
       </Visualization>
     )
     const consumer = screen.getByTestId('consumer')
@@ -122,10 +122,10 @@ describe('SVG pointer events', () => {
       return null
     }
 
-    const data = signal([{ v: 50 }])
+    const data = signal({ y: [{ v: 50 }] })
     const { container } = render(
       <Visualization data={data} axes={linearAxes}>
-        <SignalCapture />
+        {() => <SignalCapture />}
       </Visualization>
     )
 
@@ -144,10 +144,10 @@ describe('SVG pointer events', () => {
       return null
     }
 
-    const data = signal([{ v: 50 }])
+    const data = signal({ y: [{ v: 50 }] })
     const { container } = render(
       <Visualization data={data} axes={linearAxes}>
-        <SignalCapture />
+        {() => <SignalCapture />}
       </Visualization>
     )
 

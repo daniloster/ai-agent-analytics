@@ -31,7 +31,7 @@ function renderBar(
   props?: Partial<Parameters<typeof Bar>[0]>,
   extraCtx?: Record<string, unknown>,
 ) {
-  const data = signal(mockData)
+  const data = signal({ runs: mockData })
   return renderWithVisualizationContext(<Bar series="runs" axis="y" {...props} />, {
     dataSignal: data,
     innerWidth: 400,

@@ -5,8 +5,8 @@ export type AnyD3Scale =
   | ScaleBand<string>
   | ScaleTime<number, number>
 
-export interface AxisConfig {
-  id: string
+export interface AxisConfig<TId extends string = string> {
+  id: TId
   type: 'time' | 'linear' | 'band'
   position: 'bottom' | 'left' | 'right'
   accessor: (d: Record<string, unknown>) => number | string | Date

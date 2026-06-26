@@ -4,8 +4,8 @@ import { interpolateRgb } from 'd3-interpolate'
 import { useVisualizationContext } from '../VisualizationContext'
 import type { ActivePoint } from '../../../types/charts'
 
-export interface HeatmapMarkProps {
-  series: string
+export interface HeatmapMarkProps<TSeries extends string = string> {
+  series: TSeries
   dateKey: string
   colorScale: 'availability' | 'cost'
 }
@@ -32,7 +32,7 @@ export function HeatmapMark(props: HeatmapMarkProps): JSX.Element | null {
 
   if (innerWidth === 0) return null
 
-  const data = dataSignal.value
+  const data = (dataSignal.value[props.series] ?? []) as Record<string, unknown>[]
   if (data.length === 0) return null
 
   const numWeeks = Math.ceil(data.length / 7)

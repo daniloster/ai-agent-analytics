@@ -15,7 +15,7 @@ const mockData = [
 ]
 
 function renderLine(props?: Partial<Parameters<typeof Line>[0]>, extraCtx?: Record<string, unknown>) {
-  const data = signal(mockData)
+  const data = signal({ v: mockData })
   return renderWithVisualizationContext(
     <Line series="v" axis="y" {...props} />,
     {

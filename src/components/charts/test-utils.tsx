@@ -20,7 +20,7 @@ export function buildMockContext(
   overrides?: Partial<VisualizationContextValue>,
 ): VisualizationContextValue {
   return {
-    dataSignal: signal([]),
+    dataSignal: signal<Record<string, unknown[]>>({}),
     innerWidth: 400,
     innerHeight: 200,
     tokens: DEFAULT_TOKENS,
