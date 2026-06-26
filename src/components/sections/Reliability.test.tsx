@@ -1,6 +1,7 @@
 import { it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import type { ReliabilityResponse } from '../../types/api'
 
 vi.mock('@visx/responsive/lib/components/ParentSize', () => ({
   default: ({ children, className, style }: {
@@ -31,7 +32,7 @@ vi.mock('../layout/Section', () => ({
   ),
 }))
 
-const RELIABILITY = {
+const RELIABILITY: ReliabilityResponse = {
   period: { from: '2026-06-01', to: '2026-06-30' },
   error_rate: 0.062,
   error_rate_prior: 0.041,
@@ -63,10 +64,10 @@ const RELIABILITY = {
   ],
 }
 
-const RELIABILITY_NO_INCIDENTS = { ...RELIABILITY, incidents: [], mttr_minutes: null }
-const RELIABILITY_GOOD_ERROR = { ...RELIABILITY, error_rate: 0.01, error_rate_prior: 0.02 }
+const RELIABILITY_NO_INCIDENTS: ReliabilityResponse = { ...RELIABILITY, incidents: [], mttr_minutes: null }
+const RELIABILITY_GOOD_ERROR: ReliabilityResponse = { ...RELIABILITY, error_rate: 0.01, error_rate_prior: 0.02 }
 
-function mockFetch(data = RELIABILITY) {
+function mockFetch(data: ReliabilityResponse = RELIABILITY) {
   vi.stubGlobal(
     'fetch',
     vi.fn(() =>

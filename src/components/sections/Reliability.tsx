@@ -10,12 +10,7 @@ import { Skeleton } from '../ui/skeleton'
 import { computeErrorRateSeverity, computeDeltaPercent } from '../../lib/kpi/formulas'
 import { formatCurrency, formatPercent, formatDuration } from '../../lib/kpi/formatters'
 import type { ReliabilityResponse } from '../../types/api'
-
-function buildQueryParams(params: { from: string; to: string; team_id?: string }): string {
-  const sp = new URLSearchParams({ from: params.from, to: params.to })
-  if (params.team_id) sp.set('team_id', params.team_id)
-  return sp.toString()
-}
+import { buildQueryParams } from '../../utils/buildQueryParams'
 
 export function Reliability(): JSX.Element {
   const params = filterQueryParams.value

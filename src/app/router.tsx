@@ -6,6 +6,7 @@ import { Section } from "../components/layout/Section";
 import { Overview } from "../components/sections/Overview";
 import { TeamBreakdown } from "../components/sections/TeamBreakdown";
 import { Reliability } from "../components/sections/Reliability";
+import { Billing } from "../components/sections/Billing";
 import {
   initFiltersFromUrl,
   syncFiltersToUrl,
@@ -24,10 +25,7 @@ function DashboardRoute(): JSX.Element {
       <Overview />
       <TeamBreakdown />
       <Reliability />
-      <Section id="billing" labelledBy="billing-heading">
-        <h2 id="billing-heading">Billing</h2>
-        <p>Content coming in WP-08</p>
-      </Section>
+      <Billing />
     </DashboardLayout>
   );
 }

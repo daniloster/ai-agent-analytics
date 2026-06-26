@@ -47,6 +47,14 @@ vi.mock('../components/sections/Reliability', () => ({
   ),
 }))
 
+vi.mock('../components/sections/Billing', () => ({
+  Billing: () => (
+    <section id="billing">
+      <h2>Billing</h2>
+    </section>
+  ),
+}))
+
 vi.mock('@preact/signals-react', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@preact/signals-react')>()
   return {

@@ -1,0 +1,246 @@
+import { useQuery } from '@tanstack/react-query'
+import { filterQueryParams } from '../../lib/filters/filterSignals'
+import { Section } from '../layout/Section'
+import { KpiCard } from '../kpis/KpiCard'
+import { GaugeChart } from '../charts/GaugeChart'
+import { AreaChart } from '../charts/AreaChart'
+import { ColumnChart } from '../charts/ColumnChart'
+import { DonutChart } from '../charts/DonutChart'
+import { Heatmap } from '../charts/Heatmap'
+import { ChargebackTable } from '../kpis/ChargebackTable'
+import { Skeleton } from '../ui/skeleton'
+import { useChartTokens } from '../charts/primitives/useChartTokens'
+import { formatCurrency, formatPercent } from '../../lib/kpi/formatters'
+import { buildQueryParams } from '../../utils/buildQueryParams'
+import type { BillingResponse, OverviewResponse } from '../../types/api'
+
+export function Billing(): JSX.Element {
+  const params = filterQueryParams.value
+  const tokens = useChartTokens()
+
+  const billingQuery = useQuery<BillingResponse>({
+    queryKey: ['billing', params],
+    queryFn: () =>
+      fetch('/api/analytics/billing?' + buildQueryParams(params)).then(
+        (r) => r.json() as Promise<BillingResponse>,
+      ),
+  })
+
+  const overviewQuery = useQuery<OverviewResponse>({
+    queryKey: ['overview', params],
+    queryFn: () =>
+      fetch('/api/analytics/overview?' + buildQueryParams(params)).then(
+        (r) => r.json() as Promise<OverviewResponse>,
+      ),
+  })
+
+  const billing = billingQuery.data
+  const overview = overviewQuery.data
+  const isLoading = billingQuery.isLoading || overviewQuery.isLoading
+
+  return (
+    <Section id="billing" labelledBy="billing-heading">
+      <h2 id="billing-heading">Billing & Financial</h2>
+
+      {isLoading ? (
+        <>
+          <div className="grid grid-cols-4 gap-4">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+          <div className="grid grid-cols-2 gap-4 mt-4">
+            <Skeleton className="h-48 w-full" />
+            <Skeleton className="h-48 w-full" />
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Row 1: Current Month Spend, Projected Month-End, GaugeChart, Projected Annual */}
+          <div className="grid grid-cols-4 gap-4">
+            <KpiCard
+              label="Current Month Spend"
+              value={billing ? formatCurrency(billing.current_month_spend) : undefined}
+              subValue={billing ? `of ${formatCurrency(billing.monthly_budget)} budget` : undefined}
+              formulaTooltip="Total API spend so far this month."
+              exampleTooltip="e.g. $9,800"
+            />
+            <KpiCard
+              label="Projected Month-End"
+              value={billing ? formatCurrency(billing.projected_month_end) : undefined}
+              subValue={billing ? `Day ${billing.days_elapsed} of ${billing.days_in_month}` : undefined}
+              formulaTooltip="Projected total spend by end of month at current burn rate."
+              exampleTooltip="e.g. $14,200"
+            />
+            {billing && (
+              <GaugeChart
+                value={billing.budget_utilization}
+                label={formatPercent(billing.budget_utilization, 1)}
+                subLabel={`of ${formatCurrency(billing.monthly_budget)} budget`}
+                tokens={tokens}
+              />
+            )}
+            <KpiCard
+              label="Projected Annual Spend"
+              value={billing ? formatCurrency(billing.projected_annual_spend) : undefined}
+              formulaTooltip="Annualized spend based on current 90-day average."
+              exampleTooltip="e.g. $157,300"
+            />
+          </div>
+
+          {/* Row 2: Cumulative Spend vs Budget AreaChart + Invoice History ColumnChart */}
+          <div className="grid grid-cols-2 gap-4 mt-4">
+            <figure>
+              <figcaption className="text-sm font-medium mb-2">Cumulative spend vs budget</figcaption>
+              {billing && (() => {
+                const ih = billing.invoice_history
+                const last = ih[ih.length - 1]
+                const currentMonthStart = billing.period.to.slice(0, 7) + '-01'
+                const actualSeries = {
+                  id: 'actual',
+                  label: 'Actual',
+                  data: ih.map((h) => ({ date: h.month + '-01', value: h.total_billed })),
+                }
+                const projectedSeries = last
+                  ? {
+                      id: 'projected',
+                      label: 'Projected',
+                      dashed: true,
+                      data: [
+                        { date: last.month + '-01', value: last.total_billed },
+                        { date: currentMonthStart, value: billing.projected_month_end },
+                      ],
+                    }
+                  : null
+                return (
+                  <AreaChart
+                    series={projectedSeries ? [actualSeries, projectedSeries] : [actualSeries]}
+                    referenceLine={{ value: billing.monthly_budget, label: 'Budget' }}
+                    ariaLabel="Cumulative spend vs budget"
+                  />
+                )
+              })()}
+            </figure>
+            <figure>
+              <figcaption className="text-sm font-medium mb-2">Invoice history</figcaption>
+              <ColumnChart
+                bars={billing ? billing.invoice_history.map((h) => ({ label: h.month, value: h.total_billed })) : []}
+                trendLine={true}
+                ariaLabel="Invoice history"
+              />
+            </figure>
+          </div>
+
+          {/* Row 3: Team cost allocation DonutChart + ChargebackTable */}
+          <div className="grid grid-cols-2 gap-4 mt-4">
+            <figure>
+              <figcaption className="text-sm font-medium mb-2">Cost by team</figcaption>
+              <DonutChart
+                slices={billing ? billing.cost_by_team.map((t) => ({ label: t.team_name, value: t.total })) : []}
+                ariaLabel="Cost by team"
+              />
+            </figure>
+            <ChargebackTable rows={billing ? billing.cost_by_team : []} />
+          </div>
+
+          {/* Row 4: Cost anomaly Heatmap */}
+          <div className="mt-4">
+            <figure>
+              <figcaption className="text-sm font-medium mb-2">Cost anomaly calendar</figcaption>
+              <Heatmap
+                data={
+                  billing
+                    ? billing.cost_anomaly_days.map((d) => ({
+                        date: d.date,
+                        value: d.daily_cost,
+                        isAnomaly: d.is_anomaly,
+                        avgDailyCost: d.avg_daily_cost,
+                      }))
+                    : []
+                }
+                colorScale="cost"
+                ariaLabel="Cost anomaly calendar"
+                getAriaLabel={(d) =>
+                  `${d.date}: $${d.value.toFixed(0)} (avg $${Number(d.avgDailyCost).toFixed(0)})`
+                }
+              />
+            </figure>
+          </div>
+
+          {/* Row 5: Cost per Successful Run, Token Rate Efficiency, Cost of Failed Runs */}
+          <div className="grid grid-cols-3 gap-4 mt-4">
+            <KpiCard
+              label="Cost per Successful Run"
+              value={billing ? formatCurrency(billing.cost_per_successful_run) : undefined}
+              formulaTooltip="Total cost divided by the number of successful runs."
+              exampleTooltip="e.g. $1.21"
+            />
+            <KpiCard
+              label="Token Rate Efficiency"
+              value={
+                billing
+                  ? `${formatCurrency(billing.token_rate_actual)}/1M`
+                  : undefined
+              }
+              subValue={
+                billing
+                  ? `${formatPercent(((billing.token_rate_list - billing.token_rate_actual) / billing.token_rate_list) * 100, 1)} below list (${formatCurrency(billing.token_rate_list)}/1M)`
+                  : undefined
+              }
+              formulaTooltip="Effective token rate vs. list price."
+              exampleTooltip="e.g. $2.40/1M"
+            />
+            <KpiCard
+              label="Cost of Failed Runs"
+              value={billing ? formatCurrency(billing.cost_of_failed_runs) : undefined}
+              subValue={
+                billing && billing.current_month_spend > 0
+                  ? `${formatPercent((billing.cost_of_failed_runs / billing.current_month_spend) * 100, 1)} of monthly spend`
+                  : '0.0% of monthly spend'
+              }
+              formulaTooltip="API spend on runs that ultimately failed."
+              exampleTooltip="e.g. $1,420"
+            />
+          </div>
+
+          {/* Row 6: Quality-Cost Efficiency, User Churn Risk, New User Activation Cost (from overview) */}
+          <div className="grid grid-cols-3 gap-4 mt-4">
+            <KpiCard
+              label="Quality-Cost Efficiency"
+              value={
+                overview && overview.quality_cost_efficiency !== null
+                  ? overview.quality_cost_efficiency.toFixed(2)
+                  : overview
+                  ? ''
+                  : undefined
+              }
+              insufficientData={overview ? overview.quality_cost_efficiency === null : undefined}
+              formulaTooltip="(avg_quality * acceptance_rate) / cost_per_run."
+              exampleTooltip="e.g. 1.60"
+            />
+            <KpiCard
+              label="Churn Risk Users"
+              value={overview ? String(overview.churn_risk_count) : undefined}
+              formulaTooltip="Users showing declining engagement patterns."
+              exampleTooltip="e.g. 5"
+            />
+            <KpiCard
+              label="New User Activation Cost"
+              value={
+                overview && overview.new_user_activation_cost !== null
+                  ? formatCurrency(overview.new_user_activation_cost)
+                  : overview
+                  ? ''
+                  : undefined
+              }
+              insufficientData={overview ? overview.new_user_activation_cost === null : undefined}
+              formulaTooltip="Total cost attributed to onboarding new users."
+              exampleTooltip="e.g. $50.00"
+            />
+          </div>
+        </>
+      )}
+    </Section>
+  )
+}
