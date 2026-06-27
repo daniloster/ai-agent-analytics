@@ -10,6 +10,7 @@
 Read this section before starting any task. Several items the SPEC describes as "new" already exist.
 
 **Already done - no work needed:**
+
 - `package.json` `"test:coverage"` script: already `"vitest run --coverage"`. No change.
 - `src/components/charts/primitives/scales.test.ts`: EXISTS - covers scaleLinear domain/range, scaleBand bandwidth > 0, scaleTime first-date mapping. Needs gap fills (T-3).
 - `src/lib/kpi/formulas.test.ts`: EXISTS and comprehensive. Needs two new functions first (T-2).
@@ -19,13 +20,13 @@ Read this section before starting any task. Several items the SPEC describes as 
 
 **SPEC vs actual codebase discrepancies - read before touching formulas.ts:**
 
-| SPEC claim | Actual implementation | Resolution |
-|---|---|---|
-| `computeRetentionCost(1000, 0)` returns `null` | Returns `0` (guarded) | Do NOT change; tests pass; SPEC description is wrong |
-| `computeProjectedMonthEnd(..., 0, ...)` returns `null` | Returns `0` | Do NOT change |
-| `computeErrorRateSeverity` uses `'green'`/`'amber'`/`'red'` thresholds 0.05/0.1 | Uses `'good'`/`'warning'`/`'critical'` thresholds 0.02/0.05 | Do NOT change; AC #10 uses existing values |
-| `computeBudgetUtilization` | Does NOT exist in formulas.ts | T-2 adds it |
-| `computeChurnSignal` | Does NOT exist in formulas.ts | T-2 adds it |
+| SPEC claim                                                                      | Actual implementation                                       | Resolution                                           |
+| ------------------------------------------------------------------------------- | ----------------------------------------------------------- | ---------------------------------------------------- |
+| `computeRetentionCost(1000, 0)` returns `null`                                  | Returns `0` (guarded)                                       | Do NOT change; tests pass; SPEC description is wrong |
+| `computeProjectedMonthEnd(..., 0, ...)` returns `null`                          | Returns `0`                                                 | Do NOT change                                        |
+| `computeErrorRateSeverity` uses `'green'`/`'amber'`/`'red'` thresholds 0.05/0.1 | Uses `'good'`/`'warning'`/`'critical'` thresholds 0.02/0.05 | Do NOT change; AC #10 uses existing values           |
+| `computeBudgetUtilization`                                                      | Does NOT exist in formulas.ts                               | T-2 adds it                                          |
+| `computeChurnSignal`                                                            | Does NOT exist in formulas.ts                               | T-2 adds it                                          |
 
 ---
 
@@ -107,6 +108,7 @@ This task has no new test files - it configures the test runner. Acceptance is v
 Implements SPEC §3 "formulas.test.ts" coverage for two pure functions referenced in the SPEC's test plan that do not yet exist in `src/lib/kpi/formulas.ts`. Without them, SPEC AC #9 and related tests cannot be written. Because this WP adds no features, these two functions serve purely as testable business logic expressions that the existing section components might use or will use in maintenance.
 
 Before starting, read:
+
 - `src/lib/kpi/formulas.ts` - add the two new functions at the end of the file in alphabetical order (after `computeTokenRateEfficiency`)
 - `src/lib/kpi/formulas.test.ts` - follow the existing `describe(...) { it(...) }` pattern; add new `describe` blocks at the end
 
@@ -134,31 +136,37 @@ Before starting, read:
 ```ts
 // src/lib/kpi/formulas.ts  (modified - append after computeTokenRateEfficiency)
 
-export function computeBudgetUtilization(currentSpend: number, budget: number): number | null
+export function computeBudgetUtilization(
+  currentSpend: number,
+  budget: number,
+): number | null;
 // Guard: if (budget === 0) return null
 // Returns: (currentSpend / budget) * 100
 
-export function computeChurnSignal(recentRuns: number, historicalRuns: number): boolean
+export function computeChurnSignal(
+  recentRuns: number,
+  historicalRuns: number,
+): boolean;
 // Returns: historicalRuns >= 5 && recentRuns === 0
 ```
 
 ```ts
 // src/lib/kpi/formulas.test.ts  (modified - append new describe blocks)
 
-describe('computeBudgetUtilization', () => {
-  it('returns null when budget is 0')           // zero guard
-  it('returns 65 when spend is 13000 budget 20000')  // standard case: 13000/20000*100=65
-  it('returns 0 when currentSpend is 0 and budget > 0')  // zero spend edge
-  it('returns > 100 when over budget')           // overspend case
-})
+describe("computeBudgetUtilization", () => {
+  it("returns null when budget is 0"); // zero guard
+  it("returns 65 when spend is 13000 budget 20000"); // standard case: 13000/20000*100=65
+  it("returns 0 when currentSpend is 0 and budget > 0"); // zero spend edge
+  it("returns > 100 when over budget"); // overspend case
+});
 
-describe('computeChurnSignal', () => {
-  it('returns true when historicalRuns >= 5 and recentRuns === 0')
-  it('returns false when historicalRuns < 5')     // insufficient history (e.g. new user)
-  it('returns false when recentRuns > 0')         // still active
-  it('returns false when historicalRuns === 4 and recentRuns === 0')  // boundary: exactly 4 < 5
-  it('returns true when historicalRuns === 5 and recentRuns === 0')   // boundary: exactly 5 >= 5
-})
+describe("computeChurnSignal", () => {
+  it("returns true when historicalRuns >= 5 and recentRuns === 0");
+  it("returns false when historicalRuns < 5"); // insufficient history (e.g. new user)
+  it("returns false when recentRuns > 0"); // still active
+  it("returns false when historicalRuns === 4 and recentRuns === 0"); // boundary: exactly 4 < 5
+  it("returns true when historicalRuns === 5 and recentRuns === 0"); // boundary: exactly 5 >= 5
+});
 ```
 
 **Acceptance criteria**
@@ -200,6 +208,7 @@ Implements SPEC §3 gap fills for two existing test files. `scales.test.ts` (fro
 These two test files are grouped here because both are small gap-fills that require no new source code and no new dependencies.
 
 Before starting, read:
+
 - `src/components/charts/primitives/scales.test.ts` - understand which cases already exist; do not duplicate them
 - `src/components/charts/primitives/scales.ts` - `buildScale()` only supports `band`, `time`, and `linear`; does NOT support `scaleSequential`. For scaleLinear clamp and scaleSequential tests, import directly from `@visx/scale` and `d3-scale`/`d3-interpolate`
 - `src/lib/mock/handlers.test.ts` - understand which handler tests already exist; add only the `team_id` case
@@ -233,9 +242,9 @@ Before starting, read:
 
 ```ts
 // src/components/charts/primitives/scales.test.ts  (modified)
-import { scaleLinear, scaleBand } from '@visx/scale'
-import { scaleSequential } from 'd3-scale'
-import { interpolateRgb } from 'd3-interpolate'
+import { scaleLinear, scaleBand } from "@visx/scale";
+import { scaleSequential } from "d3-scale";
+import { interpolateRgb } from "d3-interpolate";
 
 // Inside describe('scaleLinear'):
 // it('clamp(true) returns range max when input exceeds domain max')
@@ -294,6 +303,7 @@ Implements SPEC §3 "`src/components/sections/integration.test.ts`" (new file) a
 Follow the EXACT pattern from `src/components/sections/Overview.test.tsx`: same mocks (`@visx/responsive`, `@visx/axis`, `@visx/grid`, `../layout/Section`), same `vi.stubGlobal('fetch', ...)` approach, same `makeWrapper()` function.
 
 Before starting, read:
+
 - `src/components/sections/Overview.test.tsx` in full - copy the mock block, `mockFetch`, and `makeWrapper` patterns verbatim
 - `src/lib/filters/filterSignals.ts` - `initFiltersFromUrl()` reads `window.location.search`; use `vi.stubGlobal('location', { search: '...' })` to control it
 - `src/lib/filters/filterSignals.test.ts` - understand which signal scenarios are ALREADY tested there; do not duplicate them
@@ -325,57 +335,71 @@ Before starting, read:
 // src/components/sections/integration.test.ts  (new file)
 // @vitest-environment jsdom
 
-import { it, expect, vi, beforeEach } from 'vitest'
-import { render, waitFor } from '@testing-library/react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { dateRange, teamId, initFiltersFromUrl } from '../../lib/filters/filterSignals'
+import { it, expect, vi, beforeEach } from "vitest";
+import { render, waitFor } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  dateRange,
+  teamId,
+  initFiltersFromUrl,
+} from "../../lib/filters/filterSignals";
 
 // Same 4 vi.mock blocks as Overview.test.tsx
 
-const OVERVIEW = { /* same fixture as Overview.test.tsx */ }
-const TIMESERIES = { /* same fixture */ }
-const ORG_CONFIG = { /* same fixture */ }
+const OVERVIEW = {
+  /* same fixture as Overview.test.tsx */
+};
+const TIMESERIES = {
+  /* same fixture */
+};
+const ORG_CONFIG = {
+  /* same fixture */
+};
 
-function mockFetch(overview = OVERVIEW, ts = TIMESERIES, config = ORG_CONFIG): void
+function mockFetch(
+  overview = OVERVIEW,
+  ts = TIMESERIES,
+  config = ORG_CONFIG,
+): void;
 // vi.stubGlobal('fetch', vi.fn((url: string) => { ... }))
 
-function makeWrapper(): React.ComponentType<{ children: React.ReactNode }>
+function makeWrapper(): React.ComponentType<{ children: React.ReactNode }>;
 // new QueryClient({ defaultOptions: { queries: { retry: false } } })
 // returns QueryClientProvider wrapper
 
 beforeEach(() => {
-  vi.restoreAllMocks()
-  dateRange.value = { from: '2026-06-01', to: '2026-06-30', preset: '30d' }
-  teamId.value = undefined
-})
+  vi.restoreAllMocks();
+  dateRange.value = { from: "2026-06-01", to: "2026-06-30", preset: "30d" };
+  teamId.value = undefined;
+});
 
-it('URL hydration sets filter signals before first render', () => {
+it("URL hydration sets filter signals before first render", () => {
   // vi.stubGlobal('location', { search: '?from=2026-05-01&to=2026-05-31&team=team-2' })
   // initFiltersFromUrl()
   // expect(dateRange.value.from).toBe('2026-05-01')
   // expect(teamId.value).toBe('team-2')
-})
+});
 
-it('team_id signal change includes team_id in fetch URL', async () => {
+it("team_id signal change includes team_id in fetch URL", async () => {
   // mockFetch(); render Overview; await initial fetch
   // teamId.value = 'team_platform'
   // await waitFor(() => expect some fetch call URL to include 'team_id=team_platform')
-})
+});
 
-it('date range change triggers fetch with updated params', async () => {
+it("date range change triggers fetch with updated params", async () => {
   // mockFetch(); render Overview; await initial fetch
   // dateRange.value = { from: '2026-01-01', to: '2026-01-31', preset: 'custom' }
   // await waitFor(() => expect some fetch call URL to include 'from=2026-01-01')
-})
+});
 
-it('setting same filter params does not trigger an additional fetch', async () => {
+it("setting same filter params does not trigger an additional fetch", async () => {
   // mockFetch(); render Overview; await initial fetch
   // const before = vi.mocked(fetch).mock.calls.length
   // set dateRange.value to identical from/to/preset as the current default
   // dateRange.value = { from: '2026-06-01', to: '2026-06-30', preset: '30d' }
   // await a short wait (so any hypothetical refetch would have happened)
   // expect(vi.mocked(fetch).mock.calls.length).toBe(before)
-})
+});
 ```
 
 **Acceptance criteria**
@@ -441,7 +465,7 @@ No source code changes. No test changes. Only a YAML file.
 name: CI
 on:
   push:
-    branches: ['**']
+    branches: ["**"]
   pull_request:
     branches: [main]
 
@@ -452,8 +476,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
       - run: npm ci
       - run: npx tsc --noEmit
       - run: npx eslint src/ --max-warnings 0
@@ -483,10 +507,12 @@ No test file is created for the CI workflow itself. Acceptance is verified by re
 
 ## Implementation order table
 
-| Done | Priority | Task | Depends on | Effort |
-|------|----------|------|------------|--------|
-| [ ]  | 1        | T-1: vitest.config.ts coverage config | - | Small |
-| [ ]  | 2        | T-2: computeBudgetUtilization + computeChurnSignal | - | Small |
-| [ ]  | 3        | T-3: Scale test gaps + handlers team_id test | - | Small |
-| [ ]  | 4        | T-4: Filter-to-fetch integration test | T-2 | Medium |
-| [ ]  | 5        | T-5: GitHub Actions CI pipeline | T-1 | Small |
+| Done | Priority | Task                                               | Depends on | Effort |
+| ---- | -------- | -------------------------------------------------- | ---------- | ------ |
+| [ ]  | 1        | T-1: vitest.config.ts coverage config              | -          | Small  |
+| [ ]  | 2        | T-2: computeBudgetUtilization + computeChurnSignal | -          | Small  |
+| [ ]  | 3        | T-3: Scale test gaps + handlers team_id test       | -          | Small  |
+| [ ]  | 4        | T-4: Filter-to-fetch integration test              | T-2        | Medium |
+| [ ]  | 5        | ~T-5: GitHub Actions CI pipeline~                  | T-1        | Small  |
+
+**Skip:** T-5
