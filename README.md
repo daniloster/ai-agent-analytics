@@ -14,6 +14,8 @@ The dashboard gives engineering leads and platform teams a single view of how Cl
 
 All data is served from Mock Service Worker (MSW) - no backend required.
 
+![Demo AI Agent Analytics](./demo.png)
+
 ---
 
 ## Running the app
@@ -53,25 +55,25 @@ Attaches an interactive bash session to the already-running `claude-dev` contain
 
 ## Scripts reference
 
-| Script | What it does |
-|--------|--------------|
-| `./scripts/up.sh` | Build image, start container, install deps, start Vite dev server, launch Claude Code with `--dangerously-skip-permissions` |
-| `./scripts/down.sh` | Stop and remove all containers |
-| `./scripts/ssh.sh` | Open a bash shell inside the running container |
+| Script              | What it does                                                                                                                |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `./scripts/up.sh`   | Build image, start container, install deps, start Vite dev server, launch Claude Code with `--dangerously-skip-permissions` |
+| `./scripts/down.sh` | Stop and remove all containers                                                                                              |
+| `./scripts/ssh.sh`  | Open a bash shell inside the running container                                                                              |
 
 ---
 
 ## npm scripts (run inside the container)
 
-| Command | What it does |
-|---------|--------------|
-| `npm run dev` | Start Vite dev server on `0.0.0.0:5173` |
-| `npm run build` | Type-check and produce a production build in `dist/` |
-| `npm run preview` | Serve the production build on port 4173 |
-| `npm run test` | Run the full Vitest suite once |
-| `npm run test:watch` | Run Vitest in watch mode |
-| `npm run test:coverage` | Run tests with V8 coverage report |
-| `npm run lint` | ESLint over `src/` |
+| Command                 | What it does                                         |
+| ----------------------- | ---------------------------------------------------- |
+| `npm run dev`           | Start Vite dev server on `0.0.0.0:5173`              |
+| `npm run build`         | Type-check and produce a production build in `dist/` |
+| `npm run preview`       | Serve the production build on port 4173              |
+| `npm run test`          | Run the full Vitest suite once                       |
+| `npm run test:watch`    | Run Vitest in watch mode                             |
+| `npm run test:coverage` | Run tests with V8 coverage report                    |
+| `npm run lint`          | ESLint over `src/`                                   |
 
 ---
 
