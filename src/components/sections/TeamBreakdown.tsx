@@ -12,7 +12,6 @@ import type { TeamsResponse } from "../../types/api";
 import { AreaChart } from "../charts/AreaChart";
 import { BarChart } from "../charts/BarChart";
 import { ColumnChart } from "../charts/ColumnChart";
-import { Annotation } from "../charts/overlays/Annotation";
 import { DataLabels } from "../charts/overlays/DataLabels";
 import { SeriesTooltip } from "../charts/overlays/SeriesTooltip";
 import { SparklineChart } from "../charts/SparklineChart";
@@ -52,7 +51,10 @@ function buildTeamQualityAxes(data: Record<string, unknown[]>) {
   const pts = (data["quality"] ?? []) as TeamQualityPoint[];
   const qValues = pts.map((p) => p.quality).filter((v): v is number => v !== null);
   const minQ = qValues.length > 0 ? Math.min(...qValues) : 1;
+  const maxQ = qValues.length > 0 ? Math.max(...qValues) : 5;
   const paddedMin = Math.max(0, Math.floor((minQ - 0.5) * 2) / 2);
+  // Extra headroom so DataLabels above the tallest bar are not clipped
+  const paddedMax = Math.min(5.5, maxQ + 0.5);
   return [
     {
       id: "x",
@@ -67,7 +69,7 @@ function buildTeamQualityAxes(data: Record<string, unknown[]>) {
       position: "left" as const,
       accessor: (d: Record<string, unknown>) =>
         (d as unknown as TeamQualityPoint).quality ?? 0,
-      domain: [paddedMin, 5] as [number, number],
+      domain: [paddedMin, paddedMax] as [number, number],
       numTicks: 3,
     },
     {
@@ -102,19 +104,6 @@ export function TeamBreakdown(): JSX.Element {
 
   const orgAvgFailedRunRate = data?.org_avg_failed_run_rate ?? 0;
 
-  const nonNullQuality = data
-    ? data.teams.filter((t) => t.cost_per_quality_point !== null)
-    : [];
-  const avgCostPerQualityPoint =
-    nonNullQuality.length > 0
-      ? Math.round(
-          nonNullQuality.reduce(
-            (sum, t) => sum + (t.cost_per_quality_point ?? 0),
-            0,
-          ) / nonNullQuality.length,
-        )
-      : null;
-
   const sparklineDataSig = useDeepComputed(() => {
     const team = data?.teams[0];
     if (!team || currentTeamId.value === undefined) {
@@ -145,39 +134,6 @@ export function TeamBreakdown(): JSX.Element {
     return { quality: pts, volume: pts };
   });
 
-  const cpqDataSig = useDeepComputed(() => {
-    const teams = data?.teams ?? [];
-    const qualified = [...teams]
-      .filter((t) => t.cost_per_quality_point !== null)
-      .sort(
-        (a, b) =>
-          (a.cost_per_quality_point ?? Infinity) -
-          (b.cost_per_quality_point ?? Infinity),
-      );
-    return {
-      cpq: qualified.map((t) => ({
-        label: t.team_name,
-        value: t.cost_per_quality_point as number,
-        cpq: t.cost_per_quality_point as number,
-      })),
-    };
-  });
-
-  const BAND_AXES = defineAxes([
-    {
-      id: "x",
-      type: "band" as const,
-      position: "bottom" as const,
-      accessor: (d) => (d as { label: string }).label,
-    },
-    {
-      id: "y",
-      type: "linear" as const,
-      position: "left" as const,
-      accessor: (d) => (d as { value: number }).value,
-      domain: "auto" as const,
-    },
-  ]);
 
   return (
     <Section id="teams" labelledBy="teams-heading">
@@ -462,76 +418,6 @@ export function TeamBreakdown(): JSX.Element {
               </Visualization>
             </figure>
 
-            <figure
-              className="rounded-lg border bg-card shadow-sm p-6"
-              aria-label="Use cases by team"
-            >
-              <figcaption className="mb-4">
-                <p className="text-[14px] font-semibold text-foreground">
-                  Use cases by team
-                </p>
-                <p className="text-[12px] text-muted-foreground mt-0.5">
-                  Category distribution per team
-                </p>
-              </figcaption>
-              <div role="list" className="space-y-2">
-                {data.teams.map((team) => {
-                  const COLORS = ["#6366f1", "#f59e0b", "#10b981", "#ef4444", "#3b82f6", "#8b5cf6"];
-                  return (
-                    <div key={team.team_id} role="listitem">
-                      <div className="text-xs text-muted-foreground mb-1">
-                        {team.team_name}
-                      </div>
-                      <div className="flex h-6 rounded overflow-hidden">
-                        {team.top_use_cases.map((seg, i) => (
-                          <div
-                            key={seg.category}
-                            aria-label={seg.category}
-                            style={{
-                              width: seg.percentage + "%",
-                              background: COLORS[i % COLORS.length],
-                            }}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </figure>
-
-            <figure
-              className="rounded-lg border bg-card shadow-sm p-6"
-              aria-label="Cost per quality point"
-            >
-              <figcaption className="mb-4">
-                <p className="text-[14px] font-semibold text-foreground">
-                  Cost per quality point
-                </p>
-                <p className="text-[12px] text-muted-foreground mt-0.5">
-                  Lower is better
-                </p>
-              </figcaption>
-              <Visualization
-                data={cpqDataSig}
-                axes={BAND_AXES}
-                ariaLabel="Cost per quality point"
-              >
-                {() => (
-                  <>
-                    <ColumnChart series="cpq" axis="y" />
-                    {avgCostPerQualityPoint !== null && (
-                      <Annotation
-                        axis="y"
-                        value={avgCostPerQualityPoint}
-                        label="lower is better"
-                        variant="warning"
-                      />
-                    )}
-                  </>
-                )}
-              </Visualization>
-            </figure>
           </div>
         )
       )}

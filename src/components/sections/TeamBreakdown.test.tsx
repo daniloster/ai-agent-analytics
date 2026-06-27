@@ -110,14 +110,24 @@ beforeEach(() => {
   teamId.value = undefined
 })
 
-it('org-wide view renders TeamTable and five figcaptions when teamId is undefined', async () => {
+it('org-wide view renders TeamTable and three figcaptions when teamId is undefined', async () => {
   mockFetch(TEAMS_RESPONSE)
   const { TeamBreakdown } = await import('./TeamBreakdown')
   const { container } = render(<TeamBreakdown />, { wrapper: makeWrapper() })
   await waitFor(() => {
     expect(container.querySelector('table')).not.toBeNull()
     const captions = container.querySelectorAll('figcaption')
-    expect(captions).toHaveLength(5)
+    expect(captions).toHaveLength(3)
+  })
+})
+
+it('"Use cases by team" and "Cost per quality point" are not rendered', async () => {
+  mockFetch(TEAMS_RESPONSE)
+  const { TeamBreakdown } = await import('./TeamBreakdown')
+  render(<TeamBreakdown />, { wrapper: makeWrapper() })
+  await waitFor(() => {
+    expect(screen.queryByText('Use cases by team')).toBeNull()
+    expect(screen.queryByText('Cost per quality point')).toBeNull()
   })
 })
 
@@ -143,12 +153,13 @@ it('loading state renders Skeleton elements and no table or cards', async () => 
   expect(container.querySelector('button[aria-label="More information"]')).toBeNull()
 })
 
-it('KPI-22 ColumnChart has annotation line when teams have non-null cost_per_quality_point', async () => {
+it('quality score per team chart renders SVG paths for area series', async () => {
   mockFetch(TEAMS_RESPONSE)
   const { TeamBreakdown } = await import('./TeamBreakdown')
   const { container } = render(<TeamBreakdown />, { wrapper: makeWrapper() })
   await waitFor(() => {
-    expect(container.querySelector('line')).not.toBeNull()
+    const paths = container.querySelectorAll('svg path')
+    expect(paths.length).toBeGreaterThan(0)
   })
 })
 

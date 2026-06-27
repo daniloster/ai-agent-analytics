@@ -60,7 +60,9 @@ function buildQualityTrendAxes(data: Record<string, unknown[]>) {
     .map((p) => p.quality)
     .filter((v): v is number => v !== null);
   const minQ = qValues.length > 0 ? Math.min(...qValues) : 1;
+  const maxQ = qValues.length > 0 ? Math.max(...qValues) : 5;
   const paddedMin = Math.max(0, Math.floor((minQ - 0.5) * 2) / 2);
+  const paddedMax = Math.min(5.5, maxQ + 0.5);
   return [
     {
       id: "x",
@@ -75,7 +77,7 @@ function buildQualityTrendAxes(data: Record<string, unknown[]>) {
       position: "left" as const,
       accessor: (d: Record<string, unknown>) =>
         (d as unknown as MonthlyQualityPoint).quality ?? 0,
-      domain: [paddedMin, 5] as [number, number],
+      domain: [paddedMin, paddedMax] as [number, number],
       numTicks: 5,
     },
     {
