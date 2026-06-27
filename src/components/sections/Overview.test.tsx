@@ -160,6 +160,26 @@ it('token area chart renders two Area series when timeseries data is present', a
   })
 })
 
+it('Success Rate card renders "watch requests count" when rate improved', async () => {
+  // OVERVIEW has success_rate=94.2 > success_rate_prior=91.0 => positive delta
+  mockFetch()
+  const { Overview } = await import('./Overview')
+  render(<Overview />, { wrapper: makeWrapper() })
+  await waitFor(() => {
+    expect(screen.getByText('watch requests count')).toBeTruthy()
+  })
+})
+
+it('Success Rate card renders "watch errors" when rate dropped', async () => {
+  const degraded = { ...OVERVIEW, success_rate: 88.0, success_rate_prior: 94.2 }
+  mockFetch(degraded)
+  const { Overview } = await import('./Overview')
+  render(<Overview />, { wrapper: makeWrapper() })
+  await waitFor(() => {
+    expect(screen.getByText('watch errors')).toBeTruthy()
+  })
+})
+
 it('Retention Cost card renders "/user" value suffix', async () => {
   mockFetch()
   const { Overview } = await import('./Overview')

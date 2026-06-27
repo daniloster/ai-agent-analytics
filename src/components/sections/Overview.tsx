@@ -363,6 +363,13 @@ export function Overview(): JSX.Element {
               ? computeDeltaPercent(d.success_rate, d.success_rate_prior)
               : undefined
           }
+          deltaLabel={
+            d
+              ? d.success_rate >= d.success_rate_prior
+                ? 'watch requests count'
+                : 'watch errors'
+              : undefined
+          }
           trend={ts?.points.map((p) => ({
             date: p.date,
             value: 100 - p.error_rate,
