@@ -46,6 +46,7 @@ export interface OverviewResponse {
   avg_quality_score_prior: number | null
   rated_run_count: number
   cost_per_quality_point: number | null
+  cost_per_quality_point_prior: number | null
   acceptance_rate: number | null
   cost_per_accepted_output: number | null
   mom_usage_growth: number

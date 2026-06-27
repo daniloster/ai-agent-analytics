@@ -424,6 +424,18 @@ export function Overview(): JSX.Element {
               ? "Fewer than 10 rated runs"
               : undefined
           }
+          delta={
+            d && costPerQualityPoint !== null && d.cost_per_quality_point_prior !== null
+              ? -computeDeltaPercent(costPerQualityPoint, d.cost_per_quality_point_prior)
+              : undefined
+          }
+          deltaLabel={
+            d && costPerQualityPoint !== null && d.cost_per_quality_point_prior !== null
+              ? costPerQualityPoint <= d.cost_per_quality_point_prior
+                ? 'improving efficiency'
+                : 'degrading efficiency'
+              : undefined
+          }
           trend={ts?.points
             .filter(
               (p) => p.avg_quality_score !== null && p.avg_quality_score > 0,
@@ -433,8 +445,8 @@ export function Overview(): JSX.Element {
               value: p.cost / p.avg_quality_score!,
             }))}
           trendColor="#7c3aed"
-          formulaTooltip="Total cost / (rated_run_count * avg_quality_score)."
-          exampleTooltip="e.g. $0.42 / point"
+          formulaTooltip="How much you spend per unit of quality delivered. Calculated as total cost divided by the volume of quality-rated outputs. Lower means better value."
+          exampleTooltip="e.g. $0.42 per quality point"
         />
       </div>
 

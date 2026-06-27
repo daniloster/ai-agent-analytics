@@ -88,6 +88,7 @@ const OVERVIEW: OverviewResponse = {
   avg_quality_score_prior: 3.9,
   rated_run_count: 500,
   cost_per_quality_point: 0.42,
+  cost_per_quality_point_prior: 0.50,
   acceptance_rate: 72.5,
   cost_per_accepted_output: 0.18,
   mom_usage_growth: 12.5,
