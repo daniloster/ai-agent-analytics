@@ -17,6 +17,7 @@ describe('generateOverview', () => {
     expect(typeof result.total_runs).toBe('number')
     expect(typeof result.total_runs_prior).toBe('number')
     expect(typeof result.mau).toBe('number')
+    expect(typeof result.mau_prior).toBe('number')
     expect(typeof result.dau).toBe('number')
     expect(typeof result.seat_count).toBe('number')
     expect(typeof result.total_tokens).toBe('number')
@@ -42,7 +43,7 @@ describe('generateOverview', () => {
     // Use many seeds until we find one that produces rated_run_count < 10,
     // or test the invariant directly by checking correlated nulls
     let found = false
-    for (let seed = 0; seed < 200; seed++) {
+    for (let seed = 0; seed < 2000; seed++) {
       const result = generateOverview(makeSeededFaker(seed), STD_PARAMS)
       if (result.rated_run_count < 10) {
         expect(result.avg_quality_score).toBeNull()

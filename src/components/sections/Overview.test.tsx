@@ -37,6 +37,7 @@ const OVERVIEW: Record<string, unknown> = {
   total_runs: 12450,
   total_runs_prior: 10000,
   mau: 340,
+  mau_prior: 300,
   dau: 120,
   seat_count: 400,
   total_tokens: 1000000,
@@ -155,6 +156,34 @@ it('token area chart renders two Area series when timeseries data is present', a
     const paths = container.querySelectorAll('svg path')
     // At minimum, the two Area series (input_tokens, output_tokens) each render a path
     expect(paths.length).toBeGreaterThanOrEqual(2)
+  })
+})
+
+it('Active Users card is labelled "Active Users" not "Monthly Active Users"', async () => {
+  mockFetch()
+  const { Overview } = await import('./Overview')
+  render(<Overview />, { wrapper: makeWrapper() })
+  await waitFor(() => {
+    expect(screen.getByText('Active Users')).toBeTruthy()
+    expect(screen.queryByText('Monthly Active Users')).toBeNull()
+  })
+})
+
+it('Active Users card renders "vs previous period" delta label', async () => {
+  mockFetch()
+  const { Overview } = await import('./Overview')
+  render(<Overview />, { wrapper: makeWrapper() })
+  await waitFor(() => {
+    expect(screen.getByText('vs previous period')).toBeTruthy()
+  })
+})
+
+it('Active Users card does not render "DAU:" subvalue', async () => {
+  mockFetch()
+  const { Overview } = await import('./Overview')
+  render(<Overview />, { wrapper: makeWrapper() })
+  await waitFor(() => {
+    expect(screen.queryByText(/DAU:/)).toBeNull()
   })
 })
 

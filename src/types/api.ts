@@ -27,6 +27,7 @@ export interface OverviewResponse {
   total_runs: number
   total_runs_prior: number
   mau: number
+  mau_prior: number
   dau: number
   seat_count: number
   total_tokens: number

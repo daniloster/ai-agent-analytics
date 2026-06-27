@@ -272,13 +272,14 @@ export function Overview(): JSX.Element {
           exampleTooltip="e.g. 12,450 runs"
         />
         <KpiCard
-          label="Monthly Active Users"
+          label="Active Users"
           value={d ? formatNumber(d.mau) : undefined}
-          subValue={d ? `DAU: ${formatNumber(d.dau)}` : undefined}
+          delta={d ? computeDeltaPercent(d.mau, d.mau_prior) : undefined}
+          deltaLabel="vs previous period"
           trend={ts?.points.map((p) => ({ date: p.date, value: p.dau }))}
           trendColor="#0d9488"
-          formulaTooltip="Unique users who ran at least one request this month."
-          exampleTooltip="e.g. 340 MAU"
+          formulaTooltip="Unique users who ran at least one request this period."
+          exampleTooltip="e.g. 340 users"
         />
         <KpiCard
           label="Seat Adoption"

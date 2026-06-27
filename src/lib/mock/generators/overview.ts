@@ -20,6 +20,7 @@ export function generateOverview(faker: Faker, params: FilterParams): OverviewRe
   const totalRuns = faker.number.int({ min: 1000, max: 50000 })
   const totalRunsPrior = faker.number.int({ min: 800, max: 45000 })
   const mau = faker.number.int({ min: 10, max: 500 })
+  const mauPrior = faker.number.int({ min: 8, max: 480 })
   const dau = faker.number.int({ min: 1, max: mau })
   const seatCount = faker.number.int({ min: mau, max: mau + 100 })
 
@@ -84,6 +85,7 @@ export function generateOverview(faker: Faker, params: FilterParams): OverviewRe
     total_runs: totalRuns,
     total_runs_prior: totalRunsPrior,
     mau,
+    mau_prior: mauPrior,
     dau,
     seat_count: seatCount,
     total_tokens: totalTokens,
