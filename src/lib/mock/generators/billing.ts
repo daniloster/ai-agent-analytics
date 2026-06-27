@@ -26,8 +26,8 @@ function buildDailyArray<T>(from: string, to: string, buildEntry: (date: string)
 function buildInvoiceHistory(faker: Faker, from: string): Array<{ month: string; total_billed: number }> {
   const history: Array<{ month: string; total_billed: number }> = []
   const base = new Date(from + 'T00:00:00Z')
-  // 6 months ending at the month of `from`
-  for (let i = 5; i >= 0; i--) {
+  // 6 months of closed invoices ending at the month PRIOR to `from` (current month is in-flight)
+  for (let i = 6; i >= 1; i--) {
     const d = new Date(Date.UTC(base.getUTCFullYear(), base.getUTCMonth() - i, 1))
     const month = d.toISOString().slice(0, 7)
     history.push({ month, total_billed: faker.number.float({ min: 5000, max: 30000, fractionDigits: 2 }) })
@@ -88,9 +88,9 @@ function buildCostAnomalyDays(faker: Faker, from: string, to: string): BillingRe
 }
 
 export function generateBilling(faker: Faker, params: FilterParams): BillingResponse {
-  const fromDate = new Date(params.from + 'T00:00:00Z')
-  const daysInMonth = new Date(Date.UTC(fromDate.getUTCFullYear(), fromDate.getUTCMonth() + 1, 0)).getUTCDate()
-  const daysElapsed = clamp(fromDate.getUTCDate(), 1, daysInMonth)
+  const toDate = new Date(params.to + 'T00:00:00Z')
+  const daysInMonth = new Date(Date.UTC(toDate.getUTCFullYear(), toDate.getUTCMonth() + 1, 0)).getUTCDate()
+  const daysElapsed = clamp(toDate.getUTCDate(), 1, daysInMonth)
 
   const currentMonthSpend = faker.number.float({ min: 1000, max: 20000, fractionDigits: 2 })
   const currentMonthSpendPrior = faker.number.float({ min: 800, max: 22000, fractionDigits: 2 })

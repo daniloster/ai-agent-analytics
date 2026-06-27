@@ -147,26 +147,29 @@ export function Billing(): JSX.Element {
     return projectedSeries ? [actualSeries, projectedSeries] : [actualSeries];
   })();
 
+  // Reading filterQueryParams.value here gives preact a signal dep so the computed
+  // goes stale when the filter changes, forcing re-evaluation with fresh billing data.
   const spendDataSig = useDeepComputed(() => {
-    const result: Record<
-      string,
-      Array<{ date: string; value: number; [k: string]: unknown }>
-    > = {};
+    void filterQueryParams.value;
+    const result: Record<string, Array<{ date: string; value: number; [k: string]: unknown }>> = {};
     for (const s of spendSeries) {
       result[s.id] = s.data.map((d) => ({ ...d, [s.id]: d.value }));
     }
     return result;
   });
 
-  const invoiceDataSig = useDeepComputed(() => ({
-    bars: billing
-      ? billing.invoice_history.map((h) => ({
-          label: h.month,
-          value: h.total_billed,
-          bars: h.total_billed,
-        }))
-      : ([] as Array<{ label: string; value: number; bars: number }>),
-  }));
+  const invoiceDataSig = useDeepComputed(() => {
+    void filterQueryParams.value;
+    return {
+      bars: billing
+        ? billing.invoice_history.map((h) => ({
+            label: h.month,
+            value: h.total_billed,
+            bars: h.total_billed,
+          }))
+        : ([] as Array<{ label: string; value: number; bars: number }>),
+    };
+  });
 
   // Derived values
   const budgetRemaining = billing

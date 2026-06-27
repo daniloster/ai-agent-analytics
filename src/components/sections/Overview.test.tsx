@@ -276,6 +276,18 @@ it('filter change causes fetch to be called again with new params', async () => 
   dateRange.value = { from: '2026-06-01', to: '2026-06-30', preset: '30d' }
 })
 
+it('cost vs budget chart renders SVG paths when timeseries data is present', async () => {
+  mockFetch()
+  const { Overview } = await import('./Overview')
+  const { container } = render(<Overview />, { wrapper: makeWrapper() })
+  await waitFor(() => {
+    const costFigure = container.querySelector('[aria-label="Cost vs. budget"]')
+    expect(costFigure).not.toBeNull()
+    const paths = costFigure?.querySelectorAll('path') ?? []
+    expect(paths.length).toBeGreaterThanOrEqual(1)
+  })
+})
+
 it('quality trend figure has subtitle "6-month trajectory"', async () => {
   mockFetch()
   const { Overview } = await import('./Overview')

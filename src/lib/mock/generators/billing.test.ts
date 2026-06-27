@@ -32,10 +32,27 @@ describe('generateBilling', () => {
   })
 
   it('projected_month_end >= current_month_spend', () => {
+    // to=2026-06-30 => daysElapsed=30, daysInMonth=30 => projection = spend exactly
     for (let seed = 0; seed < 10; seed++) {
       const result = generateBilling(makeSeededFaker(seed), STD_PARAMS)
       expect(result.projected_month_end).toBeGreaterThanOrEqual(result.current_month_spend)
     }
+  })
+
+  it('projected_month_end is not inflated (not > monthly_budget * 5)', () => {
+    // Before fix: daysElapsed = fromDate.getUTCDate() = 1, causing 30x inflation
+    for (let seed = 0; seed < 10; seed++) {
+      const result = generateBilling(makeSeededFaker(seed), STD_PARAMS)
+      expect(result.projected_month_end).toBeLessThanOrEqual(result.monthly_budget * 5)
+    }
+  })
+
+  it('invoice_history last month is strictly before from date month', () => {
+    const result = generateBilling(makeSeededFaker(1), STD_PARAMS)
+    const months = result.invoice_history.map((h) => h.month)
+    const lastMonth = months[months.length - 1]!
+    // from = '2026-06-01', so last invoice must be '2026-05' or earlier
+    expect(lastMonth < '2026-06').toBe(true)
   })
 
   it('budget_utilization is in [0, 100]', () => {

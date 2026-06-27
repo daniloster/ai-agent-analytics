@@ -65,12 +65,12 @@ const BILLING: BillingResponse = {
     { team_id: 't2', team_name: 'Beta', token_cost: 4000, seat_cost_prorated: 600, total: 4600, percentage: 47 },
   ],
   invoice_history: [
-    { month: '2026-01', total_billed: 8000 },
-    { month: '2026-02', total_billed: 9000 },
-    { month: '2026-03', total_billed: 8500 },
-    { month: '2026-04', total_billed: 9200 },
-    { month: '2026-05', total_billed: 9600 },
-    { month: '2026-06', total_billed: 9800 },
+    { month: '2025-12', total_billed: 8000 },
+    { month: '2026-01', total_billed: 9000 },
+    { month: '2026-02', total_billed: 8500 },
+    { month: '2026-03', total_billed: 9200 },
+    { month: '2026-04', total_billed: 9600 },
+    { month: '2026-05', total_billed: 9800 },
   ],
   cost_anomaly_days: [
     { date: '2026-06-10', daily_cost: 800, avg_daily_cost: 450, is_anomaly: true },
@@ -166,6 +166,18 @@ it('new_user_activation_cost = null shows "Insufficient data"', async () => {
   await waitFor(() => {
     const badges = screen.getAllByText('Insufficient data')
     expect(badges.length).toBeGreaterThanOrEqual(1)
+  })
+})
+
+it('cumulative spend chart renders SVG paths when billing data is loaded', async () => {
+  mockFetch()
+  const { Billing } = await import('./Billing')
+  const { container } = render(<Billing />, { wrapper: makeWrapper() })
+  await waitFor(() => {
+    const figure = container.querySelector('[aria-label="Cumulative spend vs budget"]')
+    expect(figure).not.toBeNull()
+    const paths = figure?.querySelectorAll('path') ?? []
+    expect(paths.length).toBeGreaterThanOrEqual(1)
   })
 })
 

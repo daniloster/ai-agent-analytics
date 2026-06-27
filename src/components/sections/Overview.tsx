@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useDeepComputed } from "../../hooks/useDeepComputed";
+import { useLiveSignal } from "../../hooks/useLiveSignal";
 import { filterQueryParams } from "../../lib/filters/filterSignals";
 import {
   formatCurrency,
@@ -101,16 +101,20 @@ export function Overview(): JSX.Element {
   const overview = useQuery<OverviewResponse>({
     queryKey: ["overview", params],
     queryFn: () =>
-      fetch("/api/analytics/overview?" + buildQueryParams(params)).then(
-        (r) => { if (!r.ok) throw new Error(r.statusText); return r.json() as Promise<OverviewResponse> },
-      ),
+      fetch("/api/analytics/overview?" + buildQueryParams(params)).then((r) => {
+        if (!r.ok) throw new Error(r.statusText);
+        return r.json() as Promise<OverviewResponse>;
+      }),
   });
 
   const timeseries = useQuery<TimeseriesResponse>({
     queryKey: ["timeseries", params],
     queryFn: () =>
       fetch("/api/analytics/timeseries?" + buildQueryParams(params)).then(
-        (r) => { if (!r.ok) throw new Error(r.statusText); return r.json() as Promise<TimeseriesResponse> },
+        (r) => {
+          if (!r.ok) throw new Error(r.statusText);
+          return r.json() as Promise<TimeseriesResponse>;
+        },
       ),
   });
 
@@ -125,7 +129,10 @@ export function Overview(): JSX.Element {
     queryKey: ["quality-trend", qtFrom, params.to],
     queryFn: () =>
       fetch(`/api/analytics/timeseries?from=${qtFrom}&to=${params.to}`).then(
-        (r) => { if (!r.ok) throw new Error(r.statusText); return r.json() as Promise<TimeseriesResponse> },
+        (r) => {
+          if (!r.ok) throw new Error(r.statusText);
+          return r.json() as Promise<TimeseriesResponse>;
+        },
       ),
   });
 
@@ -144,7 +151,8 @@ export function Overview(): JSX.Element {
         d.avg_quality_score,
       )
     : null;
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
   const tokenSeries = ts
     ? [
@@ -236,40 +244,37 @@ export function Overview(): JSX.Element {
     return { costSeries: series, projectedCostData: projected, budgetPct: pct };
   })();
 
-  // Data signals for Visualization consumers
-  const tokenDataSig = useDeepComputed(() => {
-    const result: Record<
-      string,
-      Array<{ date: string; value: number; [k: string]: unknown }>
-    > = {};
-    for (const s of tokenSeries) {
-      result[s.id] = s.data.map((d) => ({ ...d, [s.id]: d.value }));
-    }
-    return result;
-  });
+  // Data signals for Visualization consumers.
+  // useLiveSignal bridges React state (TanStack Query data) into signals so Visualization
+  // re-renders when filter changes cause new data to load. useDeepComputed cannot do this
+  // because it only tracks @preact/signals signal dependencies, not React state.
+  const tokenData: Record<
+    string,
+    Array<{ date: string; value: number; [k: string]: unknown }>
+  > = {};
+  for (const s of tokenSeries) {
+    tokenData[s.id] = s.data.map((d) => ({ ...d, [s.id]: d.value }));
+  }
+  const tokenDataSig = useLiveSignal(tokenData);
 
-  const costDataSig = useDeepComputed(() => {
-    const result: Record<
-      string,
-      Array<{ date: string; value: number; [k: string]: unknown }>
-    > = {};
-    for (const s of costSeries) {
-      result[s.id] = s.data.map((d) => ({ ...d, [s.id]: d.value }));
-    }
-    return result;
-  });
+  const costData: Record<
+    string,
+    Array<{ date: string; value: number; [k: string]: unknown }>
+  > = {};
+  for (const s of costSeries) {
+    costData[s.id] = s.data.map((d) => ({ ...d, [s.id]: d.value }));
+  }
+  const costDataSig = useLiveSignal(costData);
 
-  const qualityMonthly = useDeepComputed(() => {
-    const qtPoints = qualityTrendQuery.data?.points ?? [];
-    return aggregateQualityMonthly(qtPoints, params.to);
-  });
-
-  const qualityTrendDataSig = useDeepComputed(() => {
-    const monthly = qualityMonthly.value;
-    if (monthly.length === 0)
-      return {} as Record<string, MonthlyQualityPoint[]>;
-    return { quality: monthly, volume: monthly };
-  });
+  const qualityMonthly = aggregateQualityMonthly(
+    qualityTrendQuery.data?.points ?? [],
+    params.to,
+  );
+  const qualityTrendDataSig = useLiveSignal(
+    qualityMonthly.length === 0
+      ? ({} as Record<string, MonthlyQualityPoint[]>)
+      : { quality: qualityMonthly, volume: qualityMonthly },
+  );
 
   return (
     <Section id="overview" labelledBy="overview-heading">
