@@ -46,9 +46,6 @@ describe('UnderstandingPage', () => {
 
   it('exactly 38 <code> elements are present (one per KpiEntryCard formula)', () => {
     const { container } = renderPage()
-    const codes = container.querySelectorAll('code')
-    // TECH_DECISIONS also has code elements (packageRef)
-    // Count only code elements that are inside #kpis section
     const kpisSection = container.querySelector('#kpis')
     const kpisCodes = kpisSection?.querySelectorAll('code') ?? []
     expect(kpisCodes.length).toBe(38)
