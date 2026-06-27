@@ -2,7 +2,7 @@ import { useSignal } from '@preact/signals-react'
 import { Card, CardHeader, CardContent } from '../ui/card'
 import { Skeleton } from '../ui/skeleton'
 import { Popover, PopoverTrigger, PopoverContent } from '../ui/popover'
-import { formatPercent } from '../../lib/kpi/formatters'
+import { formatNumber, formatPercent } from '../../lib/kpi/formatters'
 
 const STATUS_DOT_COLORS: Record<'good' | 'warning' | 'critical', string> = {
   good: 'bg-emerald-500',
@@ -15,6 +15,7 @@ export interface KpiCardProps {
   value: string | undefined
   subValue?: string
   delta?: number
+  deltaFormat?: 'percent' | 'number'
   deltaLabel?: string
   trend?: Array<{ date: string; value: number }>
   trendColor?: string
@@ -106,7 +107,7 @@ function StarRating({ rating, subtext }: { rating: number; subtext?: string }): 
   )
 }
 
-function DeltaBadge({ delta, deltaLabel }: { delta: number; deltaLabel?: string }): JSX.Element {
+function DeltaBadge({ delta, deltaFormat = 'percent', deltaLabel }: { delta: number; deltaFormat?: 'percent' | 'number'; deltaLabel?: string }): JSX.Element {
   const isPositive = delta > 0
   const isNegative = delta < 0
   const prefix = isPositive ? '+' : isNegative ? '-' : ''
@@ -121,7 +122,7 @@ function DeltaBadge({ delta, deltaLabel }: { delta: number; deltaLabel?: string 
       <span
         className={`inline-flex items-center rounded-full px-[7px] py-0.5 text-[11px] font-semibold ${colorClass}`}
       >
-        {prefix}{formatPercent(Math.abs(delta), 1)}
+        {prefix}{deltaFormat === 'number' ? formatNumber(Math.abs(delta)) : formatPercent(Math.abs(delta), 1)}
       </span>
       {deltaLabel && <span className="text-[11px] text-muted-foreground">{deltaLabel}</span>}
     </div>
@@ -153,7 +154,7 @@ export function KpiCard(props: KpiCardProps): JSX.Element {
                 ?
               </button>
             </PopoverTrigger>
-            <PopoverContent>
+            <PopoverContent style={{ maxWidth: 'min(320px, var(--radix-popper-available-width))' }}>
               <p className="text-sm">{props.formulaTooltip}</p>
               <p className="mt-1 text-xs text-muted-foreground">{props.exampleTooltip}</p>
             </PopoverContent>
@@ -178,7 +179,7 @@ export function KpiCard(props: KpiCardProps): JSX.Element {
             <p className="text-[11px] text-muted-foreground">{props.subValue}</p>
           )}
           {typeof props.delta === 'number' && (
-            <DeltaBadge delta={props.delta} deltaLabel={props.deltaLabel} />
+            <DeltaBadge delta={props.delta} deltaFormat={props.deltaFormat} deltaLabel={props.deltaLabel} />
           )}
         </div>
         {props.trend && props.trend.length >= 2 && (

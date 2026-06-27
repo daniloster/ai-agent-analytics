@@ -69,6 +69,7 @@ const OVERVIEW: OverviewResponse = {
   total_runs: 12450,
   total_runs_prior: 11000,
   mau: 340,
+  mau_prior: 300,
   dau: 120,
   seat_count: 400,
   total_tokens: 5000000,
