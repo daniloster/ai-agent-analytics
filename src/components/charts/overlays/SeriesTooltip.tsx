@@ -5,6 +5,7 @@ export interface SeriesTooltipSeries {
   id: string;
   label: string;
   color?: string;
+  dashed?: boolean;
   formatValue?: (v: number) => string;
   /** y-axis id for this series; defaults to "y" */
   axis?: string;
@@ -53,7 +54,8 @@ export function SeriesTooltip({
       : 0;
 
   const xFn = bScale as (v: unknown) => number;
-  const x = xFn(baseAxisAccessor.value?.(primaryDatum) ?? primaryDatum) + halfBw;
+  const x =
+    xFn(baseAxisAccessor.value?.(primaryDatum) ?? primaryDatum) + halfBw;
   const h = innerHeight.value;
   const w = innerWidth.value;
 
@@ -72,7 +74,11 @@ export function SeriesTooltip({
     if (!yFn) return [];
     const y = yFn(val);
     if (isNaN(y)) return [];
-    return [{ s, val, y }];
+
+    const stroke = s.color ?? tokens.primary;
+    const fill = s.dashed ? "transparent" : stroke;
+
+    return [{ s, val, y, stroke, fill }];
   });
 
   if (points.length === 0) return null;
@@ -107,14 +113,14 @@ export function SeriesTooltip({
         stroke={tokens.border}
         strokeWidth={1}
       />
-      {points.map(({ s, y }) => (
+      {points.map(({ s, y, fill, stroke }) => (
         <circle
           key={s.id}
           cx={x}
           cy={y}
           r={4}
-          fill={s.color ?? tokens.primary}
-          stroke="#fff"
+          fill={fill}
+          stroke={stroke}
           strokeWidth={2}
         />
       ))}
@@ -137,7 +143,7 @@ export function SeriesTooltip({
       >
         {headerLabel}
       </text>
-      {points.map(({ s, val }, i) => {
+      {points.map(({ s, val, fill, stroke }, i) => {
         const rowY = 4 + TOOLTIP_HEADER_H + i * ROW_H;
         const display = s.formatValue
           ? s.formatValue(val)
@@ -148,7 +154,8 @@ export function SeriesTooltip({
               cx={tooltipX + 10}
               cy={rowY + 6}
               r={3}
-              fill={s.color ?? tokens.primary}
+              fill={fill}
+              stroke={stroke}
             />
             <text
               x={tooltipX + 19}

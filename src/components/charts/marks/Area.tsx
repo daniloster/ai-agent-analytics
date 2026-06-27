@@ -110,7 +110,7 @@ export function Area(props: AreaProps): JSX.Element | null {
         y={(d) => yScaleFn(d[props.series])}
         stroke={color}
         strokeWidth={strokeWidth}
-        strokeDasharray={props.dashed ? "4 2" : undefined}
+        strokeDasharray={props.dashed ? `4 ${strokeWidth * 2}` : undefined}
         fill="none"
         defined={(d) => isDefined(d, props.series)}
       />
@@ -134,8 +134,7 @@ export function Area(props: AreaProps): JSX.Element | null {
               cy={cy}
               r={4}
               opacity={0}
-              stroke={color}
-              {...(props.dashed ? { fill: "transparent" } : { fill: color })}
+              fill={color}
               tabIndex={0}
               role="listitem"
               aria-label={xLabel + ": " + yLabel}
