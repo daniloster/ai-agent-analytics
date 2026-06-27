@@ -1,13 +1,14 @@
 import { cn } from '../../lib/utils'
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
-  variant?: 'default' | 'secondary' | 'destructive'
+  variant?: 'default' | 'secondary' | 'destructive' | 'outline'
 }
 
 const variantClasses: Record<NonNullable<BadgeProps['variant']>, string> = {
   default: 'bg-primary text-primary-foreground',
   secondary: 'bg-secondary text-secondary-foreground',
   destructive: 'bg-destructive text-destructive-foreground',
+  outline: 'border border-border bg-transparent text-foreground',
 }
 
 export function Badge({ variant = 'default', className, ...props }: BadgeProps): JSX.Element {
