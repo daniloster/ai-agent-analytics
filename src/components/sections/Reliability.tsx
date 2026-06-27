@@ -13,11 +13,8 @@ import {
 } from "../../lib/kpi/formulas";
 import type { ReliabilityResponse } from "../../types/api";
 import { buildQueryParams } from "../../utils/buildQueryParams";
-import { AreaChart } from "../charts/AreaChart";
 import { DonutChart } from "../charts/DonutChart";
 import { DonutLegend } from "../charts/DonutLegend";
-import { Annotation } from "../charts/overlays/Annotation";
-import { SeriesTooltip } from "../charts/overlays/SeriesTooltip";
 import { Visualization, defineAxes } from "../charts/Visualization";
 import { KpiCard } from "../kpis/KpiCard";
 import { Section } from "../layout/Section";
@@ -380,15 +377,15 @@ export function Reliability(): JSX.Element {
                 axes={AREA_AXES}
                 ariaLabel="Error rate trend"
               >
-                {() => (
+                {(Viz) => (
                   <>
-                    <AreaChart
+                    <Viz.AreaChart
                       series="error_rate"
                       axis="y"
                       color={errorRateColor}
                     />
-                    <Annotation axis="y" value={0.05} label="5% threshold" />
-                    <SeriesTooltip
+                    <Viz.Annotation axis="y" value={0.05} label="5% threshold" />
+                    <Viz.SeriesTooltip
                       series={[
                         { id: "error_rate", label: "Error Rate (7d avg)" },
                       ]}

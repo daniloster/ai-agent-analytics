@@ -7,7 +7,6 @@ import {
 } from "../../lib/kpi/formatters";
 import { teamColor } from "../../lib/team/teamColors";
 import type { TeamMetrics } from "../../types/api";
-import { SparklineChart } from "../charts/SparklineChart";
 import { Visualization, defineAxes } from "../charts/Visualization";
 import { Badge } from "../ui/badge";
 import { Progress } from "../ui/progress";
@@ -179,8 +178,8 @@ function TeamRow({ team }: { team: TeamMetrics }): JSX.Element {
 
       <TableCell style={{ maxWidth: "160px", width: "160px" }}>
         <Visualization data={trendDataSig} axes={SPARKLINE_AXES} height={40}>
-          {() => (
-            <SparklineChart
+          {(Viz) => (
+            <Viz.SparklineChart
               series="trend"
               axis="y"
               color={teamColor(team.team_id)}

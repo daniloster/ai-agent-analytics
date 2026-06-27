@@ -5,14 +5,10 @@ import { formatCurrency, formatPercent } from "../../lib/kpi/formatters";
 import { teamColor } from "../../lib/team/teamColors";
 import type { BillingResponse, OverviewResponse } from "../../types/api";
 import { buildQueryParams } from "../../utils/buildQueryParams";
-import { AreaChart } from "../charts/AreaChart";
-import { ColumnChart, ColumnTrendLine } from "../charts/ColumnChart";
 import { DonutChart } from "../charts/DonutChart";
 import { DonutLegend } from "../charts/DonutLegend";
 import { GaugeChart } from "../charts/GaugeChart";
 import { Heatmap } from "../charts/Heatmap";
-import { Annotation } from "../charts/overlays/Annotation";
-import { SeriesTooltip } from "../charts/overlays/SeriesTooltip";
 import { useChartTokens } from "../charts/primitives/useChartTokens";
 import { Visualization, defineAxes } from "../charts/Visualization";
 import { ChargebackTable } from "../kpis/ChargebackTable";
@@ -234,10 +230,10 @@ export function Billing(): JSX.Element {
                 axes={AREA_AXES}
                 ariaLabel="Cumulative spend vs budget"
               >
-                {() => (
+                {(Viz) => (
                   <>
                     {spendSeries.map((s) => (
-                      <AreaChart
+                      <Viz.AreaChart
                         key={s.id}
                         series={s.id}
                         axis="y"
@@ -247,13 +243,13 @@ export function Billing(): JSX.Element {
                       />
                     ))}
                     {billing && (
-                      <Annotation
+                      <Viz.Annotation
                         axis="y"
                         value={billing.monthly_budget}
                         label="Budget"
                       />
                     )}
-                    <SeriesTooltip
+                    <Viz.SeriesTooltip
                       series={spendSeries.map((s) => ({
                         id: s.id,
                         label: s.label,
@@ -282,10 +278,10 @@ export function Billing(): JSX.Element {
                 axes={BAND_AXES}
                 ariaLabel="Invoice history"
               >
-                {() => (
+                {(Viz) => (
                   <>
-                    <ColumnChart series="bars" axis="y" />
-                    <ColumnTrendLine series="bars" axis="y" />
+                    <Viz.ColumnChart series="bars" axis="y" />
+                    <Viz.ColumnTrendLine series="bars" axis="y" />
                   </>
                 )}
               </Visualization>

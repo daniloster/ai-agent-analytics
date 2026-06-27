@@ -19,6 +19,14 @@ import type { LineProps } from "./marks/Line";
 import { Line } from "./marks/Line";
 import type { AnnotationProps } from "./overlays/Annotation";
 import { Annotation } from "./overlays/Annotation";
+import type { DataLabelsProps } from "./overlays/DataLabels";
+import { DataLabels } from "./overlays/DataLabels";
+import type { SeriesTooltipProps } from "./overlays/SeriesTooltip";
+import { SeriesTooltip } from "./overlays/SeriesTooltip";
+import { AreaChart } from "./AreaChart";
+import { ColumnChart, ColumnTrendLine } from "./ColumnChart";
+import type { SparklineChartProps } from "./SparklineChart";
+import { SparklineChart } from "./SparklineChart";
 import { AxisBottom, AxisLeft, AxisRight } from "./primitives/Axis";
 import { ChartSVG } from "./primitives/ChartSVG";
 import { GridRows } from "./primitives/Grid";
@@ -38,6 +46,12 @@ export type VisMark<
     props: HeatmapMarkProps<keyof TData & string>,
   ) => JSX.Element | null;
   Annotation: (props: AnnotationProps<TAxisId>) => JSX.Element | null;
+  AreaChart: (props: AreaProps<keyof TData & string, TAxisId>) => JSX.Element | null;
+  ColumnChart: (props: BarProps<keyof TData & string, TAxisId>) => JSX.Element | null;
+  ColumnTrendLine: (props: { series: string; axis: string }) => JSX.Element | null;
+  SparklineChart: (props: SparklineChartProps) => JSX.Element | null;
+  SeriesTooltip: (props: SeriesTooltipProps) => JSX.Element | null;
+  DataLabels: (props: DataLabelsProps) => JSX.Element | null;
 };
 
 // Module-level singleton - all chart mark components collected for render-prop dispatch.
@@ -48,6 +62,12 @@ const VIS_MARKS = {
   Gauge,
   HeatmapMark,
   Annotation,
+  AreaChart,
+  ColumnChart,
+  ColumnTrendLine,
+  SparklineChart,
+  SeriesTooltip,
+  DataLabels,
 };
 
 export interface VisualizationProps<
@@ -61,7 +81,7 @@ export interface VisualizationProps<
   height?: number;
   className?: string;
   ariaLabel?: string;
-  children: (marks: VisMark<TData, TAxes[number]["id"]>) => React.ReactNode;
+  children: (Viz: VisMark<TData, TAxes[number]["id"]>) => React.ReactNode;
 }
 
 const ZERO_MARGIN = { top: 0, right: 0, bottom: 0, left: 0 };

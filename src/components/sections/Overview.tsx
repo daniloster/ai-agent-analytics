@@ -21,11 +21,6 @@ import type {
 import type { MonthlyQualityPoint } from "../../utils/aggregateQualityMonthly";
 import { aggregateQualityMonthly } from "../../utils/aggregateQualityMonthly";
 import { buildQueryParams } from "../../utils/buildQueryParams";
-import { AreaChart } from "../charts/AreaChart";
-import { ColumnChart } from "../charts/ColumnChart";
-import { Annotation } from "../charts/overlays/Annotation";
-import { DataLabels } from "../charts/overlays/DataLabels";
-import { SeriesTooltip } from "../charts/overlays/SeriesTooltip";
 import { Visualization, defineAxes } from "../charts/Visualization";
 import { KpiCard } from "../kpis/KpiCard";
 import { Section } from "../layout/Section";
@@ -534,17 +529,17 @@ export function Overview(): JSX.Element {
               axes={AREA_AXES}
               ariaLabel="Token usage over time"
             >
-              {() => (
+              {(Viz) => (
                 <>
                   {tokenSeries.map((s) => (
-                    <AreaChart
+                    <Viz.AreaChart
                       key={s.id}
                       series={s.id}
                       axis="y"
                       color={s.color}
                     />
                   ))}
-                  <SeriesTooltip
+                  <Viz.SeriesTooltip
                     series={tokenSeries.map((s) => ({
                       id: s.id,
                       label: s.label,
@@ -605,10 +600,10 @@ export function Overview(): JSX.Element {
               axes={AREA_AXES}
               ariaLabel="Cost vs. budget"
             >
-              {() => (
+              {(Viz) => (
                 <>
                   {costSeries.map((s) => (
-                    <AreaChart
+                    <Viz.AreaChart
                       key={s.id}
                       series={s.id}
                       axis="y"
@@ -618,14 +613,14 @@ export function Overview(): JSX.Element {
                     />
                   ))}
                   {orgConfig && (
-                    <Annotation
+                    <Viz.Annotation
                       axis="y"
                       value={orgConfig.monthly_budget}
                       label={`$${(orgConfig.monthly_budget / 1000).toFixed(0)}k`}
                       variant="destructive"
                     />
                   )}
-                  <SeriesTooltip
+                  <Viz.SeriesTooltip
                     series={costSeries.map((s) => ({
                       id: s.id,
                       label: s.label,
@@ -680,26 +675,26 @@ export function Overview(): JSX.Element {
               axes={buildQualityTrendAxes}
               ariaLabel="Quality score 6-month trend"
             >
-              {() => (
+              {(Viz) => (
                 <>
-                  <ColumnChart
+                  <Viz.ColumnChart
                     series="volume"
                     axis="volume_y"
                     color={QUALITY_COLUMN_COLOR}
                   />
-                  <AreaChart
+                  <Viz.AreaChart
                     series="quality"
                     axis="quality_y"
                     color={QUALITY_LINE_COLOR}
                     centered
                   />
-                  <DataLabels
+                  <Viz.DataLabels
                     series="quality"
                     axis="quality_y"
                     format={(v) => v.toFixed(1)}
                     centered
                   />
-                  <SeriesTooltip
+                  <Viz.SeriesTooltip
                     matchKey="label"
                     series={[
                       {

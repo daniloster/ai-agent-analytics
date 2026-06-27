@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { signal } from '@preact/signals-react'
 import * as VxGrid from '@visx/grid'
 import { Visualization } from './Visualization'
+import type { VisMark } from './Visualization'
 import { useVisualizationContext } from './VisualizationContext'
 import type { AxisConfig } from '../../types/charts'
 
@@ -122,6 +123,30 @@ describe('GridColumns not rendered', () => {
       </Visualization>
     )
     expect(vi.mocked(VxGrid.GridColumns)).not.toHaveBeenCalled()
+  })
+})
+
+describe('Viz render-prop argument', () => {
+  it('exposes all expected chart marks via the Viz argument', () => {
+    const data = signal({ y: [{ v: 50 }] })
+    let capturedViz: VisMark<typeof data.value> | null = null
+    render(
+      <Visualization data={data} axes={linearAxes}>
+        {(Viz) => {
+          capturedViz = Viz
+          return null
+        }}
+      </Visualization>
+    )
+    expect(capturedViz).not.toBeNull()
+    const expectedMarks = [
+      'Line', 'Area', 'Bar', 'Gauge', 'HeatmapMark', 'Annotation',
+      'AreaChart', 'ColumnChart', 'ColumnTrendLine', 'SparklineChart',
+      'SeriesTooltip', 'DataLabels',
+    ]
+    for (const mark of expectedMarks) {
+      expect(typeof (capturedViz as unknown as Record<string, unknown>)[mark], mark).toBe('function')
+    }
   })
 })
 

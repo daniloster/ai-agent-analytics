@@ -9,12 +9,7 @@ import {
 } from "../../lib/kpi/formatters";
 import { teamColor } from "../../lib/team/teamColors";
 import type { TeamsResponse } from "../../types/api";
-import { AreaChart } from "../charts/AreaChart";
 import { BarChart } from "../charts/BarChart";
-import { ColumnChart } from "../charts/ColumnChart";
-import { DataLabels } from "../charts/overlays/DataLabels";
-import { SeriesTooltip } from "../charts/overlays/SeriesTooltip";
-import { SparklineChart } from "../charts/SparklineChart";
 import { Visualization, defineAxes } from "../charts/Visualization";
 import { KpiCard } from "../kpis/KpiCard";
 import { TeamTable } from "../kpis/TeamTable";
@@ -240,8 +235,8 @@ export function TeamBreakdown(): JSX.Element {
                   axes={SPARKLINE_AXES}
                   height={80}
                 >
-                  {() => (
-                    <SparklineChart
+                  {(Viz) => (
+                    <Viz.SparklineChart
                       series="trend"
                       axis="y"
                       color={teamColor(team.team_id)}
@@ -346,26 +341,26 @@ export function TeamBreakdown(): JSX.Element {
                 axes={buildTeamQualityAxes}
                 ariaLabel="Quality score per team"
               >
-                {() => (
+                {(Viz) => (
                   <>
-                    <ColumnChart
+                    <Viz.ColumnChart
                       series="volume"
                       axis="volume_y"
                       color={QUALITY_COLUMN_COLOR}
                     />
-                    <AreaChart
+                    <Viz.AreaChart
                       series="quality"
                       axis="quality_y"
                       color={QUALITY_LINE_COLOR}
                       centered
                     />
-                    <DataLabels
+                    <Viz.DataLabels
                       series="quality"
                       axis="quality_y"
                       format={(v) => v.toFixed(1)}
                       centered
                     />
-                    <SeriesTooltip
+                    <Viz.SeriesTooltip
                       matchKey="label"
                       series={[
                         {
