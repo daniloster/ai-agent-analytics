@@ -121,6 +121,21 @@ it('org-wide view renders TeamTable and three figcaptions when teamId is undefin
   })
 })
 
+it('"Runs per team" and "Cost per team" figures share a grid-cols-2 wrapper', async () => {
+  mockFetch(TEAMS_RESPONSE)
+  const { TeamBreakdown } = await import('./TeamBreakdown')
+  const { container } = render(<TeamBreakdown />, { wrapper: makeWrapper() })
+  await waitFor(() => {
+    const runsEl = container.querySelector('[aria-label="Runs per team"]')
+    const costEl = container.querySelector('[aria-label="Cost per team"]')
+    expect(runsEl).not.toBeNull()
+    expect(costEl).not.toBeNull()
+    // Both figures must share the same parent grid wrapper
+    expect(runsEl?.parentElement).toBe(costEl?.parentElement)
+    expect(runsEl?.parentElement?.className).toContain('grid-cols-2')
+  })
+})
+
 it('"Use cases by team" and "Cost per quality point" are not rendered', async () => {
   mockFetch(TEAMS_RESPONSE)
   const { TeamBreakdown } = await import('./TeamBreakdown')

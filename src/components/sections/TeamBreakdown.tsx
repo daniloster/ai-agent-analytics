@@ -296,67 +296,69 @@ export function TeamBreakdown(): JSX.Element {
               </div>
             </div>
 
-            <figure
-              className="rounded-lg border bg-card shadow-sm p-6"
-              aria-label="Runs per team"
-            >
-              <figcaption className="mb-4">
-                <p className="text-[14px] font-semibold text-foreground">
-                  Runs per team
+            <div className="grid grid-cols-2 gap-4">
+              <figure
+                className="rounded-lg border bg-card shadow-sm p-6"
+                aria-label="Runs per team"
+              >
+                <figcaption className="mb-4">
+                  <p className="text-[14px] font-semibold text-foreground">
+                    Runs per team
+                  </p>
+                  <p className="text-[12px] text-muted-foreground mt-0.5">
+                    Total agent runs this period
+                  </p>
+                </figcaption>
+                <BarChart
+                  bars={[...data.teams]
+                    .sort((a, b) => b.runs - a.runs)
+                    .map((t) => ({
+                      label: t.team_name,
+                      value: t.runs,
+                      color: teamColor(t.team_id),
+                    }))}
+                  formatValue={formatNumber}
+                  barHeight={28}
+                />
+                <p className="text-[12px] text-muted-foreground mt-3 text-right">
+                  Total&nbsp;&nbsp;
+                  <span className="font-medium text-foreground">
+                    {formatNumber(data.teams.reduce((s, t) => s + t.runs, 0))} runs
+                  </span>
                 </p>
-                <p className="text-[12px] text-muted-foreground mt-0.5">
-                  Total agent runs this period
-                </p>
-              </figcaption>
-              <BarChart
-                bars={[...data.teams]
-                  .sort((a, b) => b.runs - a.runs)
-                  .map((t) => ({
-                    label: t.team_name,
-                    value: t.runs,
-                    color: teamColor(t.team_id),
-                  }))}
-                formatValue={formatNumber}
-                barHeight={28}
-              />
-              <p className="text-[12px] text-muted-foreground mt-3 text-right">
-                Total&nbsp;&nbsp;
-                <span className="font-medium text-foreground">
-                  {formatNumber(data.teams.reduce((s, t) => s + t.runs, 0))} runs
-                </span>
-              </p>
-            </figure>
+              </figure>
 
-            <figure
-              className="rounded-lg border bg-card shadow-sm p-6"
-              aria-label="Cost per team"
-            >
-              <figcaption className="mb-4">
-                <p className="text-[14px] font-semibold text-foreground">
-                  Cost per team
+              <figure
+                className="rounded-lg border bg-card shadow-sm p-6"
+                aria-label="Cost per team"
+              >
+                <figcaption className="mb-4">
+                  <p className="text-[14px] font-semibold text-foreground">
+                    Cost per team
+                  </p>
+                  <p className="text-[12px] text-muted-foreground mt-0.5">
+                    Total token + infrastructure costs
+                  </p>
+                </figcaption>
+                <BarChart
+                  bars={[...data.teams]
+                    .sort((a, b) => b.cost - a.cost)
+                    .map((t) => ({
+                      label: t.team_name,
+                      value: t.cost,
+                      color: teamColor(t.team_id),
+                    }))}
+                  formatValue={formatCurrency}
+                  barHeight={28}
+                />
+                <p className="text-[12px] text-muted-foreground mt-3 text-right">
+                  Total&nbsp;&nbsp;
+                  <span className="font-medium text-foreground">
+                    {formatCurrency(data.teams.reduce((s, t) => s + t.cost, 0))}
+                  </span>
                 </p>
-                <p className="text-[12px] text-muted-foreground mt-0.5">
-                  Total token + infrastructure costs
-                </p>
-              </figcaption>
-              <BarChart
-                bars={[...data.teams]
-                  .sort((a, b) => b.cost - a.cost)
-                  .map((t) => ({
-                    label: t.team_name,
-                    value: t.cost,
-                    color: teamColor(t.team_id),
-                  }))}
-                formatValue={formatCurrency}
-                barHeight={28}
-              />
-              <p className="text-[12px] text-muted-foreground mt-3 text-right">
-                Total&nbsp;&nbsp;
-                <span className="font-medium text-foreground">
-                  {formatCurrency(data.teams.reduce((s, t) => s + t.cost, 0))}
-                </span>
-              </p>
-            </figure>
+              </figure>
+            </div>
 
             <figure
               className="rounded-lg border bg-card shadow-sm p-6"
