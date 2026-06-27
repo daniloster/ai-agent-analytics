@@ -75,6 +75,21 @@ it('trigger shows "All teams" label when teamId is undefined', async () => {
   })
 })
 
+it('trigger aria-label is "Filter by team, currently All teams" when no team selected', async () => {
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(() =>
+      Promise.resolve(new Response(JSON.stringify(TEAMS), { status: 200 })),
+    ),
+  )
+  teamId.value = undefined
+  render(<TeamSelector />, { wrapper: makeWrapper() })
+  await waitFor(() => {
+    const trigger = screen.getByRole('combobox')
+    expect(trigger.getAttribute('aria-label')).toBe('Filter by team, currently All teams')
+  })
+})
+
 it('selecting all teams sets teamId.value to undefined', () => {
   teamId.value = 'team_001'
   // simulate onValueChange('__all__') which maps to undefined

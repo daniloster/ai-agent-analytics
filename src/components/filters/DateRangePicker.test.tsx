@@ -42,11 +42,20 @@ it('active preset button has active class when preset matches and no pending', (
   expect(screen.getByText('30 days').className).not.toContain('bg-primary')
 })
 
+it('trigger button aria-label includes the formatted range', () => {
+  render(<DateRangePicker />)
+  expect(
+    screen.getByRole('button', { name: /Select date range, currently Jun 1 - Jun 30/ }),
+  ).toBeTruthy()
+})
+
 it('trigger label shows applied range only (not pending) after first calendar click', () => {
   render(<DateRangePicker />)
-  fireEvent.click(screen.getByRole('button', { name: 'Jun 1 - Jun 30' }))
+  fireEvent.click(screen.getByRole('button', { name: /Select date range, currently Jun 1 - Jun 30/ }))
   // trigger label should still show the applied range, not change mid-selection
-  expect(screen.getByRole('button', { name: 'Jun 1 - Jun 30' })).toHaveTextContent('Jun 1 - Jun 30')
+  expect(
+    screen.getByRole('button', { name: /Select date range, currently Jun 1 - Jun 30/ }),
+  ).toHaveTextContent('Jun 1 - Jun 30')
 })
 
 it('Apply button is absent before a range is completed via calendar', () => {

@@ -25,6 +25,16 @@ it('container div has flex class', () => {
   expect(div?.className).toContain('flex')
 })
 
+it('wrapper has role="search"', () => {
+  const { container } = render(<FilterBar />, { wrapper })
+  expect(container.firstElementChild?.getAttribute('role')).toBe('search')
+})
+
+it('wrapper has aria-label "Filter dashboard data"', () => {
+  const { container } = render(<FilterBar />, { wrapper })
+  expect(container.firstElementChild?.getAttribute('aria-label')).toBe('Filter dashboard data')
+})
+
 it('DateRangePicker appears before TeamSelector in DOM', () => {
   const { container } = render(<FilterBar />, { wrapper })
   const children = Array.from(container.firstElementChild?.children ?? [])

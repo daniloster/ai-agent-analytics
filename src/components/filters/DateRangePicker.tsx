@@ -64,7 +64,7 @@ export function DateRangePicker(): JSX.Element {
   return (
     <Popover onOpenChange={(open) => { if (!open) pending.value = null }}>
       <PopoverTrigger asChild>
-        <Button variant="outline" className="h-9 px-3 text-sm">
+        <Button variant="outline" aria-label={"Select date range, currently " + triggerLabel} className="h-9 px-3 text-sm">
           {triggerLabel}
         </Button>
       </PopoverTrigger>

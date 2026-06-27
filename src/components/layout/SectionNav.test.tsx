@@ -120,6 +120,26 @@ it('clicking a link updates the section URL param', () => {
   document.body.removeChild(el)
 })
 
+it('nav has aria-label "Dashboard navigation"', () => {
+  const { container } = render(<SectionNav />)
+  const nav = container.querySelector('nav')
+  expect(nav?.getAttribute('aria-label')).toBe('Dashboard navigation')
+})
+
+it('ul has aria-label "Dashboard sections"', () => {
+  const { container } = render(<SectionNav />)
+  const ul = container.querySelector('ul')
+  expect(ul?.getAttribute('aria-label')).toBe('Dashboard sections')
+})
+
+it('each link is wrapped in a li element', () => {
+  const { getAllByRole } = render(<SectionNav />)
+  const links = getAllByRole('link')
+  for (const link of links) {
+    expect(link.parentElement?.tagName).toBe('LI')
+  }
+})
+
 it('reads initial active section from URL param', () => {
   window.history.replaceState({}, '', '?section=billing')
   const { getByText } = render(<SectionNav />)

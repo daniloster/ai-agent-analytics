@@ -14,12 +14,14 @@ export function TeamSelector(): JSX.Element {
     return <Skeleton className="h-9 w-36" />
   }
 
+  const currentLabel = data?.find((t) => t.id === teamId.value)?.name ?? 'All teams'
+
   return (
     <Select
       value={teamId.value ?? '__all__'}
       onValueChange={(v) => { teamId.value = v === '__all__' ? undefined : v }}
     >
-      <SelectTrigger className="h-9 w-36">
+      <SelectTrigger aria-label={"Filter by team, currently " + currentLabel} className="h-9 w-36">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

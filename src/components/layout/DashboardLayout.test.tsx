@@ -50,6 +50,30 @@ it('header contains FilterBar and SectionNav', () => {
   expect(screen.getByTestId('section-nav')).toBeTruthy()
 })
 
+it('SkipLink is rendered before sticky header div', () => {
+  const { container } = render(
+    <DashboardLayout>
+      <p>content</p>
+    </DashboardLayout>,
+  )
+  const skipLink = container.querySelector('a[href="#main-content"]')
+  const sticky = container.querySelector('div.sticky')
+  expect(skipLink).not.toBeNull()
+  const position = skipLink!.compareDocumentPosition(sticky!)
+  expect(position & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+})
+
+it('main element has id="main-content" and tabIndex -1', () => {
+  const { container } = render(
+    <DashboardLayout>
+      <p>content</p>
+    </DashboardLayout>,
+  )
+  const main = container.querySelector('main')
+  expect(main?.id).toBe('main-content')
+  expect(main?.tabIndex).toBe(-1)
+})
+
 it('two separate renders produce independent QueryClients', () => {
   const { unmount } = render(
     <DashboardLayout>
