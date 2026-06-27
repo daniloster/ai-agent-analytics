@@ -35,6 +35,17 @@ This builds the Docker image, starts the container, installs npm dependencies if
 
 Open `http://localhost:5173` in your host browser.
 
+### Explore the codebase with Claude
+
+Once the app is running, Claude Code is already active inside the container. You can talk to it to explore the project:
+
+- Ask about any implementation decision: "Why is Preact Signals used instead of Redux?"
+- Ask about architecture: "Walk me through how a KPI card gets its data."
+- Ask about the tech stack: "Why visx instead of Recharts or Victory?"
+- Ask about any file or component: "What does `DashboardLayout` do?"
+
+Claude has full context of the entire codebase and the docs in `docs/` - including the PRD, SPEC, architecture invariants, and task history. It can answer questions, explain tradeoffs, and trace data flows end to end.
+
 ### Stop
 
 ```bash
