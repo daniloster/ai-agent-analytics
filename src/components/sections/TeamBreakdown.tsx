@@ -255,10 +255,15 @@ export function TeamBreakdown(): JSX.Element {
       ) : (
         data && (
           <div className="space-y-4">
-            <TeamTable
-              teams={data.teams}
-              orgAvgFailedRunRate={orgAvgFailedRunRate}
-            />
+            <div className="rounded-lg border bg-card shadow-sm overflow-hidden">
+              <TeamTable
+                teams={data.teams}
+                orgAvgFailedRunRate={orgAvgFailedRunRate}
+              />
+              <div className="px-6 py-3 border-t text-[13px] text-muted-foreground">
+                Showing {data.teams.length} teams
+              </div>
+            </div>
 
             <div className="grid grid-cols-2 gap-4">
               <figure

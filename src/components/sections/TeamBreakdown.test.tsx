@@ -121,7 +121,7 @@ it('org-wide view renders TeamTable and three figcaptions when teamId is undefin
   })
 })
 
-it('table card header and footer chrome are not rendered', async () => {
+it('table card has no header chrome but shows "Showing N teams" footer', async () => {
   mockFetch(TEAMS_RESPONSE)
   const { TeamBreakdown } = await import('./TeamBreakdown')
   render(<TeamBreakdown />, { wrapper: makeWrapper() })
@@ -129,7 +129,7 @@ it('table card header and footer chrome are not rendered', async () => {
     expect(screen.queryByText('Team Performance')).toBeNull()
     expect(screen.queryByText('Filter')).toBeNull()
     expect(screen.queryByText('Export CSV')).toBeNull()
-    expect(screen.queryByText(/Showing/)).toBeNull()
+    expect(screen.getByText(/Showing 2 teams/)).toBeTruthy()
     // table column headers still present
     expect(screen.getByText('Team')).toBeTruthy()
   })
