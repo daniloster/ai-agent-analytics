@@ -4,15 +4,53 @@ import { Section } from '../layout/Section'
 import { KpiCard } from '../kpis/KpiCard'
 import { GaugeChart } from '../charts/GaugeChart'
 import { AreaChart } from '../charts/AreaChart'
-import { ColumnChart } from '../charts/ColumnChart'
+import { ColumnChart, ColumnTrendLine } from '../charts/ColumnChart'
 import { DonutChart } from '../charts/DonutChart'
 import { Heatmap } from '../charts/Heatmap'
+import { Annotation } from '../charts/overlays/Annotation'
+import { SeriesTooltip } from '../charts/overlays/SeriesTooltip'
+import { Visualization, defineAxes } from '../charts/Visualization'
 import { ChargebackTable } from '../kpis/ChargebackTable'
 import { Skeleton } from '../ui/skeleton'
 import { useChartTokens } from '../charts/primitives/useChartTokens'
+import { useDeepComputed } from '../../hooks/useDeepComputed'
 import { formatCurrency, formatPercent } from '../../lib/kpi/formatters'
 import { buildQueryParams } from '../../utils/buildQueryParams'
 import type { BillingResponse, OverviewResponse } from '../../types/api'
+
+const AREA_AXES = defineAxes([
+  {
+    id: 'x',
+    type: 'time' as const,
+    position: 'bottom' as const,
+    accessor: (d) => new Date((d as { date: string }).date),
+    numTicks: 5,
+  },
+  {
+    id: 'y',
+    type: 'linear' as const,
+    position: 'left' as const,
+    accessor: (d) => (d as { value: number }).value,
+    domain: 'auto' as const,
+    numTicks: 4,
+  },
+])
+
+const BAND_AXES = defineAxes([
+  {
+    id: 'x',
+    type: 'band' as const,
+    position: 'bottom' as const,
+    accessor: (d) => (d as { label: string }).label,
+  },
+  {
+    id: 'y',
+    type: 'linear' as const,
+    position: 'left' as const,
+    accessor: (d) => (d as { value: number }).value,
+    domain: 'auto' as const,
+  },
+])
 
 export function Billing(): JSX.Element {
   const params = filterQueryParams.value
@@ -37,6 +75,52 @@ export function Billing(): JSX.Element {
   const billing = billingQuery.data
   const overview = overviewQuery.data
   const isLoading = billingQuery.isLoading || overviewQuery.isLoading
+
+  // Build spend area series config from billing data
+  const spendSeries = (() => {
+    if (!billing) return []
+    const ih = billing.invoice_history
+    const last = ih[ih.length - 1]
+    const currentMonthStart = billing.period.to.slice(0, 7) + '-01'
+    const actualSeries = {
+      id: 'actual',
+      label: 'Actual',
+      color: undefined as string | undefined,
+      formatValue: formatCurrency,
+      dashed: undefined as boolean | undefined,
+      fillOpacity: undefined as number | undefined,
+      data: ih.map((h) => ({ date: h.month + '-01', value: h.total_billed })),
+    }
+    const projectedSeries = last
+      ? {
+          id: 'projected',
+          label: 'Projected',
+          color: undefined as string | undefined,
+          formatValue: formatCurrency,
+          dashed: true,
+          fillOpacity: undefined as number | undefined,
+          data: [
+            { date: last.month + '-01', value: last.total_billed },
+            { date: currentMonthStart, value: billing.projected_month_end },
+          ],
+        }
+      : null
+    return projectedSeries ? [actualSeries, projectedSeries] : [actualSeries]
+  })()
+
+  const spendDataSig = useDeepComputed(() => {
+    const result: Record<string, Array<{ date: string; value: number; [k: string]: unknown }>> = {}
+    for (const s of spendSeries) {
+      result[s.id] = s.data.map((d) => ({ ...d, [s.id]: d.value }))
+    }
+    return result
+  })
+
+  const invoiceDataSig = useDeepComputed(() => ({
+    bars: billing
+      ? billing.invoice_history.map((h) => ({ label: h.month, value: h.total_billed, bars: h.total_billed }))
+      : [] as Array<{ label: string; value: number; bars: number }>,
+  }))
 
   return (
     <Section id="billing" labelledBy="billing-heading">
@@ -92,52 +176,54 @@ export function Billing(): JSX.Element {
             />
           </div>
 
-          {/* Row 2: Cumulative Spend vs Budget AreaChart + Invoice History ColumnChart */}
+          {/* Row 2: Cumulative Spend vs Budget + Invoice History */}
           <div className="grid grid-cols-2 gap-4 mt-4">
             <figure className="rounded-lg border bg-card shadow-sm p-6" aria-label="Cumulative spend vs budget">
               <div className="mb-4">
                 <p className="text-[14px] font-semibold text-foreground">Cumulative spend vs budget</p>
                 <p className="text-[12px] text-muted-foreground mt-0.5">Monthly actual and projected spend</p>
               </div>
-              {billing && (() => {
-                const ih = billing.invoice_history
-                const last = ih[ih.length - 1]
-                const currentMonthStart = billing.period.to.slice(0, 7) + '-01'
-                const actualSeries = {
-                  id: 'actual',
-                  label: 'Actual',
-                  data: ih.map((h) => ({ date: h.month + '-01', value: h.total_billed })),
-                }
-                const projectedSeries = last
-                  ? {
-                      id: 'projected',
-                      label: 'Projected',
-                      dashed: true,
-                      data: [
-                        { date: last.month + '-01', value: last.total_billed },
-                        { date: currentMonthStart, value: billing.projected_month_end },
-                      ],
-                    }
-                  : null
-                return (
-                  <AreaChart
-                    series={projectedSeries ? [actualSeries, projectedSeries] : [actualSeries]}
-                    referenceLine={{ value: billing.monthly_budget, label: 'Budget' }}
-                    ariaLabel="Cumulative spend vs budget"
-                  />
-                )
-              })()}
+              <Visualization data={spendDataSig} axes={AREA_AXES} ariaLabel="Cumulative spend vs budget">
+                {() => (
+                  <>
+                    {spendSeries.map((s) => (
+                      <AreaChart
+                        key={s.id}
+                        series={s.id}
+                        axis="y"
+                        color={s.color}
+                        dashed={s.dashed}
+                        fillOpacity={s.fillOpacity}
+                      />
+                    ))}
+                    {billing && (
+                      <Annotation axis="y" value={billing.monthly_budget} label="Budget" />
+                    )}
+                    <SeriesTooltip
+                      series={spendSeries.map((s) => ({
+                        id: s.id,
+                        label: s.label,
+                        color: s.color,
+                        formatValue: s.formatValue,
+                      }))}
+                    />
+                  </>
+                )}
+              </Visualization>
             </figure>
             <figure className="rounded-lg border bg-card shadow-sm p-6" aria-label="Invoice history">
               <div className="mb-4">
                 <p className="text-[14px] font-semibold text-foreground">Invoice history</p>
                 <p className="text-[12px] text-muted-foreground mt-0.5">Monthly billed amounts</p>
               </div>
-              <ColumnChart
-                bars={billing ? billing.invoice_history.map((h) => ({ label: h.month, value: h.total_billed })) : []}
-                trendLine={true}
-                ariaLabel="Invoice history"
-              />
+              <Visualization data={invoiceDataSig} axes={BAND_AXES} ariaLabel="Invoice history">
+                {() => (
+                  <>
+                    <ColumnChart series="bars" axis="y" />
+                    <ColumnTrendLine series="bars" axis="y" />
+                  </>
+                )}
+              </Visualization>
             </figure>
           </div>
 
@@ -219,7 +305,7 @@ export function Billing(): JSX.Element {
             />
           </div>
 
-          {/* Row 6: Quality-Cost Efficiency, User Churn Risk, New User Activation Cost (from overview) */}
+          {/* Row 6: Quality-Cost Efficiency, User Churn Risk, New User Activation Cost */}
           <div className="grid grid-cols-3 gap-4 mt-4">
             <KpiCard
               label="Quality-Cost Efficiency"

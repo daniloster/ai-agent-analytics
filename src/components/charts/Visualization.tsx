@@ -19,8 +19,6 @@ import type { LineProps } from "./marks/Line";
 import { Line } from "./marks/Line";
 import type { AnnotationProps } from "./overlays/Annotation";
 import { Annotation } from "./overlays/Annotation";
-import type { SeriesTooltipProps } from "./overlays/SeriesTooltip";
-import { SeriesTooltip } from "./overlays/SeriesTooltip";
 import { AxisBottom, AxisLeft, AxisRight } from "./primitives/Axis";
 import { ChartSVG } from "./primitives/ChartSVG";
 import { GridRows } from "./primitives/Grid";
@@ -40,9 +38,6 @@ export type VisMark<
     props: HeatmapMarkProps<keyof TData & string>,
   ) => JSX.Element | null;
   Annotation: (props: AnnotationProps<TAxisId>) => JSX.Element | null;
-  SeriesTooltip: <TSeries extends keyof TData & string>(
-    props: SeriesTooltipProps<Record<string, unknown>, TSeries>,
-  ) => JSX.Element | null;
 };
 
 // Module-level singleton - all chart mark components collected for render-prop dispatch.
@@ -53,7 +48,6 @@ const VIS_MARKS = {
   Gauge,
   HeatmapMark,
   Annotation,
-  SeriesTooltip,
 };
 
 export interface VisualizationProps<

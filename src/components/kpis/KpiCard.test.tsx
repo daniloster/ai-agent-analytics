@@ -95,7 +95,7 @@ it('clicking info button renders formulaTooltip text in the DOM', () => {
   expect(screen.getByText('Total runs formula')).toBeTruthy()
 })
 
-it('trend array renders a Sparkline SVG element', () => {
+it('trend array renders a SparklineChart SVG element', () => {
   const trend = [{ date: '2026-06-01', value: 10 }, { date: '2026-06-02', value: 20 }]
   const { container } = render(<KpiCard {...BASE_PROPS} trend={trend} />)
   expect(container.querySelector('svg')).not.toBeNull()

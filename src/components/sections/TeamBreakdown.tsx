@@ -6,12 +6,47 @@ import { TeamTable } from '../kpis/TeamTable'
 import { KpiCard } from '../kpis/KpiCard'
 import { BarChart } from '../charts/BarChart'
 import { ColumnChart } from '../charts/ColumnChart'
-import { Sparkline } from '../charts/Sparkline'
+import { SparklineChart } from '../charts/SparklineChart'
+import { Annotation } from '../charts/overlays/Annotation'
+import { Visualization, defineAxes } from '../charts/Visualization'
 import { Skeleton } from '../ui/skeleton'
 import { formatCurrency, formatPercent, formatNumber, formatQuality } from '../../lib/kpi/formatters'
 import type { TeamsResponse } from '../../types/api'
 
 const COLORS = ['#6366f1', '#f59e0b', '#10b981', '#ef4444', '#3b82f6', '#8b5cf6']
+
+const SPARKLINE_AXES = defineAxes([
+  {
+    id: 'x',
+    type: 'time' as const,
+    position: 'bottom' as const,
+    accessor: (d) => new Date((d as { date: string }).date),
+    hidden: true,
+  },
+  {
+    id: 'y',
+    type: 'linear' as const,
+    position: 'left' as const,
+    accessor: (d) => (d as { value: number }).value,
+    hidden: true,
+  },
+])
+
+const BAND_AXES = defineAxes([
+  {
+    id: 'x',
+    type: 'band' as const,
+    position: 'bottom' as const,
+    accessor: (d) => (d as { label: string }).label,
+  },
+  {
+    id: 'y',
+    type: 'linear' as const,
+    position: 'left' as const,
+    accessor: (d) => (d as { value: number }).value,
+    domain: 'auto' as const,
+  },
+])
 
 export function TeamBreakdown(): JSX.Element {
   const params = filterQueryParams.value
@@ -41,6 +76,43 @@ export function TeamBreakdown(): JSX.Element {
             nonNullQuality.length,
         )
       : null
+
+  // Data signals for chart consumers
+  const sparklineDataSig = useDeepComputed(() => {
+    const team = data?.teams[0]
+    if (!team || currentTeamId.value === undefined) {
+      return { trend: [] as Array<{ date: string; value: number; trend: number }> }
+    }
+    return { trend: team.cost_trend.map((p) => ({ date: p.date, value: p.cost, trend: p.cost })) }
+  })
+
+  const qualityScoreDataSig = useDeepComputed(() => {
+    const teams = data?.teams ?? []
+    const qualified = [...teams]
+      .filter((t) => t.avg_quality_score !== null)
+      .sort((a, b) => (b.avg_quality_score ?? 0) - (a.avg_quality_score ?? 0))
+    return {
+      scores: qualified.map((t) => ({
+        label: t.team_name,
+        value: t.avg_quality_score as number,
+        scores: t.avg_quality_score as number,
+      })),
+    }
+  })
+
+  const cpqDataSig = useDeepComputed(() => {
+    const teams = data?.teams ?? []
+    const qualified = [...teams]
+      .filter((t) => t.cost_per_quality_point !== null)
+      .sort((a, b) => (a.cost_per_quality_point ?? Infinity) - (b.cost_per_quality_point ?? Infinity))
+    return {
+      cpq: qualified.map((t) => ({
+        label: t.team_name,
+        value: t.cost_per_quality_point as number,
+        cpq: t.cost_per_quality_point as number,
+      })),
+    }
+  })
 
   return (
     <Section id="teams" labelledBy="teams-heading">
@@ -119,10 +191,9 @@ export function TeamBreakdown(): JSX.Element {
 
               <figure>
                 <figcaption className="text-sm font-medium mb-2">Cost trend</figcaption>
-                <Sparkline
-                  data={team.cost_trend.map((p) => ({ date: p.date, value: p.cost }))}
-                  height={80}
-                />
+                <Visualization data={sparklineDataSig} axes={SPARKLINE_AXES} height={80}>
+                  {() => <SparklineChart series="trend" axis="y" />}
+                </Visualization>
               </figure>
             </div>
           )
@@ -162,12 +233,9 @@ export function TeamBreakdown(): JSX.Element {
                 <p className="text-[14px] font-semibold text-foreground">Quality score per team</p>
                 <p className="text-[12px] text-muted-foreground mt-0.5">Average rated quality scores</p>
               </figcaption>
-              <ColumnChart
-                bars={[...data.teams]
-                  .filter((t) => t.avg_quality_score !== null)
-                  .sort((a, b) => (b.avg_quality_score ?? 0) - (a.avg_quality_score ?? 0))
-                  .map((t) => ({ label: t.team_name, value: t.avg_quality_score as number }))}
-              />
+              <Visualization data={qualityScoreDataSig} axes={BAND_AXES} ariaLabel="Quality score per team">
+                {() => <ColumnChart series="scores" axis="y" />}
+              </Visualization>
             </figure>
 
             <figure className="rounded-lg border bg-card shadow-sm p-6" aria-label="Use cases by team">
@@ -201,17 +269,16 @@ export function TeamBreakdown(): JSX.Element {
                 <p className="text-[14px] font-semibold text-foreground">Cost per quality point</p>
                 <p className="text-[12px] text-muted-foreground mt-0.5">Lower is better</p>
               </figcaption>
-              <ColumnChart
-                bars={[...data.teams]
-                  .filter((t) => t.cost_per_quality_point !== null)
-                  .sort((a, b) => (a.cost_per_quality_point ?? Infinity) - (b.cost_per_quality_point ?? Infinity))
-                  .map((t) => ({ label: t.team_name, value: t.cost_per_quality_point as number }))}
-                annotation={
-                  avgCostPerQualityPoint !== null
-                    ? { value: avgCostPerQualityPoint, label: 'lower is better' }
-                    : undefined
-                }
-              />
+              <Visualization data={cpqDataSig} axes={BAND_AXES} ariaLabel="Cost per quality point">
+                {() => (
+                  <>
+                    <ColumnChart series="cpq" axis="y" />
+                    {avgCostPerQualityPoint !== null && (
+                      <Annotation axis="y" value={avgCostPerQualityPoint} label="lower is better" variant="warning" />
+                    )}
+                  </>
+                )}
+              </Visualization>
             </figure>
           </div>
         )

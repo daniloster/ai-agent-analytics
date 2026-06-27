@@ -1,88 +1,85 @@
-import { it, expect, vi } from 'vitest'
-import { render } from '@testing-library/react'
-import { ColumnChart } from './ColumnChart'
+import { it, expect } from 'vitest'
+import { signal } from '@preact/signals-react'
+import { scaleBand, scaleLinear } from '@visx/scale'
+import { ColumnChart, ColumnTrendLine } from './ColumnChart'
+import { buildMockContext, renderWithVisualizationContext } from './test-utils'
+import type { AnyD3Scale } from '../../types/charts'
 
-vi.mock('@visx/responsive/lib/components/ParentSize', () => ({
-  default: ({ children, className, style }: {
-    children: (args: { width: number; height: number }) => React.ReactNode
-    className?: string
-    style?: React.CSSProperties
-  }) => (
-    <div className={className} style={style}>
-      {children({ width: 400, height: 300 })}
-    </div>
-  ),
-}))
-
-vi.mock('@visx/axis', () => ({
-  AxisBottom: vi.fn(() => null),
-  AxisLeft: vi.fn(() => null),
-  AxisRight: vi.fn(() => null),
-}))
-
-vi.mock('@visx/grid', () => ({
-  GridRows: vi.fn(() => null),
-  GridColumns: vi.fn(() => null),
-}))
-
-const BARS = [
-  { label: 'A', value: 10 },
-  { label: 'B', value: 20 },
+const DATA = [
+  { label: 'A', value: 10, bars: 10 },
+  { label: 'B', value: 20, bars: 20 },
 ]
 
-it('renders an SVG with rect elements when given non-empty bars', () => {
-  const { container } = render(<ColumnChart bars={BARS} />)
-  expect(container.querySelector('svg')).not.toBeNull()
-  const rects = container.querySelectorAll('rect')
-  expect(rects.length).toBeGreaterThanOrEqual(2)
+const BASE_CTX = buildMockContext({
+  dataSignal: signal<Record<string, unknown[]>>({ bars: DATA }),
+  innerWidth: signal(400),
+  innerHeight: signal(200),
+  scales: signal<Record<string, AnyD3Scale>>({
+    x: scaleBand({ domain: ['A', 'B'], range: [0, 400], padding: 0.1 }) as unknown as AnyD3Scale,
+    y: scaleLinear({ domain: [0, 30], range: [200, 0] }) as unknown as AnyD3Scale,
+  }),
+  baseAxisAccessor: signal((d: Record<string, unknown>) => d['label'] as string),
+  baseScale: signal(null),
 })
 
-it('annotation prop renders a line element', () => {
-  const { container } = render(
-    <ColumnChart bars={BARS} annotation={{ value: 15, label: 'lower is better' }} />,
+it('renders rect elements for each data point', () => {
+  const { container } = renderWithVisualizationContext(
+    <ColumnChart series="bars" axis="y" />,
+    BASE_CTX,
   )
-  expect(container.querySelector('line')).not.toBeNull()
-})
-
-it('no annotation prop renders no line element', () => {
-  const { container } = render(<ColumnChart bars={BARS} />)
-  expect(container.querySelector('line')).toBeNull()
-})
-
-it('empty bars array does not throw', () => {
-  expect(() => render(<ColumnChart bars={[]} />)).not.toThrow()
-})
-
-it('ariaLabel appears on the figure element', () => {
-  const { container } = render(<ColumnChart bars={BARS} ariaLabel="Cost per team" />)
-  const figure = container.querySelector('figure')
-  expect(figure?.getAttribute('aria-label')).toBe('Cost per team')
-})
-
-it('trendLine={true} renders a LinePath <path> element', () => {
-  const { container } = render(<ColumnChart bars={BARS} trendLine={true} />)
-  expect(container.querySelector('path')).not.toBeNull()
-})
-
-it('no trendLine prop renders no <path> element', () => {
-  const { container } = render(<ColumnChart bars={BARS} />)
-  expect(container.querySelector('path')).toBeNull()
-})
-
-it('trend line x positions span the bars (centered on bands)', () => {
-  const { container } = render(<ColumnChart bars={BARS} trendLine={true} />)
-  const path = container.querySelector('path')
-  // LinePath produces a path element with a "d" attribute; just verify it exists
-  expect(path?.getAttribute('d')).toBeTruthy()
-})
-
-it('bar rects have finite, positive height values', () => {
-  const { container } = render(<ColumnChart bars={BARS} />)
   const rects = container.querySelectorAll('rect')
-  expect(rects.length).toBeGreaterThanOrEqual(2)
-  rects.forEach((rect) => {
+  expect(rects.length).toBeGreaterThanOrEqual(DATA.length)
+})
+
+it('bar rects have finite non-negative heights', () => {
+  const { container } = renderWithVisualizationContext(
+    <ColumnChart series="bars" axis="y" />,
+    BASE_CTX,
+  )
+  container.querySelectorAll('rect').forEach((rect) => {
     const h = parseFloat(rect.getAttribute('height') ?? 'NaN')
     expect(isFinite(h)).toBe(true)
     expect(h).toBeGreaterThanOrEqual(0)
   })
+})
+
+it('returns null when innerWidth is 0', () => {
+  const { container } = renderWithVisualizationContext(
+    <ColumnChart series="bars" axis="y" />,
+    { ...BASE_CTX, innerWidth: signal(0) },
+  )
+  expect(container.querySelectorAll('rect').length).toBe(0)
+})
+
+it('empty series data does not throw', () => {
+  const ctx = { ...BASE_CTX, dataSignal: signal<Record<string, unknown[]>>({ bars: [] }) }
+  expect(() =>
+    renderWithVisualizationContext(<ColumnChart series="bars" axis="y" />, ctx),
+  ).not.toThrow()
+})
+
+it('ColumnTrendLine renders a path element', () => {
+  const { container } = renderWithVisualizationContext(
+    <ColumnTrendLine series="bars" axis="y" />,
+    BASE_CTX,
+  )
+  expect(container.querySelector('path')).not.toBeNull()
+})
+
+it('ColumnTrendLine path has a non-empty d attribute', () => {
+  const { container } = renderWithVisualizationContext(
+    <ColumnTrendLine series="bars" axis="y" />,
+    BASE_CTX,
+  )
+  const path = container.querySelector('path')
+  expect(path?.getAttribute('d')).toBeTruthy()
+})
+
+it('ColumnTrendLine returns null for empty data', () => {
+  const ctx = { ...BASE_CTX, dataSignal: signal<Record<string, unknown[]>>({ bars: [] }) }
+  const { container } = renderWithVisualizationContext(
+    <ColumnTrendLine series="bars" axis="y" />,
+    ctx,
+  )
+  expect(container.querySelector('path')).toBeNull()
 })

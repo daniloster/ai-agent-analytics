@@ -1,15 +1,34 @@
 import { useSignal } from '@preact/signals-react'
+import { useDeepComputed } from '../../hooks/useDeepComputed'
+import { Card, CardHeader, CardContent } from '../ui/card'
+import { Skeleton } from '../ui/skeleton'
+import { Popover, PopoverTrigger, PopoverContent } from '../ui/popover'
+import { SparklineChart } from '../charts/SparklineChart'
+import { Visualization, defineAxes } from '../charts/Visualization'
+import { formatPercent } from '../../lib/kpi/formatters'
 
 const STATUS_DOT_COLORS: Record<'good' | 'warning' | 'critical', string> = {
   good: 'bg-emerald-500',
   warning: 'bg-amber-500',
   critical: 'bg-red-500',
 }
-import { Card, CardHeader, CardContent } from '../ui/card'
-import { Skeleton } from '../ui/skeleton'
-import { Popover, PopoverTrigger, PopoverContent } from '../ui/popover'
-import { Sparkline } from '../charts/Sparkline'
-import { formatPercent } from '../../lib/kpi/formatters'
+
+const SPARKLINE_AXES = defineAxes([
+  {
+    id: 'x',
+    type: 'time' as const,
+    position: 'bottom' as const,
+    accessor: (d) => new Date((d as { date: string }).date),
+    hidden: true,
+  },
+  {
+    id: 'y',
+    type: 'linear' as const,
+    position: 'left' as const,
+    accessor: (d) => (d as { value: number }).value,
+    hidden: true,
+  },
+])
 
 export interface KpiCardProps {
   label: string
@@ -50,6 +69,9 @@ function DeltaBadge({ delta, deltaLabel }: { delta: number; deltaLabel?: string 
 
 export function KpiCard(props: KpiCardProps): JSX.Element {
   const open = useSignal(false)
+  const trendDataSig = useDeepComputed(() => ({
+    trend: (props.trend ?? []).map((d) => ({ ...d, trend: d.value })),
+  }))
 
   return (
     <Card>
@@ -103,7 +125,9 @@ export function KpiCard(props: KpiCardProps): JSX.Element {
         </div>
         {props.trend && (
           <div className="mt-3">
-            <Sparkline data={props.trend} color={props.trendColor} />
+            <Visualization data={trendDataSig} axes={SPARKLINE_AXES} height={40}>
+              {() => <SparklineChart series="trend" axis="y" color={props.trendColor} />}
+            </Visualization>
           </div>
         )}
       </CardContent>

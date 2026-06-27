@@ -4,7 +4,8 @@ import type { TeamMetrics } from '../../types/api'
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../ui/table'
 import { Badge } from '../ui/badge'
 import { Progress } from '../ui/progress'
-import { Sparkline } from '../charts/Sparkline'
+import { SparklineChart } from '../charts/SparklineChart'
+import { Visualization, defineAxes } from '../charts/Visualization'
 import { formatCurrency, formatPercent, formatNumber, formatQuality } from '../../lib/kpi/formatters'
 
 type SortKey =
@@ -24,6 +25,23 @@ export interface TeamTableProps {
   orgAvgFailedRunRate: number
 }
 
+const SPARKLINE_AXES = defineAxes([
+  {
+    id: 'x',
+    type: 'time' as const,
+    position: 'bottom' as const,
+    accessor: (d) => new Date((d as { date: string }).date),
+    hidden: true,
+  },
+  {
+    id: 'y',
+    type: 'linear' as const,
+    position: 'left' as const,
+    accessor: (d) => (d as { value: number }).value,
+    hidden: true,
+  },
+])
+
 function compareFn(key: SortKey, dir: SortDirection): (a: TeamMetrics, b: TeamMetrics) => number {
   return (a, b) => {
     const av = a[key]
@@ -34,6 +52,44 @@ function compareFn(key: SortKey, dir: SortDirection): (a: TeamMetrics, b: TeamMe
     const diff = (av as number) - (bv as number)
     return dir === 'asc' ? diff : -diff
   }
+}
+
+function TeamRow({ team, failedRateClass }: { team: TeamMetrics; failedRateClass: string }): JSX.Element {
+  const trendDataSig = useDeepComputed(() => ({
+    trend: team.cost_trend.map((p) => ({ date: p.date, value: p.cost, trend: p.cost })),
+  }))
+
+  return (
+    <TableRow>
+      <TableCell>{team.team_name}</TableCell>
+      <TableCell>{formatNumber(team.runs)}</TableCell>
+      <TableCell>{formatCurrency(team.cost)}</TableCell>
+      <TableCell>{formatNumber(team.mau) + ' / ' + formatNumber(team.seat_count)}</TableCell>
+      <TableCell>
+        <Progress value={team.adoption_rate * 100} />
+      </TableCell>
+      <TableCell>
+        {team.avg_quality_score !== null ? formatQuality(team.avg_quality_score) : '-'}
+      </TableCell>
+      <TableCell className={failedRateClass}>
+        {formatPercent(team.failed_run_rate * 100)}
+      </TableCell>
+      <TableCell>
+        <Visualization data={trendDataSig} axes={SPARKLINE_AXES} height={40}>
+          {() => <SparklineChart series="trend" axis="y" />}
+        </Visualization>
+      </TableCell>
+      <TableCell>
+        {team.churn_signal_count > 0 && (
+          <Badge variant="destructive">
+            {team.churn_signal_count === 1
+              ? '1 churn signal'
+              : `${team.churn_signal_count} churn signals`}
+          </Badge>
+        )}
+      </TableCell>
+    </TableRow>
+  )
 }
 
 export function TeamTable({ teams, orgAvgFailedRunRate }: TeamTableProps): JSX.Element {
@@ -95,36 +151,7 @@ export function TeamTable({ teams, orgAvgFailedRunRate }: TeamTableProps): JSX.E
       </TableHeader>
       <TableBody>
         {rows.map((team) => (
-          <TableRow key={team.team_id}>
-            <TableCell>{team.team_name}</TableCell>
-            <TableCell>{formatNumber(team.runs)}</TableCell>
-            <TableCell>{formatCurrency(team.cost)}</TableCell>
-            <TableCell>{formatNumber(team.mau) + ' / ' + formatNumber(team.seat_count)}</TableCell>
-            <TableCell>
-              <Progress value={team.adoption_rate * 100} />
-            </TableCell>
-            <TableCell>
-              {team.avg_quality_score !== null ? formatQuality(team.avg_quality_score) : '-'}
-            </TableCell>
-            <TableCell className={failedRateClass(team)}>
-              {formatPercent(team.failed_run_rate * 100)}
-            </TableCell>
-            <TableCell>
-              <Sparkline
-                data={team.cost_trend.map((p) => ({ date: p.date, value: p.cost }))}
-                height={40}
-              />
-            </TableCell>
-            <TableCell>
-              {team.churn_signal_count > 0 && (
-                <Badge variant="destructive">
-                  {team.churn_signal_count === 1
-                    ? '1 churn signal'
-                    : `${team.churn_signal_count} churn signals`}
-                </Badge>
-              )}
-            </TableCell>
-          </TableRow>
+          <TeamRow key={team.team_id} team={team} failedRateClass={failedRateClass(team)} />
         ))}
       </TableBody>
     </Table>

@@ -3,14 +3,36 @@ import { filterQueryParams } from '../../lib/filters/filterSignals'
 import { Section } from '../layout/Section'
 import { KpiCard } from '../kpis/KpiCard'
 import { AreaChart } from '../charts/AreaChart'
+import { Annotation } from '../charts/overlays/Annotation'
+import { SeriesTooltip } from '../charts/overlays/SeriesTooltip'
+import { Visualization, defineAxes } from '../charts/Visualization'
 import { DonutChart } from '../charts/DonutChart'
 import { Heatmap } from '../charts/Heatmap'
 import { IncidentTable } from '../kpis/IncidentTable'
 import { Skeleton } from '../ui/skeleton'
+import { useDeepComputed } from '../../hooks/useDeepComputed'
 import { computeErrorRateSeverity, computeDeltaPercent } from '../../lib/kpi/formulas'
 import { formatCurrency, formatPercent, formatDuration } from '../../lib/kpi/formatters'
 import type { ReliabilityResponse } from '../../types/api'
 import { buildQueryParams } from '../../utils/buildQueryParams'
+
+const AREA_AXES = defineAxes([
+  {
+    id: 'x',
+    type: 'time' as const,
+    position: 'bottom' as const,
+    accessor: (d) => new Date((d as { date: string }).date),
+    numTicks: 5,
+  },
+  {
+    id: 'y',
+    type: 'linear' as const,
+    position: 'left' as const,
+    accessor: (d) => (d as { value: number }).value,
+    domain: 'auto' as const,
+    numTicks: 4,
+  },
+])
 
 export function Reliability(): JSX.Element {
   const params = filterQueryParams.value
@@ -25,6 +47,12 @@ export function Reliability(): JSX.Element {
   })
 
   const d = query.data
+
+  const errorDataSig = useDeepComputed(() => ({
+    error_rate: d
+      ? d.error_trend_7d.map((p) => ({ date: p.date, value: p.error_rate, error_rate: p.error_rate }))
+      : [] as Array<{ date: string; value: number; error_rate: number }>,
+  }))
 
   return (
     <Section id="reliability" labelledBy="reliability-heading">
@@ -120,21 +148,17 @@ export function Reliability(): JSX.Element {
                 <p className="text-[14px] font-semibold text-foreground">Error rate trend</p>
                 <p className="text-[12px] text-muted-foreground mt-0.5">7-day rolling average</p>
               </div>
-              <AreaChart
-                series={
-                  d
-                    ? [
-                        {
-                          id: 'error_rate',
-                          label: 'Error Rate (7d avg)',
-                          data: d.error_trend_7d.map((p) => ({ date: p.date, value: p.error_rate })),
-                        },
-                      ]
-                    : []
-                }
-                referenceLine={{ value: 0.05, label: '5% threshold' }}
-                ariaLabel="Error rate trend"
-              />
+              <Visualization data={errorDataSig} axes={AREA_AXES} ariaLabel="Error rate trend">
+                {() => (
+                  <>
+                    <AreaChart series="error_rate" axis="y" />
+                    <Annotation axis="y" value={0.05} label="5% threshold" />
+                    <SeriesTooltip
+                      series={[{ id: 'error_rate', label: 'Error Rate (7d avg)' }]}
+                    />
+                  </>
+                )}
+              </Visualization>
             </figure>
             <figure className="rounded-lg border bg-card shadow-sm p-6" aria-label="Error type breakdown">
               <div className="mb-4">

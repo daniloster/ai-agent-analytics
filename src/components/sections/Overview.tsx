@@ -20,12 +20,34 @@ import type {
   TimeseriesResponse,
 } from "../../types/api";
 import { buildQueryParams } from "../../utils/buildQueryParams";
+import { useDeepComputed } from "../../hooks/useDeepComputed";
 import { AreaChart } from "../charts/AreaChart";
+import { SeriesTooltip } from '../charts/overlays/SeriesTooltip';
+import { Annotation } from "../charts/overlays/Annotation";
+import { Visualization, defineAxes } from "../charts/Visualization";
 import { BarChart } from "../charts/BarChart";
 import { DonutChart } from "../charts/DonutChart";
 import { KpiCard } from "../kpis/KpiCard";
 import { Section } from "../layout/Section";
 import { Skeleton } from "../ui/skeleton";
+
+const AREA_AXES = defineAxes([
+  {
+    id: 'x',
+    type: 'time' as const,
+    position: 'bottom' as const,
+    accessor: (d) => new Date((d as { date: string }).date),
+    numTicks: 5,
+  },
+  {
+    id: 'y',
+    type: 'linear' as const,
+    position: 'left' as const,
+    accessor: (d) => (d as { value: number }).value,
+    domain: 'auto' as const,
+    numTicks: 4,
+  },
+])
 
 export function Overview(): JSX.Element {
   const params = filterQueryParams.value;
@@ -155,6 +177,7 @@ export function Overview(): JSX.Element {
         {
           id: "quality",
           label: "Quality Score Trend",
+          formatValue: undefined as ((v: number) => string) | undefined,
           data: ts.points.map((p) => ({
             date: p.date,
             value: p.avg_quality_score ?? 0,
@@ -162,6 +185,31 @@ export function Overview(): JSX.Element {
         },
       ]
     : [];
+
+  // Data signals for Visualization consumers
+  const tokenDataSig = useDeepComputed(() => {
+    const result: Record<string, Array<{ date: string; value: number; [k: string]: unknown }>> = {}
+    for (const s of tokenSeries) {
+      result[s.id] = s.data.map((d) => ({ ...d, [s.id]: d.value }))
+    }
+    return result
+  })
+
+  const costDataSig = useDeepComputed(() => {
+    const result: Record<string, Array<{ date: string; value: number; [k: string]: unknown }>> = {}
+    for (const s of costSeries) {
+      result[s.id] = s.data.map((d) => ({ ...d, [s.id]: d.value }))
+    }
+    return result
+  })
+
+  const qualityDataSig = useDeepComputed(() => {
+    const result: Record<string, Array<{ date: string; value: number; [k: string]: unknown }>> = {}
+    for (const s of qualitySeries) {
+      result[s.id] = s.data.map((d) => ({ ...d, [s.id]: d.value }))
+    }
+    return result
+  })
 
   const activatedCount = d
     ? Math.round((d.seat_count * d.user_activation_rate) / 100)
@@ -315,7 +363,23 @@ export function Overview(): JSX.Element {
           {loading ? (
             <Skeleton className="h-48 w-full" />
           ) : (
-            <AreaChart series={tokenSeries} ariaLabel="Token usage over time" />
+            <Visualization data={tokenDataSig} axes={AREA_AXES} ariaLabel="Token usage over time">
+              {() => (
+                <>
+                  {tokenSeries.map((s) => (
+                    <AreaChart key={s.id} series={s.id} axis="y" color={s.color} />
+                  ))}
+                  <SeriesTooltip
+                    series={tokenSeries.map((s) => ({
+                      id: s.id,
+                      label: s.label,
+                      color: s.color,
+                      formatValue: s.formatValue,
+                    }))}
+                  />
+                </>
+              )}
+            </Visualization>
           )}
         </figure>
         <figure
@@ -361,19 +425,38 @@ export function Overview(): JSX.Element {
           {loading ? (
             <Skeleton className="h-48 w-full" />
           ) : (
-            <AreaChart
-              series={costSeries}
-              referenceLine={
-                orgConfig
-                  ? {
-                      value: orgConfig.monthly_budget,
-                      label: `$${(orgConfig.monthly_budget / 1000).toFixed(0)}k`,
-                      variant: "destructive",
-                    }
-                  : undefined
-              }
-              ariaLabel="Cost vs. budget"
-            />
+            <Visualization data={costDataSig} axes={AREA_AXES} ariaLabel="Cost vs. budget">
+              {() => (
+                <>
+                  {costSeries.map((s) => (
+                    <AreaChart
+                      key={s.id}
+                      series={s.id}
+                      axis="y"
+                      color={s.color}
+                      dashed={s.dashed}
+                      fillOpacity={s.fillOpacity}
+                    />
+                  ))}
+                  {orgConfig && (
+                    <Annotation
+                      axis="y"
+                      value={orgConfig.monthly_budget}
+                      label={`$${(orgConfig.monthly_budget / 1000).toFixed(0)}k`}
+                      variant="destructive"
+                    />
+                  )}
+                  <SeriesTooltip
+                    series={costSeries.map((s) => ({
+                      id: s.id,
+                      label: s.label,
+                      color: s.color,
+                      formatValue: s.formatValue,
+                    }))}
+                  />
+                </>
+              )}
+            </Visualization>
           )}
         </figure>
       </div>
@@ -502,10 +585,16 @@ export function Overview(): JSX.Element {
           {loading ? (
             <Skeleton className="h-48 w-full" />
           ) : (
-            <AreaChart
-              series={qualitySeries}
-              ariaLabel="Quality score 30-day trend"
-            />
+            <Visualization data={qualityDataSig} axes={AREA_AXES} ariaLabel="Quality score 30-day trend">
+              {() => (
+                <>
+                  <AreaChart series="quality" axis="y" />
+                  <SeriesTooltip
+                    series={[{ id: 'quality', label: 'Quality Score Trend' }]}
+                  />
+                </>
+              )}
+            </Visualization>
           )}
         </figure>
       </div>
