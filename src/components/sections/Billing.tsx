@@ -310,10 +310,7 @@ export function Billing(): JSX.Element {
               formulaTooltip="Total cost attributed to onboarding new users."
               exampleTooltip="e.g. $50.00"
             />
-          </div>
-
-          {/* Row 2: Cost per Successful Run, Token Rate Efficiency, Cost of Failed Runs */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+            {/* Row 2: Cost per Successful Run, Token Rate Efficiency, Cost of Failed Runs */}
             <KpiCard
               label="Cost per Successful Run"
               value={
@@ -492,7 +489,7 @@ export function Billing(): JSX.Element {
                   Token and seat cost allocation
                 </p>
               </div>
-              <div className="flex items-center gap-8">
+              <div className="flex flex-wrap items-center gap-6">
                 <DonutChart
                   slices={
                     billing

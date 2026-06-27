@@ -42,3 +42,8 @@ it('TableRow has border-b class', () => {
   const { container } = render(<table><tbody><TableRow><td /></TableRow></tbody></table>)
   expect(container.querySelector('tr')!.className).toContain('border-b')
 })
+
+it('TableHead has whitespace-nowrap to prevent sort icon wrapping', () => {
+  const { container } = render(<table><thead><tr><TableHead>Name</TableHead></tr></thead></table>)
+  expect(container.querySelector('th')!.className).toContain('whitespace-nowrap')
+})

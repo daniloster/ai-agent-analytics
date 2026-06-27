@@ -407,7 +407,7 @@ export function Reliability(): JSX.Element {
                 </p>
               </div>
               {d && (
-                <div className="flex items-center gap-8">
+                <div className="flex flex-wrap items-center gap-6">
                   <DonutChart
                     slices={d.error_type_breakdown.map((e) => ({
                       label: e.type,

@@ -17,6 +17,7 @@ export function IncidentTable({ incidents }: IncidentTableProps): JSX.Element {
   const n = incidents.length
 
   return (
+    <div className="overflow-x-auto">
     <Table>
       <TableCaption>{n === 1 ? '1 incident' : `${n} incidents`}</TableCaption>
       <TableHeader>
@@ -42,5 +43,6 @@ export function IncidentTable({ incidents }: IncidentTableProps): JSX.Element {
         ))}
       </TableBody>
     </Table>
+    </div>
   )
 }

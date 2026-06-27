@@ -262,3 +262,15 @@ it('passes axe accessibility check after data loads', async () => {
   })
   await checkA11y(container)
 }, 15000)
+
+it('donut+legend wrapper has flex-wrap so legend stacks below chart when narrow', async () => {
+  mockFetch()
+  const { Reliability } = await import('./Reliability')
+  const { container } = render(<Reliability />, { wrapper: makeWrapper() })
+  await waitFor(() => {
+    const paths = container.querySelectorAll('svg path')
+    expect(paths.length).toBeGreaterThan(0)
+  })
+  const donutWrapper = container.querySelector('.flex.flex-wrap.items-center')
+  expect(donutWrapper).not.toBeNull()
+})

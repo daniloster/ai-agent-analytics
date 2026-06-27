@@ -24,7 +24,7 @@ export function TableRow({ className, ...props }: React.HTMLAttributes<HTMLTable
 export function TableHead({ className, ...props }: React.ThHTMLAttributes<HTMLTableCellElement>): JSX.Element {
   return (
     <th
-      className={cn('h-12 px-4 text-left align-middle font-medium text-muted-foreground', className)}
+      className={cn('h-12 px-4 text-left align-middle font-medium text-muted-foreground whitespace-nowrap', className)}
       {...props}
     />
   )

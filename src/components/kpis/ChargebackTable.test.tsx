@@ -49,3 +49,10 @@ it('totals row percentage column shows "100.0%"', () => {
 it('single-row input does not throw', () => {
   expect(() => render(<ChargebackTable rows={[ROW_A]} />)).not.toThrow()
 })
+
+it('table is wrapped in overflow-x-auto container for horizontal scroll', () => {
+  const { container } = render(<ChargebackTable rows={[ROW_A, ROW_B]} />)
+  const wrapper = container.querySelector('div.overflow-x-auto')
+  expect(wrapper).not.toBeNull()
+  expect(wrapper?.querySelector('table')).not.toBeNull()
+})

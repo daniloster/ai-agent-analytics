@@ -23,6 +23,7 @@ export function ChargebackTable({ rows }: ChargebackTableProps): JSX.Element {
   const sumTotal = rows.reduce((s, r) => s + r.total, 0)
 
   return (
+    <div className="overflow-x-auto">
     <Table>
       <TableHeader>
         <TableRow>
@@ -59,5 +60,6 @@ export function ChargebackTable({ rows }: ChargebackTableProps): JSX.Element {
         </TableRow>
       </tfoot>
     </Table>
+    </div>
   )
 }

@@ -140,11 +140,11 @@ describe('Area mark', () => {
     expect(firstLabel).toContain(': 10')
   })
 
-  it('dashed={true} renders AreaClosed with strokeDasharray="4 2"', () => {
+  it('dashed={true} renders AreaClosed with strokeDasharray="4 4" (strokeWidth=2 default)', () => {
     const { container } = renderArea({ dashed: true })
     const paths = container.querySelectorAll('path')
     const dashedPath = Array.from(paths).find(
-      (p) => p.getAttribute('stroke-dasharray') === '4 2',
+      (p) => p.getAttribute('stroke-dasharray') === '4 4',
     )
     expect(dashedPath).not.toBeUndefined()
   })

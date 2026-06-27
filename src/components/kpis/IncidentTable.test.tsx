@@ -57,3 +57,10 @@ it('caption shows "3 incidents" (plural) when incidents.length === 3', () => {
   render(<IncidentTable incidents={[INC_JAN3, INC_JAN1, INC_JAN2]} />)
   expect(screen.getByText('3 incidents')).toBeTruthy()
 })
+
+it('table is wrapped in overflow-x-auto container for horizontal scroll', () => {
+  const { container } = render(<IncidentTable incidents={[INC_JAN3]} />)
+  const wrapper = container.querySelector('div.overflow-x-auto')
+  expect(wrapper).not.toBeNull()
+  expect(wrapper?.querySelector('table')).not.toBeNull()
+})

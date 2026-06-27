@@ -219,6 +219,7 @@ export function TeamTable({
   const rows = sortedTeams.value;
 
   return (
+    <div className="overflow-x-auto">
     <Table>
       <TableHeader>
         <TableRow>
@@ -268,5 +269,6 @@ export function TeamTable({
         ))}
       </TableBody>
     </Table>
+    </div>
   );
 }

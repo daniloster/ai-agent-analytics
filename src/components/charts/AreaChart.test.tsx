@@ -34,13 +34,13 @@ it('returns null when innerWidth is 0', () => {
   expect(container.querySelectorAll('path').length).toBe(0)
 })
 
-it('dashed prop adds stroke-dasharray="4 2" to the stroke path', () => {
+it('dashed prop adds stroke-dasharray="4 4" to the stroke path (strokeWidth=2 default)', () => {
   const { container } = renderWithVisualizationContext(
     <AreaChart series="cost" axis="y" dashed={true} />,
     BASE_CTX,
   )
   const paths = Array.from(container.querySelectorAll('path'))
-  expect(paths.some((p) => p.getAttribute('stroke-dasharray') === '4 2')).toBe(true)
+  expect(paths.some((p) => p.getAttribute('stroke-dasharray') === '4 4')).toBe(true)
 })
 
 it('no dashed prop produces no stroke-dasharray on any path', () => {

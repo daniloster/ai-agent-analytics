@@ -220,3 +220,10 @@ it('Churn column no longer rendered', () => {
   const headerTexts = Array.from(headers).map((h) => h.textContent)
   expect(headerTexts.some((t) => t?.toLowerCase().includes('churn'))).toBe(false)
 })
+
+it('table is wrapped in overflow-x-auto container for horizontal scroll', () => {
+  const { container } = render(<TeamTable teams={[TEAM_A]} orgAvgFailedRunRate={0.05} />)
+  const wrapper = container.querySelector('div.overflow-x-auto')
+  expect(wrapper).not.toBeNull()
+  expect(wrapper?.querySelector('table')).not.toBeNull()
+})

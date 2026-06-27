@@ -200,3 +200,14 @@ it('passes axe accessibility check after data loads', async () => {
   })
   await checkA11y(container)
 }, 15000)
+
+it('donut+legend wrapper has flex-wrap so legend stacks below chart when narrow', async () => {
+  mockFetch()
+  const { Billing } = await import('./Billing')
+  const { container } = render(<Billing />, { wrapper: makeWrapper() })
+  await waitFor(() => {
+    expect(screen.getByText('Budget Utilization')).toBeTruthy()
+  })
+  const donutWrapper = container.querySelector('.flex.flex-wrap.items-center')
+  expect(donutWrapper).not.toBeNull()
+})
