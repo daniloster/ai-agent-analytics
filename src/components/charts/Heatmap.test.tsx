@@ -1,5 +1,5 @@
 import { it, expect, vi } from 'vitest'
-import { render } from '@testing-library/react'
+import { render, fireEvent } from '@testing-library/react'
 import { Heatmap } from './Heatmap'
 
 vi.mock('@visx/responsive/lib/components/ParentSize', () => ({
@@ -84,4 +84,52 @@ it('figure has default aria-label when prop is omitted', () => {
   const { container } = render(<Heatmap data={[]} colorScale="availability" />)
   const figure = container.querySelector('figure')
   expect(figure?.getAttribute('aria-label')).toBe('Availability heatmap')
+})
+
+it('cells are wrapped in a <g role="list"> with aria-label "Heatmap data"', () => {
+  const { container } = render(<Heatmap data={makeData(7)} colorScale="availability" />)
+  const g = container.querySelector('g[role="list"]')
+  expect(g).not.toBeNull()
+  expect(g?.getAttribute('aria-label')).toBe('Heatmap data')
+})
+
+it('first cell has tabIndex=0, all others have tabIndex=-1', () => {
+  const { container } = render(<Heatmap data={makeData(14)} colorScale="availability" />)
+  const rects = container.querySelectorAll('rect')
+  expect(rects[0]?.getAttribute('tabindex')).toBe('0')
+  for (let i = 1; i < rects.length; i++) {
+    expect(rects[i]?.getAttribute('tabindex')).toBe('-1')
+  }
+})
+
+it('ArrowRight on first cell moves focus to index 7 (second week, same day)', () => {
+  const { container, rerender } = render(<Heatmap data={makeData(14)} colorScale="availability" />)
+  const rects = container.querySelectorAll('rect')
+  fireEvent.keyDown(rects[0] as HTMLElement, { key: 'ArrowRight' })
+  rerender(<Heatmap data={makeData(14)} colorScale="availability" />)
+  const updatedRects = container.querySelectorAll('rect')
+  expect(updatedRects[0]?.getAttribute('tabindex')).toBe('-1')
+  expect(updatedRects[7]?.getAttribute('tabindex')).toBe('0')
+})
+
+it('Enter on a cell sets the live region text to the cell aria-label', () => {
+  const data = [{ date: '2026-01-01', value: 99 }]
+  const { container, rerender } = render(<Heatmap data={data} colorScale="availability" />)
+  const rect = container.querySelector('rect') as HTMLElement
+  fireEvent.keyDown(rect, { key: 'Enter' })
+  rerender(<Heatmap data={data} colorScale="availability" />)
+  const region = container.querySelector('[role="status"]') as HTMLElement
+  expect(region.textContent).toBe('2026-01-01: 99% uptime')
+})
+
+it('Escape on a cell clears the live region text', () => {
+  const data = [{ date: '2026-01-01', value: 99 }]
+  const { container, rerender } = render(<Heatmap data={data} colorScale="availability" />)
+  const rect = container.querySelector('rect') as HTMLElement
+  fireEvent.keyDown(rect, { key: 'Enter' })
+  rerender(<Heatmap data={data} colorScale="availability" />)
+  fireEvent.keyDown(rect, { key: 'Escape' })
+  rerender(<Heatmap data={data} colorScale="availability" />)
+  const region = container.querySelector('[role="status"]') as HTMLElement
+  expect(region.textContent).toBe('')
 })
