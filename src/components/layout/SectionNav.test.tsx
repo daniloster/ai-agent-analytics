@@ -153,3 +153,27 @@ it('reads initial active section from URL param', () => {
   expect(getByText('Overview')).not.toHaveAttribute('aria-current')
   window.history.replaceState({}, '', '/')
 })
+
+it('scrolling back near the top after Teams becomes active restores Overview', () => {
+  const { MockIO, trigger } = makeObserverMock()
+  vi.stubGlobal('IntersectionObserver', MockIO)
+
+  const { getByText, rerender } = render(<SectionNav />)
+
+  // Unlock IO-driven updates via first scroll
+  fireEvent.scroll(window)
+
+  // IO fires for teams: Overview was always intersecting so IO won't re-fire for it
+  trigger('teams', true)
+  rerender(<SectionNav />)
+  expect(getByText('Teams')).toHaveAttribute('aria-current', 'true')
+  expect(getByText('Overview')).not.toHaveAttribute('aria-current')
+
+  // User scrolls back up - jsdom scrollY is always 0 (< 100), so scroll handler must
+  // detect near-top and restore Overview without waiting for IO.
+  fireEvent.scroll(window)
+  rerender(<SectionNav />)
+
+  expect(getByText('Overview')).toHaveAttribute('aria-current', 'true')
+  expect(getByText('Teams')).not.toHaveAttribute('aria-current')
+})

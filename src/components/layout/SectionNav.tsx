@@ -30,10 +30,16 @@ export function SectionNav(): JSX.Element {
   useEffect(() => {
     const onScroll = () => {
       userHasScrolled.current = true;
+      // IO won't re-fire for Overview if it never left the viewport (minimal scroll).
+      // When scrollY is near the top, force-reset to Overview as the active section.
+      if (window.scrollY < 100) {
+        activeSection.value = "overview";
+        setSectionInUrl("overview");
+      }
     };
-    window.addEventListener("scroll", onScroll, { once: true, passive: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [activeSection]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
