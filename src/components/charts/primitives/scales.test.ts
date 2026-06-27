@@ -1,5 +1,8 @@
 import { it, expect, describe } from 'vitest'
 import { buildScale } from './scales'
+import { scaleLinear, scaleBand } from '@visx/scale'
+import { scaleSequential } from 'd3-scale'
+import { interpolateRgb } from 'd3-interpolate'
 import type { AxisConfig } from '../../../types/charts'
 
 const linearLeft: AxisConfig = {
@@ -30,6 +33,16 @@ describe('scaleLinear', () => {
     const config: AxisConfig = { ...linearLeft, domain: 'auto' }
     expect(() => buildScale(config, [], 400, 200)).not.toThrow()
   })
+
+  it('clamp(true) returns range max when input exceeds domain max', () => {
+    const scale = scaleLinear({ domain: [0, 100], range: [0, 200] }).clamp(true)
+    expect(scale(150)).toBe(200)
+  })
+
+  it('without clamp, extrapolates beyond range', () => {
+    const scale = scaleLinear({ domain: [0, 100], range: [0, 200] })
+    expect(scale(150)).toBe(300)
+  })
 })
 
 describe('scaleBand', () => {
@@ -43,6 +56,28 @@ describe('scaleBand', () => {
     const data = [{ k: 'a' }, { k: 'b' }, { k: 'c' }]
     const scale = buildScale(config, data, 300, 200)
     expect((scale as { bandwidth(): number }).bandwidth()).toBeGreaterThan(0)
+  })
+
+  it('bandwidth() === 100 for 4-item domain, range [0,400], padding 0', () => {
+    const scale = scaleBand({ domain: ['a', 'b', 'c', 'd'], range: [0, 400], padding: 0 })
+    expect(scale.bandwidth()).toBe(100)
+  })
+
+  it('bandwidth() < 100 for 4-item domain, range [0,400], padding 0.1', () => {
+    const scale = scaleBand({ domain: ['a', 'b', 'c', 'd'], range: [0, 400], padding: 0.1 })
+    expect(scale.bandwidth()).toBeLessThan(100)
+  })
+})
+
+describe('scaleSequential', () => {
+  it('returns an rgb string for domain start', () => {
+    const scale = scaleSequential(interpolateRgb('#ff0000', '#00ff00')).domain([0, 1])
+    expect(scale(0)).toMatch(/^rgb/)
+  })
+
+  it('returns a different string for domain end vs domain start', () => {
+    const scale = scaleSequential(interpolateRgb('#ff0000', '#00ff00')).domain([0, 1])
+    expect(scale(0)).not.toBe(scale(1))
   })
 })
 

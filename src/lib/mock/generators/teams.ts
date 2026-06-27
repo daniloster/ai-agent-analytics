@@ -145,7 +145,10 @@ function generateTeamMetrics(faker: Faker, profile: TeamProfile, params: FilterP
 }
 
 export function generateTeams(faker: Faker, params: FilterParams): TeamsResponse {
-  const teams = TEAM_PROFILES.map((profile) => generateTeamMetrics(faker, profile, params))
+  const profiles = params.team_id
+    ? TEAM_PROFILES.filter((p) => p.team_id === params.team_id)
+    : TEAM_PROFILES
+  const teams = profiles.map((profile) => generateTeamMetrics(faker, profile, params))
 
   const totalRuns = teams.reduce((sum, t) => sum + t.runs, 0)
   const orgAvgFailedRunRate = totalRuns > 0

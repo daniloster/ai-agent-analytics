@@ -74,6 +74,15 @@ describe('GET /api/analytics/teams', () => {
     expect(Array.isArray(data.teams)).toBe(true)
     expect((data.teams as unknown[]).length).toBe(4)
   })
+
+  it('returns 1 team when team_id=team_platform is provided', async () => {
+    const res = await fetch(`${BASE}/api/analytics/teams?from=2026-06-01&to=2026-06-30&team_id=team_platform`)
+    expect(res.status).toBe(200)
+    const data = await res.json() as Record<string, unknown>
+    const teams = data.teams as Array<Record<string, unknown>>
+    expect(teams).toHaveLength(1)
+    expect(teams[0].team_id).toBe('team_platform')
+  })
 })
 
 describe('GET /api/analytics/reliability', () => {
