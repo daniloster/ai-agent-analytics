@@ -15,6 +15,7 @@ import type { ReliabilityResponse } from "../../types/api";
 import { buildQueryParams } from "../../utils/buildQueryParams";
 import { AreaChart } from "../charts/AreaChart";
 import { DonutChart } from "../charts/DonutChart";
+import { DonutLegend } from "../charts/DonutLegend";
 import { Annotation } from "../charts/overlays/Annotation";
 import { SeriesTooltip } from "../charts/overlays/SeriesTooltip";
 import { Visualization, defineAxes } from "../charts/Visualization";
@@ -421,31 +422,20 @@ export function Reliability(): JSX.Element {
                     size={180}
                     ariaLabel="Error type breakdown donut"
                   />
-                  <div className="flex flex-col gap-3 flex-1">
-                    {d.error_type_breakdown.map((e) => (
-                      <div
-                        key={e.type}
-                        className="flex items-center gap-2 text-[13px]"
-                      >
-                        <span
-                          className="w-3 h-3 rounded-sm flex-shrink-0"
-                          style={{
-                            background: ERROR_TYPE_COLORS[e.type] ?? "#6b7280",
-                          }}
-                          aria-hidden="true"
-                        />
-                        <span className="font-medium text-foreground">
-                          {ERROR_TYPE_LABELS[e.type] ?? e.type}
-                        </span>
-                        <span className="text-muted-foreground ml-auto whitespace-nowrap">
-                          {e.percentage}%{" "}
+                  <DonutLegend
+                    items={d.error_type_breakdown.map((e) => ({
+                      color: ERROR_TYPE_COLORS[e.type] ?? "#6b7280",
+                      title: ERROR_TYPE_LABELS[e.type] ?? e.type,
+                      renderDetail: () => (
+                        <>
+                          <span>{e.percentage}%</span>
                           <span className="text-foreground font-medium">
-                            - {formatNumber(e.count)} errors
+                            {" "}- {formatNumber(e.count)} errors
                           </span>
-                        </span>
-                      </div>
-                    ))}
-                  </div>
+                        </>
+                      ),
+                    }))}
+                  />
                 </div>
               )}
             </figure>

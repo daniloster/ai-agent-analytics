@@ -2,11 +2,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useDeepComputed } from "../../hooks/useDeepComputed";
 import { filterQueryParams } from "../../lib/filters/filterSignals";
 import { formatCurrency, formatPercent } from "../../lib/kpi/formatters";
+import { teamColor } from "../../lib/team/teamColors";
 import type { BillingResponse, OverviewResponse } from "../../types/api";
 import { buildQueryParams } from "../../utils/buildQueryParams";
 import { AreaChart } from "../charts/AreaChart";
 import { ColumnChart, ColumnTrendLine } from "../charts/ColumnChart";
 import { DonutChart } from "../charts/DonutChart";
+import { DonutLegend } from "../charts/DonutLegend";
 import { GaugeChart } from "../charts/GaugeChart";
 import { Heatmap } from "../charts/Heatmap";
 import { Annotation } from "../charts/overlays/Annotation";
@@ -304,17 +306,37 @@ export function Billing(): JSX.Element {
                   Token and seat cost allocation
                 </p>
               </div>
-              <DonutChart
-                slices={
-                  billing
-                    ? billing.cost_by_team.map((t) => ({
-                        label: t.team_name,
-                        value: t.total,
-                      }))
-                    : []
-                }
-                ariaLabel="Cost by team"
-              />
+              <div className="flex items-center gap-8">
+                <DonutChart
+                  slices={
+                    billing
+                      ? billing.cost_by_team.map((t, i) => ({
+                          label: t.team_name,
+                          value: t.total,
+                          color: teamColor(t.team_id, i),
+                        }))
+                      : []
+                  }
+                  size={160}
+                  ariaLabel="Cost by team"
+                />
+                {billing && (
+                  <DonutLegend
+                    items={billing.cost_by_team.map((t, i) => ({
+                      color: teamColor(t.team_id, i),
+                      title: t.team_name,
+                      renderDetail: () => (
+                        <>
+                          <span>{t.percentage}%</span>
+                          <span className="text-foreground font-medium">
+                            {" "}- {formatCurrency(t.total)}
+                          </span>
+                        </>
+                      ),
+                    }))}
+                  />
+                )}
+              </div>
             </figure>
             <ChargebackTable rows={billing ? billing.cost_by_team : []} />
           </div>

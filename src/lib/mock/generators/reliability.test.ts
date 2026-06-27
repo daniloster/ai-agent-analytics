@@ -50,18 +50,18 @@ describe('generateReliability', () => {
     expect(result.error_trend_7d.length).toBeGreaterThanOrEqual(7)
   })
 
-  it('mttr_minutes is null when incidents array is empty', () => {
-    // Try multiple seeds until we get one with no incidents
-    let found = false
-    for (let seed = 0; seed < 100; seed++) {
+  it('always generates at least 1 incident', () => {
+    for (let seed = 0; seed < 20; seed++) {
       const result = generateReliability(makeSeededFaker(seed), { from: '2026-06-01', to: '2026-06-30' })
-      if (result.incidents.length === 0) {
-        expect(result.mttr_minutes).toBeNull()
-        found = true
-        break
-      }
+      expect(result.incidents.length).toBeGreaterThanOrEqual(1)
     }
-    expect(found).toBe(true)
+  })
+
+  it('mttr_minutes is non-null because the first incident is always resolved', () => {
+    for (let seed = 0; seed < 20; seed++) {
+      const result = generateReliability(makeSeededFaker(seed), { from: '2026-06-01', to: '2026-06-30' })
+      expect(result.mttr_minutes).not.toBeNull()
+    }
   })
 
   it('majority of availability_by_day entries are >= 99.9 (green zone)', () => {

@@ -114,10 +114,10 @@ export function generateReliability(faker: Faker, params: FilterParams): Reliabi
     value: faker.number.float({ min: 0, max: 300, fractionDigits: 2 }),
   }))
 
-  const incidentCount = faker.number.int({ min: 0, max: 3 })
+  const incidentCount = faker.number.int({ min: 1, max: 3 })
   const incidents: ReliabilityResponse['incidents'] = []
   for (let i = 0; i < incidentCount; i++) {
-    const resolved = faker.datatype.boolean()
+    const resolved = i === 0 ? true : faker.datatype.boolean()
     const mttr = resolved ? faker.number.int({ min: 5, max: 240 }) : null
     incidents.push({
       detected_at: faker.date.recent({ days: 30 }).toISOString(),
