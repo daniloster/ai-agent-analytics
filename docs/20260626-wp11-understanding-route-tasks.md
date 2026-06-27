@@ -570,7 +570,7 @@ import { Link } from 'react-router-dom'
 
 | Done | Priority | Task | Depends on | Effort |
 |------|----------|------|------------|--------|
-| [ ]  | 1        | T-1: Static data layer | - | Medium |
+| [x]  | 1        | T-1: Static data layer | - | Medium |
 | [ ]  | 2        | T-2: KpiEntryCard component | T-1 | Small |
 | [ ]  | 3        | T-3: DecisionCard component | T-1 | Small |
 | [ ]  | 4        | T-4: UnderstandingSidebar component | T-1 | Medium |
