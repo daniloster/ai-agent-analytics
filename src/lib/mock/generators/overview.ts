@@ -47,6 +47,9 @@ export function generateOverview(faker: Faker, params: FilterParams): OverviewRe
   const avgQualityScore = hasQualityData
     ? faker.number.float({ min: 1, max: 5, fractionDigits: 2 })
     : null
+  const avgQualityScorePrior = hasQualityData
+    ? faker.number.float({ min: 1, max: 5, fractionDigits: 2 })
+    : null
   const costPerQualityPoint = hasQualityData && avgQualityScore !== null
     ? faker.number.float({ min: 0.5, max: 50, fractionDigits: 2 })
     : null
@@ -102,6 +105,7 @@ export function generateOverview(faker: Faker, params: FilterParams): OverviewRe
     success_rate_prior: successRatePrior,
     avg_run_duration_ms: avgRunDurationMs,
     avg_quality_score: avgQualityScore,
+    avg_quality_score_prior: avgQualityScorePrior,
     rated_run_count: ratedRunCount,
     cost_per_quality_point: costPerQualityPoint,
     acceptance_rate: acceptanceRate,

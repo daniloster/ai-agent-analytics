@@ -393,10 +393,17 @@ export function Overview(): JSX.Element {
               ? "Fewer than 10 rated runs"
               : undefined
           }
+          delta={
+            d && d.avg_quality_score !== null && d.avg_quality_score_prior !== null
+              ? d.avg_quality_score - d.avg_quality_score_prior
+              : undefined
+          }
+          deltaFormat="decimal"
+          deltaLabel={d && d.avg_quality_score !== null ? 'vs previous period' : undefined}
           starRating={d ? d.avg_quality_score : undefined}
           starRatingSubtext={
             d && d.avg_quality_score !== null
-              ? `Based on ${formatNumber(d.rated_run_count)} rated runs`
+              ? `Based on ${formatNumber(d.rated_run_count)} human-rated runs`
               : undefined
           }
           formulaTooltip="Average quality score from rated runs (1-5 scale)."

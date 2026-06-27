@@ -43,6 +43,7 @@ export interface OverviewResponse {
   success_rate_prior: number
   avg_run_duration_ms: number
   avg_quality_score: number | null
+  avg_quality_score_prior: number | null
   rated_run_count: number
   cost_per_quality_point: number | null
   acceptance_rate: number | null

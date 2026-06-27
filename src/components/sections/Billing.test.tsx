@@ -85,6 +85,7 @@ const OVERVIEW: OverviewResponse = {
   success_rate_prior: 93.0,
   avg_run_duration_ms: 47000,
   avg_quality_score: 4.1,
+  avg_quality_score_prior: 3.9,
   rated_run_count: 500,
   cost_per_quality_point: 0.42,
   acceptance_rate: 72.5,

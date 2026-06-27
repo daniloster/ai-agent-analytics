@@ -39,6 +39,17 @@ it('negative delta renders red badge with - prefix', () => {
   expect(badge).not.toBeNull()
 })
 
+it('deltaFormat="decimal" with positive delta renders one-decimal value', () => {
+  render(<KpiCard {...BASE_PROPS} delta={0.2} deltaFormat="decimal" />)
+  expect(screen.getByText('+0.2')).toBeTruthy()
+  expect(screen.queryByText('+0.2%')).toBeNull()
+})
+
+it('deltaFormat="decimal" with negative delta renders one-decimal value', () => {
+  render(<KpiCard {...BASE_PROPS} delta={-0.3} deltaFormat="decimal" />)
+  expect(screen.getByText('-0.3')).toBeTruthy()
+})
+
 it('deltaFormat="number" renders absolute count without % suffix', () => {
   render(<KpiCard {...BASE_PROPS} delta={40} deltaFormat="number" />)
   expect(screen.getByText('+40')).toBeTruthy()

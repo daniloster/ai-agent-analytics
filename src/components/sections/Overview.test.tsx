@@ -53,6 +53,7 @@ const OVERVIEW: Record<string, unknown> = {
   success_rate_prior: 91.0,
   avg_run_duration_ms: 47000,
   avg_quality_score: 4.1,
+  avg_quality_score_prior: 3.9,
   rated_run_count: 8200,
   cost_per_quality_point: 0.422,
   acceptance_rate: 72.5,
@@ -160,6 +161,15 @@ it('token area chart renders two Area series when timeseries data is present', a
   })
 })
 
+it('Quality Score card renders "human-rated runs" in star subtext', async () => {
+  mockFetch()
+  const { Overview } = await import('./Overview')
+  render(<Overview />, { wrapper: makeWrapper() })
+  await waitFor(() => {
+    expect(screen.getByText(/human-rated runs/)).toBeTruthy()
+  })
+})
+
 it('Success Rate card renders "watch requests count" when rate improved', async () => {
   // OVERVIEW has success_rate=94.2 > success_rate_prior=91.0 => positive delta
   mockFetch()
@@ -224,7 +234,7 @@ it('Active Users card renders "vs previous period" delta label', async () => {
   const { Overview } = await import('./Overview')
   render(<Overview />, { wrapper: makeWrapper() })
   await waitFor(() => {
-    expect(screen.getByText('vs previous period')).toBeTruthy()
+    expect(screen.getAllByText('vs previous period').length).toBeGreaterThanOrEqual(1)
   })
 })
 
