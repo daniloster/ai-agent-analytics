@@ -121,6 +121,20 @@ it('org-wide view renders TeamTable and three figcaptions when teamId is undefin
   })
 })
 
+it('table card header and footer chrome are not rendered', async () => {
+  mockFetch(TEAMS_RESPONSE)
+  const { TeamBreakdown } = await import('./TeamBreakdown')
+  render(<TeamBreakdown />, { wrapper: makeWrapper() })
+  await waitFor(() => {
+    expect(screen.queryByText('Team Performance')).toBeNull()
+    expect(screen.queryByText('Filter')).toBeNull()
+    expect(screen.queryByText('Export CSV')).toBeNull()
+    expect(screen.queryByText(/Showing/)).toBeNull()
+    // table column headers still present
+    expect(screen.getByText('Team')).toBeTruthy()
+  })
+})
+
 it('"Runs per team" and "Cost per team" figures share a grid-cols-2 wrapper', async () => {
   mockFetch(TEAMS_RESPONSE)
   const { TeamBreakdown } = await import('./TeamBreakdown')

@@ -255,46 +255,10 @@ export function TeamBreakdown(): JSX.Element {
       ) : (
         data && (
           <div className="space-y-4">
-            {/* Team Performance table inside card */}
-            <div className="rounded-lg border bg-card shadow-sm overflow-hidden">
-              <div className="flex items-center justify-between px-6 py-4 border-b">
-                <p className="text-[14px] font-semibold text-foreground">
-                  Team Performance
-                </p>
-                <div className="flex gap-2">
-                  <button className="inline-flex items-center justify-center rounded-md text-sm font-medium h-8 px-3 border border-border bg-transparent hover:bg-muted transition-colors text-xs">
-                    Filter
-                  </button>
-                  <button className="inline-flex items-center justify-center rounded-md text-sm font-medium h-8 px-3 border border-border bg-transparent hover:bg-muted transition-colors text-xs">
-                    Export CSV
-                  </button>
-                </div>
-              </div>
-              <TeamTable
-                teams={data.teams}
-                orgAvgFailedRunRate={orgAvgFailedRunRate}
-              />
-              <div className="flex items-center justify-between px-6 py-3 border-t text-[13px] text-muted-foreground">
-                <span>Showing {data.teams.length} teams</span>
-                <div className="flex items-center gap-1">
-                  <button
-                    className="px-3 py-1 text-xs border rounded opacity-40 cursor-not-allowed"
-                    disabled
-                  >
-                    Prev
-                  </button>
-                  <span className="px-3 py-1 text-xs bg-foreground text-background rounded font-medium">
-                    1
-                  </span>
-                  <button
-                    className="px-3 py-1 text-xs border rounded opacity-40 cursor-not-allowed"
-                    disabled
-                  >
-                    Next
-                  </button>
-                </div>
-              </div>
-            </div>
+            <TeamTable
+              teams={data.teams}
+              orgAvgFailedRunRate={orgAvgFailedRunRate}
+            />
 
             <div className="grid grid-cols-2 gap-4">
               <figure
