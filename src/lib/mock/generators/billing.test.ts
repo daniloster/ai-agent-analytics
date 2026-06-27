@@ -58,4 +58,60 @@ describe('generateBilling', () => {
       expect(entry.month).toMatch(pattern)
     }
   })
+
+  it('current_month_spend_prior is a positive number', () => {
+    const result = generateBilling(makeSeededFaker(1), STD_PARAMS)
+    expect(result.current_month_spend_prior).toBeGreaterThan(0)
+  })
+
+  it('cost_per_successful_run_trend has entries matching the date range', () => {
+    const result = generateBilling(makeSeededFaker(1), STD_PARAMS)
+    expect(result.cost_per_successful_run_trend.length).toBe(30)
+    expect(result.cost_per_successful_run_trend[0]?.date).toBe('2026-06-01')
+  })
+
+  it('token_rate_trend has entries matching the date range', () => {
+    const result = generateBilling(makeSeededFaker(1), STD_PARAMS)
+    expect(result.token_rate_trend.length).toBe(30)
+  })
+
+  it('cost_of_failed_runs_trend has entries matching the date range', () => {
+    const result = generateBilling(makeSeededFaker(1), STD_PARAMS)
+    expect(result.cost_of_failed_runs_trend.length).toBe(30)
+  })
+
+  it('new_user_activation_cost is null or positive', () => {
+    for (let seed = 0; seed < 20; seed++) {
+      const result = generateBilling(makeSeededFaker(seed), STD_PARAMS)
+      if (result.new_user_activation_cost !== null) {
+        expect(result.new_user_activation_cost).toBeGreaterThan(0)
+      }
+    }
+  })
+
+  it('new_user_activation_cost_trend is empty when cost is null', () => {
+    for (let seed = 0; seed < 30; seed++) {
+      const result = generateBilling(makeSeededFaker(seed), STD_PARAMS)
+      if (result.new_user_activation_cost === null) {
+        expect(result.new_user_activation_cost_trend).toHaveLength(0)
+      }
+    }
+  })
+
+  it('cost_anomaly_days has majority normal (green) days', () => {
+    const result = generateBilling(makeSeededFaker(7), STD_PARAMS)
+    const normalDays = result.cost_anomaly_days.filter(
+      (d) => d.daily_cost <= d.avg_daily_cost * 1.2
+    )
+    expect(normalDays.length / result.cost_anomaly_days.length).toBeGreaterThanOrEqual(0.6)
+  })
+
+  it('is_anomaly is true when daily_cost > avg * 1.2', () => {
+    const result = generateBilling(makeSeededFaker(1), STD_PARAMS)
+    for (const d of result.cost_anomaly_days) {
+      if (d.daily_cost > d.avg_daily_cost * 1.2) {
+        expect(d.is_anomaly).toBe(true)
+      }
+    }
+  })
 })

@@ -2,7 +2,7 @@ import { useSignal } from '@preact/signals-react'
 import { Card, CardHeader, CardContent } from '../ui/card'
 import { Skeleton } from '../ui/skeleton'
 import { Popover, PopoverTrigger, PopoverContent } from '../ui/popover'
-import { formatNumber, formatPercent } from '../../lib/kpi/formatters'
+import { formatCurrency, formatNumber, formatPercent } from '../../lib/kpi/formatters'
 
 const STATUS_DOT_COLORS: Record<'good' | 'warning' | 'critical', string> = {
   good: 'bg-emerald-500',
@@ -16,7 +16,7 @@ export interface KpiCardProps {
   valueSuffix?: string
   subValue?: string
   delta?: number
-  deltaFormat?: 'percent' | 'number' | 'decimal'
+  deltaFormat?: 'percent' | 'number' | 'decimal' | 'currency'
   deltaLabel?: string
   trend?: Array<{ date: string; value: number }>
   trendColor?: string
@@ -108,7 +108,7 @@ function StarRating({ rating, subtext }: { rating: number; subtext?: string }): 
   )
 }
 
-function DeltaBadge({ delta, deltaFormat = 'percent', deltaLabel }: { delta: number; deltaFormat?: 'percent' | 'number' | 'decimal'; deltaLabel?: string }): JSX.Element {
+function DeltaBadge({ delta, deltaFormat = 'percent', deltaLabel }: { delta: number; deltaFormat?: 'percent' | 'number' | 'decimal' | 'currency'; deltaLabel?: string }): JSX.Element {
   const isPositive = delta > 0
   const isNegative = delta < 0
   const prefix = isPositive ? '+' : isNegative ? '-' : ''
@@ -123,7 +123,7 @@ function DeltaBadge({ delta, deltaFormat = 'percent', deltaLabel }: { delta: num
       <span
         className={`inline-flex items-center rounded-full px-[7px] py-0.5 text-[11px] font-semibold ${colorClass}`}
       >
-        {prefix}{deltaFormat === 'number' ? formatNumber(Math.abs(delta)) : deltaFormat === 'decimal' ? Math.abs(delta).toFixed(1) : formatPercent(Math.abs(delta), 1)}
+        {prefix}{deltaFormat === 'number' ? formatNumber(Math.abs(delta)) : deltaFormat === 'decimal' ? Math.abs(delta).toFixed(1) : deltaFormat === 'currency' ? formatCurrency(Math.abs(delta)) : formatPercent(Math.abs(delta), 1)}
       </span>
       {deltaLabel && <span className="text-[11px] text-muted-foreground">{deltaLabel}</span>}
     </div>

@@ -1,5 +1,7 @@
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../ui/table'
+import { teamColor } from '../../lib/team/teamColors'
 import { formatCurrency, formatPercent } from '../../lib/kpi/formatters'
+import { Progress } from '../ui/progress'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../ui/table'
 
 export interface ChargebackRow {
   team_id: string
@@ -32,13 +34,18 @@ export function ChargebackTable({ rows }: ChargebackTableProps): JSX.Element {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {sorted.map((r) => (
+        {sorted.map((r, i) => (
           <TableRow key={r.team_id}>
             <TableCell>{r.team_name}</TableCell>
             <TableCell>{formatCurrency(r.seat_cost_prorated)}</TableCell>
             <TableCell>{formatCurrency(r.token_cost)}</TableCell>
             <TableCell>{formatCurrency(r.total)}</TableCell>
-            <TableCell>{formatPercent(r.percentage, 1)}</TableCell>
+            <TableCell>
+              <div className="flex items-center gap-2 min-w-[100px]">
+                <Progress value={r.percentage} fill={teamColor(r.team_id, i)} className="w-16" />
+                <span>{formatPercent(r.percentage, 1)}</span>
+              </div>
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>

@@ -130,6 +130,7 @@ export interface ReliabilityResponse {
 export interface BillingResponse {
   period: { from: string; to: string }
   current_month_spend: number
+  current_month_spend_prior: number
   days_elapsed: number
   days_in_month: number
   projected_month_end: number
@@ -137,7 +138,11 @@ export interface BillingResponse {
   budget_utilization: number
   projected_annual_spend: number
   cost_per_successful_run: number
+  cost_per_successful_run_prior: number
+  cost_per_successful_run_trend: Array<{ date: string; value: number }>
   token_rate_actual: number
+  token_rate_actual_prior: number
+  token_rate_trend: Array<{ date: string; value: number }>
   token_rate_list: number
   cost_by_team: Array<{
     team_id: string
@@ -155,6 +160,11 @@ export interface BillingResponse {
     is_anomaly: boolean
   }>
   cost_of_failed_runs: number
+  cost_of_failed_runs_prior: number
+  cost_of_failed_runs_trend: Array<{ date: string; value: number }>
+  new_user_activation_cost: number | null
+  new_user_activation_cost_prior: number | null
+  new_user_activation_cost_trend: Array<{ date: string; value: number }>
 }
 
 export interface TimeseriesPoint {

@@ -1,7 +1,7 @@
 import { it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import type { BillingResponse, OverviewResponse } from '../../types/api'
+import type { BillingResponse } from '../../types/api'
 
 vi.mock('@visx/responsive/lib/components/ParentSize', () => ({
   default: ({ children, className, style }: {
@@ -32,9 +32,15 @@ vi.mock('../layout/Section', () => ({
   ),
 }))
 
+const DAILY_TREND = [
+  { date: '2026-06-01', value: 10 },
+  { date: '2026-06-02', value: 12 },
+]
+
 const BILLING: BillingResponse = {
   period: { from: '2026-06-01', to: '2026-06-30' },
   current_month_spend: 9800,
+  current_month_spend_prior: 8900,
   days_elapsed: 20,
   days_in_month: 30,
   projected_month_end: 14700,
@@ -42,9 +48,18 @@ const BILLING: BillingResponse = {
   budget_utilization: 65.3,
   projected_annual_spend: 157300,
   cost_per_successful_run: 1.21,
+  cost_per_successful_run_prior: 1.35,
+  cost_per_successful_run_trend: DAILY_TREND,
   token_rate_actual: 2.4,
+  token_rate_actual_prior: 2.5,
+  token_rate_trend: DAILY_TREND,
   token_rate_list: 3.0,
   cost_of_failed_runs: 1420,
+  cost_of_failed_runs_prior: 1200,
+  cost_of_failed_runs_trend: DAILY_TREND,
+  new_user_activation_cost: 50.0,
+  new_user_activation_cost_prior: 45.0,
+  new_user_activation_cost_trend: DAILY_TREND,
   cost_by_team: [
     { team_id: 't1', team_name: 'Alpha', token_cost: 3000, seat_cost_prorated: 500, total: 3500, percentage: 35 },
     { team_id: 't2', team_name: 'Beta', token_cost: 4000, seat_cost_prorated: 600, total: 4600, percentage: 47 },
@@ -64,57 +79,17 @@ const BILLING: BillingResponse = {
   ],
 }
 
-const OVERVIEW: OverviewResponse = {
-  period: { from: '2026-06-01', to: '2026-06-30' },
-  total_runs: 12450,
-  total_runs_prior: 11000,
-  mau: 340,
-  mau_prior: 300,
-  dau: 120,
-  seat_count: 400,
-  total_tokens: 5000000,
-  total_tokens_prior: 4500000,
-  input_tokens: 3000000,
-  output_tokens: 2000000,
-  total_cost: 9800,
-  total_cost_prior: 9000,
-  retention_cost: 28.8,
-  retention_cost_prior: 32.5,
-  retained_users_7d: 110,
-  success_rate: 94.2,
-  success_rate_prior: 93.0,
-  avg_run_duration_ms: 47000,
-  avg_quality_score: 4.1,
-  avg_quality_score_prior: 3.9,
-  rated_run_count: 500,
-  cost_per_quality_point: 0.42,
-  cost_per_quality_point_prior: 0.50,
-  acceptance_rate: 72.5,
-  cost_per_accepted_output: 0.18,
-  mom_usage_growth: 12.5,
-  user_activation_rate: 85,
-  new_users_count: 20,
-  quality_cost_efficiency: 1.6,
-  churn_risk_count: 5,
-  new_user_activation_cost: 50.0,
-  quality_score_trend: [],
-}
-
-const OVERVIEW_NULL_METRICS: OverviewResponse = {
-  ...OVERVIEW,
-  quality_cost_efficiency: null,
+const BILLING_NULL_METRICS: BillingResponse = {
+  ...BILLING,
   new_user_activation_cost: null,
+  new_user_activation_cost_prior: null,
+  new_user_activation_cost_trend: [],
 }
 
-function mockFetch(billing: BillingResponse = BILLING, overview: OverviewResponse = OVERVIEW) {
+function mockFetch(billing: BillingResponse = BILLING) {
   vi.stubGlobal(
     'fetch',
-    vi.fn((url: string) => {
-      if (url.includes('/billing')) {
-        return Promise.resolve(new Response(JSON.stringify(billing), { status: 200 }))
-      }
-      return Promise.resolve(new Response(JSON.stringify(overview), { status: 200 }))
-    }),
+    vi.fn(() => Promise.resolve(new Response(JSON.stringify(billing), { status: 200 }))),
   )
 }
 
@@ -129,17 +104,18 @@ beforeEach(() => {
   vi.restoreAllMocks()
 })
 
-it('GaugeChart is present in the DOM', async () => {
+it('Budget Utilization KpiCard shows percentage and combined subValue', async () => {
   mockFetch()
   const { Billing } = await import('./Billing')
-  const { container } = render(<Billing />, { wrapper: makeWrapper() })
+  render(<Billing />, { wrapper: makeWrapper() })
   await waitFor(() => {
-    const figures = container.querySelectorAll('figure[aria-label]')
-    expect(figures.length).toBeGreaterThan(0)
+    expect(screen.getByText('Budget Utilization')).toBeTruthy()
+    // subValue: "$9,800 of $15,000 budget"
+    expect(screen.getByText(/\$9,800 of \$15,000 budget/)).toBeTruthy()
   })
 })
 
-it('invoice history ColumnChart renders 6 bars', async () => {
+it('invoice history ColumnChart renders bars', async () => {
   mockFetch()
   const { Billing } = await import('./Billing')
   const { container } = render(<Billing />, { wrapper: makeWrapper() })
@@ -149,43 +125,47 @@ it('invoice history ColumnChart renders 6 bars', async () => {
   })
 })
 
-it('cost anomaly Heatmap renders one rect per cost_anomaly_day', async () => {
+it('anomaly calendar renders one day box per cost_anomaly_day', async () => {
   mockFetch()
   const { Billing } = await import('./Billing')
   const { container } = render(<Billing />, { wrapper: makeWrapper() })
   await waitFor(() => {
-    const rects = container.querySelectorAll('svg rect[aria-label*="avg"]')
-    expect(rects.length).toBe(BILLING.cost_anomaly_days.length)
+    const calendar = container.querySelector('[aria-label="Daily cost anomaly"]')
+    const items = calendar?.querySelectorAll('[role="listitem"]') ?? []
+    expect(items.length).toBe(BILLING.cost_anomaly_days.length)
   })
 })
 
-it('anomaly rect aria-label contains "avg"', async () => {
+it('anomaly day boxes have title attribute with date and cost info', async () => {
   mockFetch()
   const { Billing } = await import('./Billing')
   const { container } = render(<Billing />, { wrapper: makeWrapper() })
   await waitFor(() => {
-    const anomalyRect = container.querySelector('svg rect[aria-label*="avg"]')
-    expect(anomalyRect).not.toBeNull()
+    const dayBox = container.querySelector('[role="listitem"] > div[title]')
+    expect(dayBox).not.toBeNull()
+    expect(dayBox?.getAttribute('title')).toContain('2026-06-10')
   })
 })
 
-it('quality_cost_efficiency = null shows "Insufficient data"', async () => {
-  mockFetch(BILLING, OVERVIEW_NULL_METRICS)
+it('anomaly footer shows correct alert count', async () => {
+  mockFetch()
+  const { Billing } = await import('./Billing')
+  const { container } = render(<Billing />, { wrapper: makeWrapper() })
+  await waitFor(() => {
+    // BILLING has 1 anomaly day (2026-06-10); footer text is split across <strong> and text node
+    const footer = container.querySelector('[aria-label="Cost anomaly calendar"] .border-t')
+    expect(footer?.textContent).toContain('1')
+    expect(footer?.textContent).toContain('anomaly alert')
+  })
+})
+
+it('new_user_activation_cost = null shows "Insufficient data"', async () => {
+  mockFetch(BILLING_NULL_METRICS)
   const { Billing } = await import('./Billing')
   render(<Billing />, { wrapper: makeWrapper() })
   await waitFor(() => {
     const badges = screen.getAllByText('Insufficient data')
     expect(badges.length).toBeGreaterThanOrEqual(1)
-  })
-})
-
-it('new_user_activation_cost = null shows "Insufficient data"', async () => {
-  mockFetch(BILLING, OVERVIEW_NULL_METRICS)
-  const { Billing } = await import('./Billing')
-  render(<Billing />, { wrapper: makeWrapper() })
-  await waitFor(() => {
-    const badges = screen.getAllByText('Insufficient data')
-    expect(badges.length).toBeGreaterThanOrEqual(2)
   })
 })
 

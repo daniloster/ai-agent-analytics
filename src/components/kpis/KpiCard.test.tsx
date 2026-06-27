@@ -61,6 +61,16 @@ it('deltaFormat="number" with negative delta renders absolute count', () => {
   expect(screen.getByText('-12')).toBeTruthy()
 })
 
+it('deltaFormat="currency" positive delta renders currency-formatted value', () => {
+  render(<KpiCard {...BASE_PROPS} delta={5200} deltaFormat="currency" />)
+  expect(screen.getByText('+$5,200')).toBeTruthy()
+})
+
+it('deltaFormat="currency" negative delta renders currency-formatted value', () => {
+  render(<KpiCard {...BASE_PROPS} delta={-1500} deltaFormat="currency" />)
+  expect(screen.getByText('-$1,500')).toBeTruthy()
+})
+
 it('deltaFormat omitted still renders percentage', () => {
   render(<KpiCard {...BASE_PROPS} delta={18.4} />)
   expect(screen.getByText('+18.4%')).toBeTruthy()
