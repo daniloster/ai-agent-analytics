@@ -10,10 +10,19 @@ export default defineConfig({
     setupFiles: ['./vitest.setup.ts'],
     coverage: {
       provider: 'v8',
+      reporter: ['text', 'html', 'lcov'],
       thresholds: {
-        lines: 80,
+        'src/lib/**': { lines: 80, functions: 80 },
+        'src/components/kpis/**': { lines: 80, functions: 80 },
       },
-      include: ['src/lib/**', 'src/components/kpis/**'],
+      include: ['src/**/*.ts', 'src/**/*.tsx'],
+      exclude: [
+        'src/lib/mock/**',
+        'src/**/*.test.ts',
+        'src/**/*.test.tsx',
+        'src/**/*.d.ts',
+        'vitest.setup.ts',
+      ],
     },
   },
   resolve: {
