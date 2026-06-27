@@ -131,7 +131,7 @@ function TeamRow({ team }: { team: TeamMetrics }): JSX.Element {
           <span>{formatNumber(team.runs)}</span>
           {team.wow_runs_change < 0 && (
             <span className="text-[11px] text-orange-500 font-medium">
-              -{Math.abs(Math.round(team.wow_runs_change))}% WoW
+              {Math.round(team.wow_runs_change)}% WoW
             </span>
           )}
         </div>
@@ -143,7 +143,9 @@ function TeamRow({ team }: { team: TeamMetrics }): JSX.Element {
         <div className="flex flex-col gap-0.5">
           <span>{formatNumber(team.mau)}</span>
           {team.mau_prior !== team.mau && (
-            <span className="text-[11px] text-muted-foreground">
+            <span
+              className={`text-[11px] ${team.mau_prior <= team.mau ? "text-muted-foreground" : "text-orange-500"}`}
+            >
               was {formatNumber(team.mau_prior)}
             </span>
           )}
@@ -220,55 +222,55 @@ export function TeamTable({
 
   return (
     <div className="overflow-x-auto">
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Team</TableHead>
-          <TableHead
-            className="cursor-pointer"
-            onClick={() => handleSort("runs")}
-          >
-            Runs{sortIndicator("runs")}
-          </TableHead>
-          <TableHead
-            className="cursor-pointer"
-            onClick={() => handleSort("cost")}
-          >
-            Cost{sortIndicator("cost")}
-          </TableHead>
-          <TableHead
-            className="cursor-pointer"
-            onClick={() => handleSort("mau")}
-          >
-            Users{sortIndicator("mau")}
-          </TableHead>
-          <TableHead
-            className="cursor-pointer"
-            onClick={() => handleSort("adoption_rate")}
-          >
-            Adoption{sortIndicator("adoption_rate")}
-          </TableHead>
-          <TableHead
-            className="cursor-pointer"
-            onClick={() => handleSort("avg_quality_score")}
-          >
-            Quality{sortIndicator("avg_quality_score")}
-          </TableHead>
-          <TableHead
-            className="cursor-pointer"
-            onClick={() => handleSort("failed_run_rate")}
-          >
-            Failure Rate{sortIndicator("failed_run_rate")}
-          </TableHead>
-          <TableHead>WoW Trend</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {rows.map((team) => (
-          <TeamRow key={team.team_id} team={team} />
-        ))}
-      </TableBody>
-    </Table>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Team</TableHead>
+            <TableHead
+              className="cursor-pointer"
+              onClick={() => handleSort("runs")}
+            >
+              Runs{sortIndicator("runs")}
+            </TableHead>
+            <TableHead
+              className="cursor-pointer"
+              onClick={() => handleSort("cost")}
+            >
+              Cost{sortIndicator("cost")}
+            </TableHead>
+            <TableHead
+              className="cursor-pointer"
+              onClick={() => handleSort("mau")}
+            >
+              Users{sortIndicator("mau")}
+            </TableHead>
+            <TableHead
+              className="cursor-pointer"
+              onClick={() => handleSort("adoption_rate")}
+            >
+              Adoption{sortIndicator("adoption_rate")}
+            </TableHead>
+            <TableHead
+              className="cursor-pointer"
+              onClick={() => handleSort("avg_quality_score")}
+            >
+              Quality{sortIndicator("avg_quality_score")}
+            </TableHead>
+            <TableHead
+              className="cursor-pointer"
+              onClick={() => handleSort("failed_run_rate")}
+            >
+              Failure Rate{sortIndicator("failed_run_rate")}
+            </TableHead>
+            <TableHead>WoW Trend</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {rows.map((team) => (
+            <TeamRow key={team.team_id} team={team} />
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 }

@@ -119,8 +119,14 @@ function generateTeamMetrics(faker: Faker, profile: TeamProfile, params: FilterP
   const frontendChurnBase = faker.number.int({ min: 0, max: 3 })
   const churnSignalCount = Math.round(frontendChurnBase * profile.churnMultiplier)
   const wowCostChange = faker.number.float({ min: -15, max: 25, fractionDigits: 1 })
-  const wowRunsChange = faker.number.float({ min: -20, max: 20, fractionDigits: 1 })
-  const mauPrior = clamp(mau + faker.number.int({ min: -4, max: 4 }), 0, profile.seat_count)
+  // Churn risk implies declining runs - force negative WoW so the orange indicator fires.
+  const wowRunsChange = churnSignalCount > 0
+    ? faker.number.float({ min: -20, max: -1, fractionDigits: 1 })
+    : faker.number.float({ min: -20, max: 20, fractionDigits: 1 })
+  // Churn risk implies user attrition - prior MAU must be >= current MAU.
+  const mauPrior = churnSignalCount > 0
+    ? clamp(mau + faker.number.int({ min: 1, max: 4 }), 0, profile.seat_count)
+    : clamp(mau + faker.number.int({ min: -4, max: 4 }), 0, profile.seat_count)
 
   return {
     team_id: profile.team_id,

@@ -74,4 +74,26 @@ describe('generateTeams', () => {
     const result = generateTeams(makeSeededFaker(1), STD_PARAMS)
     expect(Number.isFinite(result.org_avg_failed_run_rate)).toBe(true)
   })
+
+  it('churn risk teams always have negative wow_runs_change', () => {
+    for (let seed = 0; seed < 100; seed++) {
+      const result = generateTeams(makeSeededFaker(seed), STD_PARAMS)
+      for (const team of result.teams) {
+        if (team.churn_signal_count > 0) {
+          expect(team.wow_runs_change, `seed ${seed} team ${team.team_id}`).toBeLessThan(0)
+        }
+      }
+    }
+  })
+
+  it('churn risk teams always have mau_prior >= mau (declining or at seat cap)', () => {
+    for (let seed = 0; seed < 100; seed++) {
+      const result = generateTeams(makeSeededFaker(seed), STD_PARAMS)
+      for (const team of result.teams) {
+        if (team.churn_signal_count > 0) {
+          expect(team.mau_prior, `seed ${seed} team ${team.team_id}`).toBeGreaterThanOrEqual(team.mau)
+        }
+      }
+    }
+  })
 })

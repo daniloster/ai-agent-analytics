@@ -227,3 +227,23 @@ it('table is wrapped in overflow-x-auto container for horizontal scroll', () => 
   expect(wrapper).not.toBeNull()
   expect(wrapper?.querySelector('table')).not.toBeNull()
 })
+
+it('"was N" shown in orange when mau_prior > mau (user count declined)', () => {
+  const team = makeTeam({ mau: 18, mau_prior: 22 })
+  const { container } = render(<TeamTable teams={[team]} orgAvgFailedRunRate={0.05} />)
+  const wasSpan = Array.from(container.querySelectorAll('span')).find(
+    (s) => s.textContent?.startsWith('was'),
+  )
+  expect(wasSpan).toBeTruthy()
+  expect(wasSpan?.className).toContain('text-orange-500')
+})
+
+it('"was N" shown in muted when mau_prior < mau (user count grew)', () => {
+  const team = makeTeam({ mau: 22, mau_prior: 18 })
+  const { container } = render(<TeamTable teams={[team]} orgAvgFailedRunRate={0.05} />)
+  const wasSpan = Array.from(container.querySelectorAll('span')).find(
+    (s) => s.textContent?.startsWith('was'),
+  )
+  expect(wasSpan).toBeTruthy()
+  expect(wasSpan?.className).toContain('text-muted-foreground')
+})
