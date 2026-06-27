@@ -18,9 +18,13 @@ import type {
   OverviewResponse,
   TimeseriesResponse,
 } from "../../types/api";
+import type { MonthlyQualityPoint } from "../../utils/aggregateQualityMonthly";
+import { aggregateQualityMonthly } from "../../utils/aggregateQualityMonthly";
 import { buildQueryParams } from "../../utils/buildQueryParams";
 import { AreaChart } from "../charts/AreaChart";
+import { ColumnChart } from "../charts/ColumnChart";
 import { Annotation } from "../charts/overlays/Annotation";
+import { DataLabels } from "../charts/overlays/DataLabels";
 import { SeriesTooltip } from "../charts/overlays/SeriesTooltip";
 import { Visualization, defineAxes } from "../charts/Visualization";
 import { KpiCard } from "../kpis/KpiCard";
@@ -45,6 +49,55 @@ const AREA_AXES = defineAxes([
   },
 ]);
 
+const QUALITY_VOLUME_COLOR = "#ddd6fe";
+const QUALITY_LINE_COLOR = "#7c3aed";
+const QUALITY_COLUMN_COLOR = "#2563eb55";
+
+/** Dynamically scales quality y-axis to data range, avoiding forced 0-minimum. */
+function buildQualityTrendAxes(data: Record<string, unknown[]>) {
+  const pts = (data["quality"] ?? []) as MonthlyQualityPoint[];
+  const qValues = pts
+    .map((p) => p.quality)
+    .filter((v): v is number => v !== null);
+  const minQ = qValues.length > 0 ? Math.min(...qValues) : 1;
+  const paddedMin = Math.max(0, Math.floor((minQ - 0.5) * 2) / 2);
+  return [
+    {
+      id: "x",
+      type: "band" as const,
+      position: "bottom" as const,
+      accessor: (d: Record<string, unknown>) =>
+        (d as unknown as MonthlyQualityPoint).label,
+    },
+    {
+      id: "quality_y",
+      type: "linear" as const,
+      position: "left" as const,
+      accessor: (d: Record<string, unknown>) =>
+        (d as unknown as MonthlyQualityPoint).quality ?? 0,
+      domain: [paddedMin, 5] as [number, number],
+      numTicks: 5,
+    },
+    {
+      id: "volume_y",
+      type: "linear" as const,
+      position: "right" as const,
+      accessor: (d: Record<string, unknown>) =>
+        (d as unknown as MonthlyQualityPoint).volume,
+      hidden: true,
+      numTicks: 4,
+    },
+  ];
+}
+
+/** Returns the first day of the month that is `monthsBack` calendar months before `dateStr`. */
+function qualityTrendFrom(dateStr: string, monthsBack: number): string {
+  const d = new Date(dateStr + "T00:00:00Z");
+  d.setUTCMonth(d.getUTCMonth() - monthsBack);
+  d.setUTCDate(1);
+  return d.toISOString().slice(0, 10);
+}
+
 export function Overview(): JSX.Element {
   const params = filterQueryParams.value;
 
@@ -68,6 +121,15 @@ export function Overview(): JSX.Element {
     queryKey: ["org/config"],
     queryFn: () =>
       fetch("/api/org/config").then((r) => r.json() as Promise<OrgConfig>),
+  });
+
+  const qtFrom = qualityTrendFrom(params.to, 5);
+  const qualityTrendQuery = useQuery<TimeseriesResponse>({
+    queryKey: ["quality-trend", qtFrom, params.to],
+    queryFn: () =>
+      fetch(`/api/analytics/timeseries?from=${qtFrom}&to=${params.to}`).then(
+        (r) => r.json() as Promise<TimeseriesResponse>,
+      ),
   });
 
   const d = overview.data;
@@ -177,20 +239,6 @@ export function Overview(): JSX.Element {
     return { costSeries: series, projectedCostData: projected, budgetPct: pct };
   })();
 
-  const qualitySeries = ts
-    ? [
-        {
-          id: "quality",
-          label: "Quality Score Trend",
-          formatValue: undefined as ((v: number) => string) | undefined,
-          data: ts.points.map((p) => ({
-            date: p.date,
-            value: p.avg_quality_score ?? 0,
-          })),
-        },
-      ]
-    : [];
-
   // Data signals for Visualization consumers
   const tokenDataSig = useDeepComputed(() => {
     const result: Record<
@@ -214,15 +262,16 @@ export function Overview(): JSX.Element {
     return result;
   });
 
-  const qualityDataSig = useDeepComputed(() => {
-    const result: Record<
-      string,
-      Array<{ date: string; value: number; [k: string]: unknown }>
-    > = {};
-    for (const s of qualitySeries) {
-      result[s.id] = s.data.map((d) => ({ ...d, [s.id]: d.value }));
-    }
-    return result;
+  const qualityMonthly = useDeepComputed(() => {
+    const qtPoints = qualityTrendQuery.data?.points ?? [];
+    return aggregateQualityMonthly(qtPoints, params.to);
+  });
+
+  const qualityTrendDataSig = useDeepComputed(() => {
+    const monthly = qualityMonthly.value;
+    if (monthly.length === 0)
+      return {} as Record<string, MonthlyQualityPoint[]>;
+    return { quality: monthly, volume: monthly };
   });
 
   return (
@@ -595,27 +644,77 @@ export function Overview(): JSX.Element {
           className="rounded-lg border bg-card shadow-sm p-6"
           aria-label="Quality score trend"
         >
-          <div className="mb-4">
-            <p className="text-[14px] font-semibold text-foreground">
-              Quality score trend
-            </p>
-            <p className="text-[12px] text-muted-foreground mt-0.5">
-              30-day rolling average quality score
-            </p>
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <p className="text-[14px] font-semibold text-foreground">
+                Quality Score Trend
+              </p>
+              <p className="text-[12px] text-muted-foreground mt-0.5">
+                6-month trajectory of human-rated output quality (1-5 scale)
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                <span
+                  className="inline-block h-2 w-2 rounded-full"
+                  style={{ background: QUALITY_LINE_COLOR }}
+                />
+                Avg Quality Score
+              </span>
+              <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                <span
+                  className="inline-block h-2 w-2 rounded-full"
+                  style={{ background: QUALITY_VOLUME_COLOR }}
+                />
+                Rating Volume
+              </span>
+            </div>
           </div>
-          {loading ? (
+          {qualityTrendQuery.isLoading ? (
             <Skeleton className="h-48 w-full" />
           ) : (
             <Visualization
-              data={qualityDataSig}
-              axes={AREA_AXES}
-              ariaLabel="Quality score 30-day trend"
+              data={qualityTrendDataSig}
+              axes={buildQualityTrendAxes}
+              ariaLabel="Quality score 6-month trend"
             >
               {() => (
                 <>
-                  <AreaChart series="quality" axis="y" />
+                  <ColumnChart
+                    series="volume"
+                    axis="volume_y"
+                    color={QUALITY_COLUMN_COLOR}
+                  />
+                  <AreaChart
+                    series="quality"
+                    axis="quality_y"
+                    color={QUALITY_LINE_COLOR}
+                    centered
+                  />
+                  <DataLabels
+                    series="quality"
+                    axis="quality_y"
+                    format={(v) => v.toFixed(1)}
+                    centered
+                  />
                   <SeriesTooltip
-                    series={[{ id: "quality", label: "Quality Score Trend" }]}
+                    matchKey="label"
+                    series={[
+                      {
+                        id: "quality",
+                        label: "Avg Quality Score",
+                        color: QUALITY_LINE_COLOR,
+                        axis: "quality_y",
+                        formatValue: (v) => v.toFixed(1),
+                      },
+                      {
+                        id: "volume",
+                        label: "Rating Volume",
+                        color: QUALITY_COLUMN_COLOR,
+                        axis: "volume_y",
+                        formatValue: (v) => formatNumber(Math.round(v)),
+                      },
+                    ]}
                   />
                 </>
               )}

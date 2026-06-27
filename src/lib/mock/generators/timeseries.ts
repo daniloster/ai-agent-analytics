@@ -8,16 +8,18 @@ function clamp(value: number, min: number, max: number): number {
 function buildPoint(faker: Faker, date: string): TimeseriesPoint {
   const inputTokens = faker.number.int({ min: 10000, max: 150000 })
   const outputTokens = faker.number.int({ min: 200000, max: 500000 })
+  const runs = faker.number.int({ min: 10, max: 2000 })
   const isNull = faker.number.int({ min: 0, max: 4 }) === 0
   return {
     date,
-    runs: faker.number.int({ min: 10, max: 2000 }),
+    runs,
     input_tokens: inputTokens,
     output_tokens: outputTokens,
     tokens: inputTokens + outputTokens,
     cost: faker.number.float({ min: 5, max: 2000, fractionDigits: 2 }),
     dau: faker.number.int({ min: 1, max: 200 }),
     avg_quality_score: isNull ? null : faker.number.float({ min: 1, max: 5, fractionDigits: 2 }),
+    rated_run_count: isNull ? 0 : faker.number.int({ min: 1, max: Math.max(1, Math.floor(runs * 0.6)) }),
     error_rate: clamp(faker.number.float({ min: 0, max: 20, fractionDigits: 2 }), 0, 100),
   }
 }

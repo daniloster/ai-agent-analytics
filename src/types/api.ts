@@ -150,6 +150,7 @@ export interface TimeseriesPoint {
   cost: number
   dau: number
   avg_quality_score: number | null
+  rated_run_count: number
   error_rate: number
 }
 

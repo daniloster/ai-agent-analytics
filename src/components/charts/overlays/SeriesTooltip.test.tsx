@@ -1,6 +1,6 @@
 import { it, expect, describe } from 'vitest'
 import { signal } from '@preact/signals-react'
-import { scaleLinear, scaleTime } from '@visx/scale'
+import { scaleLinear, scaleTime, scaleBand } from '@visx/scale'
 import { SeriesTooltip } from './SeriesTooltip'
 import { buildMockContext, renderWithVisualizationContext } from '../test-utils'
 import type { AnyD3Scale, ActivePoint } from '../../../types/charts'
@@ -108,5 +108,62 @@ describe('with active point set', () => {
     )
     const texts = Array.from(container.querySelectorAll('text')).map((t) => t.textContent ?? '')
     expect(texts.some((t) => t.startsWith('FORMATTED:'))).toBe(true)
+  })
+})
+
+describe('matchKey prop', () => {
+  it('matches series data by custom key and shows raw label in header for band scale', () => {
+    const bandScale = scaleBand<string>({
+      domain: ['Jan', 'Feb', 'Jun (Now)'],
+      range: [0, 300],
+      padding: 0,
+    })
+    const yScale = scaleLinear({ domain: [0, 5], range: [200, 0] })
+
+    const MONTHLY_DATA = [
+      { label: 'Jan', quality: 3.8, volume: 100 },
+      { label: 'Feb', quality: 4.0, volume: 120 },
+      { label: 'Jun (Now)', quality: 4.2, volume: 80 },
+    ]
+
+    const activePoint = signal<ActivePoint | null>({
+      series: '',
+      axis: 'x',
+      datum: MONTHLY_DATA[2] as unknown as Record<string, unknown>,
+      x: (bandScale('Jun (Now)') ?? 0) + bandScale.bandwidth() / 2,
+      y: yScale(4.2),
+    })
+
+    const ctx = buildMockContext({
+      dataSignal: signal<Record<string, unknown[]>>({
+        quality: MONTHLY_DATA as unknown as Record<string, unknown>[],
+        volume: MONTHLY_DATA as unknown as Record<string, unknown>[],
+      }),
+      innerWidth: signal(300),
+      innerHeight: signal(200),
+      scales: signal<Record<string, AnyD3Scale>>({
+        quality_y: yScale as unknown as AnyD3Scale,
+        volume_y: yScale as unknown as AnyD3Scale,
+      }),
+      baseScale: signal(bandScale as unknown as AnyD3Scale),
+      baseAxisAccessor: signal((d: Record<string, unknown>) => d['label'] as string),
+      activePoint,
+    })
+
+    const { container } = renderWithVisualizationContext(
+      <SeriesTooltip
+        matchKey="label"
+        series={[
+          { id: 'quality', label: 'Avg Quality Score', axis: 'quality_y' },
+          { id: 'volume', label: 'Rating Volume', axis: 'volume_y' },
+        ]}
+      />,
+      ctx,
+    )
+
+    const texts = Array.from(container.querySelectorAll('text')).map((t) => t.textContent ?? '')
+    expect(texts.some((t) => t.includes('Jun (Now)'))).toBe(true)
+    expect(texts.some((t) => t.includes('Avg Quality Score'))).toBe(true)
+    expect(texts.some((t) => t.includes('Rating Volume'))).toBe(true)
   })
 })

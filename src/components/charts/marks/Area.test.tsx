@@ -1,7 +1,7 @@
 import { it, expect, describe } from 'vitest'
 import { fireEvent } from '@testing-library/react'
 import { signal } from '@preact/signals-react'
-import { scaleLinear } from '@visx/scale'
+import { scaleLinear, scaleBand } from '@visx/scale'
 import { Area } from './Area'
 import { renderWithVisualizationContext, buildMockContext } from '../test-utils'
 import { VisualizationContext } from '../VisualizationContext'
@@ -132,5 +132,80 @@ describe('Area mark', () => {
     const paths = container.querySelectorAll('path')
     const hasDash = Array.from(paths).some((p) => p.getAttribute('stroke-dasharray') !== null)
     expect(hasDash).toBe(false)
+  })
+
+  it('centered=true offsets circle cx by bandwidth/2 when base scale is a band scale', () => {
+    const bandScale = scaleBand<string>({
+      domain: ['a', 'b', 'c', 'd', 'e'],
+      range: [0, 400],
+      padding: 0,
+    }) as unknown as AnyD3Scale
+
+    const bandData = [
+      { label: 'a', v: 10 },
+      { label: 'b', v: 50 },
+      { label: 'c', v: 90 },
+      { label: 'd', v: 30 },
+      { label: 'e', v: 70 },
+    ]
+
+    const data = signal({ v: bandData })
+    const { container: withoutCentered } = renderWithVisualizationContext(
+      <Area series="v" axis="y" centered={false} />,
+      {
+        dataSignal: data,
+        innerWidth: signal(400),
+        innerHeight: signal(200),
+        scales: signal({ y: yScale }),
+        baseScale: signal(bandScale),
+        baseAxisAccessor: signal((d: Record<string, unknown>) => d.label),
+      },
+    )
+    const { container: withCentered } = renderWithVisualizationContext(
+      <Area series="v" axis="y" centered />,
+      {
+        dataSignal: data,
+        innerWidth: signal(400),
+        innerHeight: signal(200),
+        scales: signal({ y: yScale }),
+        baseScale: signal(bandScale),
+        baseAxisAccessor: signal((d: Record<string, unknown>) => d.label),
+      },
+    )
+
+    const circlesWithout = Array.from(withoutCentered.querySelectorAll('circle')).map(c =>
+      parseFloat(c.getAttribute('cx') ?? '0'),
+    )
+    const circlesWith = Array.from(withCentered.querySelectorAll('circle')).map(c =>
+      parseFloat(c.getAttribute('cx') ?? '0'),
+    )
+
+    // Each centered cx should be offset by bandwidth/2 relative to non-centered
+    const bw = (bandScale as unknown as { bandwidth: () => number }).bandwidth()
+    expect(bw).toBeGreaterThan(0)
+    circlesWithout.forEach((cx, i) => {
+      expect(circlesWith[i]).toBeCloseTo(cx + bw / 2, 2)
+    })
+  })
+
+  it('skips null data points - renders fewer circles when series has nulls', () => {
+    const dataWithNulls = [
+      { date: 0, v: 10 },
+      { date: 1, v: null },
+      { date: 2, v: 90 },
+      { date: 3, v: null },
+      { date: 4, v: 70 },
+    ]
+    const data = signal({ v: dataWithNulls })
+    const { container } = renderWithVisualizationContext(<Area series="v" axis="y" />, {
+      dataSignal: data,
+      innerWidth: signal(400),
+      innerHeight: signal(200),
+      scales: signal({ y: yScale }),
+      baseScale: signal(xScale),
+      baseAxisAccessor: signal((d: Record<string, unknown>) => d.date),
+    })
+    const circles = container.querySelectorAll('circle')
+    expect(circles).toHaveLength(3)
   })
 })

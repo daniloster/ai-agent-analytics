@@ -7,13 +7,15 @@ import type { LineProps } from './Line'
 export interface AreaProps<TSeries extends string = string, TAxisId extends string = string> extends LineProps<TSeries, TAxisId> {
   fillOpacity?: number
   dashed?: boolean
+  /** When true, offsets x positions by half the band width. Use when the x-axis is a band scale. */
+  centered?: boolean
 }
 
 function makeActivePoint(
   series: string,
   axis: string,
   datum: Record<string, unknown>,
-  xScale: (v: unknown) => number,
+  xFn: (v: unknown) => number,
   yScale: (v: unknown) => number,
   baseAxisAccessor: (d: Record<string, unknown>) => unknown,
 ): ActivePoint {
@@ -21,9 +23,14 @@ function makeActivePoint(
     series,
     axis,
     datum,
-    x: xScale(baseAxisAccessor(datum)),
+    x: xFn(baseAxisAccessor(datum)),
     y: yScale(datum[series]),
   }
+}
+
+function isDefined(datum: Record<string, unknown>, series: string): boolean {
+  const v = datum[series]
+  return v !== null && v !== undefined && !isNaN(Number(v))
 }
 
 export function Area(props: AreaProps): JSX.Element | null {
@@ -44,11 +51,18 @@ export function Area(props: AreaProps): JSX.Element | null {
   const gradientId = `area-gradient-${props.series}`
 
   const yScale = scales.value[props.axis] as unknown as AnyD3Scale
-  const xScaleFn = baseScale.value as ((v: unknown) => number) | null
+  const rawXScaleFn = baseScale.value as ((v: unknown) => number) | null
   const yScaleFn = yScale as unknown as (v: unknown) => number
   const accessor = baseAxisAccessor.value
 
-  if (!xScaleFn || !accessor) return null
+  if (!rawXScaleFn || !accessor) return null
+
+  const bw =
+    props.centered && baseScale.value !== null && 'bandwidth' in (baseScale.value as object)
+      ? (baseScale.value as { bandwidth: () => number }).bandwidth() / 2
+      : 0
+
+  const xScaleFn = bw !== 0 ? (v: unknown) => rawXScaleFn(v) + bw : rawXScaleFn
 
   const buildPoint = (datum: Record<string, unknown>) =>
     makeActivePoint(props.series, props.axis, datum, xScaleFn, yScaleFn, accessor)
@@ -72,6 +86,7 @@ export function Area(props: AreaProps): JSX.Element | null {
         yScale={yScale as Parameters<typeof AreaClosed>[0]['yScale']}
         fill={`url(#${gradientId})`}
         stroke="none"
+        defined={(d) => isDefined(d, props.series)}
       />
       <LinePath
         data={data}
@@ -81,8 +96,10 @@ export function Area(props: AreaProps): JSX.Element | null {
         strokeWidth={props.strokeWidth ?? 2}
         strokeDasharray={props.dashed ? '4 2' : undefined}
         fill="none"
+        defined={(d) => isDefined(d, props.series)}
       />
       {data.map((datum, i) => {
+        if (!isDefined(datum, props.series)) return null
         const cx = xScaleFn(accessor(datum))
         const cy = yScaleFn(datum[props.series])
         const handleActivate = () => {

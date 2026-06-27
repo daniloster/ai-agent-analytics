@@ -74,8 +74,8 @@ const TIMESERIES = {
   period: { from: '2026-06-01', to: '2026-06-30' },
   granularity: 'day',
   points: [
-    { date: '2026-06-01', runs: 100, tokens: 50000, input_tokens: 35000, output_tokens: 15000, cost: 450, dau: 85, avg_quality_score: 4.1, error_rate: 2.0 },
-    { date: '2026-06-02', runs: 120, tokens: 60000, input_tokens: 42000, output_tokens: 18000, cost: 520, dau: 90, avg_quality_score: 4.2, error_rate: 1.5 },
+    { date: '2026-06-01', runs: 100, tokens: 50000, input_tokens: 35000, output_tokens: 15000, cost: 450, dau: 85, avg_quality_score: 4.1, rated_run_count: 60, error_rate: 2.0 },
+    { date: '2026-06-02', runs: 120, tokens: 60000, input_tokens: 42000, output_tokens: 18000, cost: 520, dau: 90, avg_quality_score: 4.2, rated_run_count: 72, error_rate: 1.5 },
   ],
 }
 
@@ -274,4 +274,32 @@ it('filter change causes fetch to be called again with new params', async () => 
   })
   // Reset signal
   dateRange.value = { from: '2026-06-01', to: '2026-06-30', preset: '30d' }
+})
+
+it('quality trend figure has subtitle "6-month trajectory"', async () => {
+  mockFetch()
+  const { Overview } = await import('./Overview')
+  render(<Overview />, { wrapper: makeWrapper() })
+  await waitFor(() => {
+    expect(screen.getByText(/6-month trajectory/i)).toBeTruthy()
+  })
+})
+
+it('quality trend legend shows "Avg Quality Score" and "Rating Volume"', async () => {
+  mockFetch()
+  const { Overview } = await import('./Overview')
+  render(<Overview />, { wrapper: makeWrapper() })
+  await waitFor(() => {
+    expect(screen.getByText('Avg Quality Score')).toBeTruthy()
+    expect(screen.getByText('Rating Volume')).toBeTruthy()
+  })
+})
+
+it('quality trend section title is "Quality Score Trend"', async () => {
+  mockFetch()
+  const { Overview } = await import('./Overview')
+  render(<Overview />, { wrapper: makeWrapper() })
+  await waitFor(() => {
+    expect(screen.getByText('Quality Score Trend')).toBeTruthy()
+  })
 })

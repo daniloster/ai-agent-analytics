@@ -208,6 +208,36 @@ function VisualizationInner({
           y: point.y,
         };
       }
+    } else if (bScale && "bandwidth" in (bScale as object) && baseAxisCfg) {
+      const innerX = point.x - margin.left;
+      const rawData = (Object.values(data.value)[0] ?? []) as Record<
+        string,
+        unknown
+      >[];
+      const scaleFn = bScale as (v: unknown) => number;
+      const bw = (bScale as { bandwidth: () => number }).bandwidth();
+
+      let closestDatum: Record<string, unknown> | null = null;
+      let closestDist = Infinity;
+      for (const datum of rawData) {
+        const bx = scaleFn(baseAxisCfg.accessor(datum));
+        const dist = Math.abs(bx + bw / 2 - innerX);
+        if (dist < closestDist) {
+          closestDist = dist;
+          closestDatum = datum;
+        }
+      }
+
+      if (closestDatum) {
+        const xPx = scaleFn(baseAxisCfg.accessor(closestDatum));
+        activePoint.value = {
+          series: "",
+          axis: baseAxisCfg.id,
+          datum: closestDatum,
+          x: xPx + margin.left,
+          y: point.y,
+        };
+      }
     }
   };
 

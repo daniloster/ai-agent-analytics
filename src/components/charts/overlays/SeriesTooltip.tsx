@@ -6,10 +6,14 @@ export interface SeriesTooltipSeries {
   label: string;
   color?: string;
   formatValue?: (v: number) => string;
+  /** y-axis id for this series; defaults to "y" */
+  axis?: string;
 }
 
 export interface SeriesTooltipProps {
   series: SeriesTooltipSeries[];
+  /** Data key used to match active point to series rows; defaults to "date" */
+  matchKey?: string;
 }
 
 const TOOLTIP_W = 180;
@@ -19,6 +23,7 @@ const TOOLTIP_GAP = 10;
 
 export function SeriesTooltip({
   series,
+  matchKey = "date",
 }: SeriesTooltipProps): JSX.Element | null {
   const {
     activePoint,
@@ -38,25 +43,33 @@ export function SeriesTooltip({
 
   const primaryDatum =
     (activePoint.value?.datum as Record<string, unknown>) ?? {};
-  const date = primaryDatum["date"] as string | undefined;
-  if (!date) return null;
+  const matchValue = primaryDatum[matchKey];
+  if (matchValue === undefined || matchValue === null) return null;
 
-  const xFn = baseScale.value as (v: unknown) => number;
-  const x = xFn(baseAxisAccessor.value?.(primaryDatum) ?? primaryDatum);
+  const bScale = baseScale.value;
+  const halfBw =
+    bScale !== null && "bandwidth" in (bScale as object)
+      ? (bScale as { bandwidth: () => number }).bandwidth() / 2
+      : 0;
+
+  const xFn = bScale as (v: unknown) => number;
+  const x = xFn(baseAxisAccessor.value?.(primaryDatum) ?? primaryDatum) + halfBw;
   const h = innerHeight.value;
   const w = innerWidth.value;
-  const yFn = scales.value.y as ((v: unknown) => number) | undefined;
-  if (!yFn) return null;
 
   const points = series.flatMap((s) => {
     const seriesData = (dataSignal.value[s.id] ?? []) as Record<
       string,
       unknown
     >[];
-    const match = seriesData.find((d) => d["date"] === date);
+    const match = seriesData.find((d) => d[matchKey] === matchValue);
     if (!match) return [];
     const val = match[s.id] as number | undefined;
     if (val === undefined || val === null) return [];
+    const yFn = scales.value[s.axis ?? "y"] as
+      | ((v: unknown) => number)
+      | undefined;
+    if (!yFn) return [];
     const y = yFn(val);
     if (isNaN(y)) return [];
     return [{ s, val, y }];
@@ -70,14 +83,18 @@ export function SeriesTooltip({
       ? x - TOOLTIP_W - TOOLTIP_GAP
       : x + TOOLTIP_GAP;
 
-  let formattedDate = date;
-  try {
-    formattedDate = new Date(date + "T00:00:00").toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-    });
-  } catch {
-    // keep raw date string
+  let headerLabel = String(matchValue);
+  if (matchKey === "date") {
+    try {
+      headerLabel = new Date(
+        (matchValue as string) + "T00:00:00",
+      ).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      });
+    } catch {
+      // keep raw value
+    }
   }
 
   return (
@@ -118,7 +135,7 @@ export function SeriesTooltip({
         fontWeight={600}
         fill={tokens.muted}
       >
-        {formattedDate}
+        {headerLabel}
       </text>
       {points.map(({ s, val }, i) => {
         const rowY = 4 + TOOLTIP_HEADER_H + i * ROW_H;
