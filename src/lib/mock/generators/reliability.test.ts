@@ -64,6 +64,13 @@ describe('generateReliability', () => {
     expect(found).toBe(true)
   })
 
+  it('majority of availability_by_day entries are >= 99.9 (green zone)', () => {
+    // Fixed seed - deterministic check that distribution is mostly green
+    const result = generateReliability(makeSeededFaker(7), { from: '2026-06-01', to: '2026-06-30' })
+    const greenCount = result.availability_by_day.filter((d) => d.uptime_pct >= 99.9).length
+    expect(greenCount / result.availability_by_day.length).toBeGreaterThanOrEqual(0.6)
+  })
+
   it('completes in under 50ms for a 365-day range', () => {
     const faker = makeSeededFaker(42)
     const start = performance.now()

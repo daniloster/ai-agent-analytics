@@ -18,7 +18,6 @@ import { DonutChart } from "../charts/DonutChart";
 import { Annotation } from "../charts/overlays/Annotation";
 import { SeriesTooltip } from "../charts/overlays/SeriesTooltip";
 import { Visualization, defineAxes } from "../charts/Visualization";
-import { IncidentTable } from "../kpis/IncidentTable";
 import { KpiCard } from "../kpis/KpiCard";
 import { Section } from "../layout/Section";
 import { Skeleton } from "../ui/skeleton";
@@ -550,9 +549,6 @@ export function Reliability(): JSX.Element {
                 </div>
               )}
             </figure>
-            {d && d.incidents.length > 0 && (
-              <IncidentTable incidents={d.incidents} />
-            )}
           </div>
         </>
       )}

@@ -54,10 +54,18 @@ export function generateReliability(faker: Faker, params: FilterParams): Reliabi
   const p99 = faker.number.int({ min: p95, max: p95 * 3 })
   const p99Prior = faker.number.int({ min: p95Prior, max: p95Prior * 3 })
 
-  const availabilityByDay = buildDailyArray(params.from, params.to, (date) => ({
-    date,
-    uptime_pct: clamp(faker.number.float({ min: 90, max: 100, fractionDigits: 3 }), 0, 100),
-  }))
+  const availabilityByDay = buildDailyArray(params.from, params.to, (date) => {
+    const roll = faker.number.float({ min: 0, max: 1 })
+    let uptime_pct: number
+    if (roll < 0.8) {
+      uptime_pct = faker.number.float({ min: 99.9, max: 100, fractionDigits: 3 })
+    } else if (roll < 0.9) {
+      uptime_pct = faker.number.float({ min: 99.0, max: 99.9, fractionDigits: 3 })
+    } else {
+      uptime_pct = faker.number.float({ min: 90.0, max: 99.0, fractionDigits: 3 })
+    }
+    return { date, uptime_pct }
+  })
 
   const trendDays = Math.max(7, availabilityByDay.length)
   const trendStart = new Date(params.from + 'T00:00:00Z')

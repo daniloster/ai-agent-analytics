@@ -153,24 +153,6 @@ it('DonutChart is present in the DOM', async () => {
   })
 })
 
-it('incidents = [] renders no IncidentTable', async () => {
-  mockFetch(RELIABILITY_NO_INCIDENTS)
-  const { Reliability } = await import('./Reliability')
-  const { container } = render(<Reliability />, { wrapper: makeWrapper() })
-  await waitFor(() => {
-    expect(container.querySelector('caption')).toBeNull()
-  })
-})
-
-it('incidents with entries renders IncidentTable', async () => {
-  mockFetch()
-  const { Reliability } = await import('./Reliability')
-  const { container } = render(<Reliability />, { wrapper: makeWrapper() })
-  await waitFor(() => {
-    expect(container.querySelector('caption')).not.toBeNull()
-  })
-})
-
 it('MTTR KpiCard shows "No incidents" when mttr_minutes is null', async () => {
   mockFetch(RELIABILITY_NO_INCIDENTS)
   const { Reliability } = await import('./Reliability')
