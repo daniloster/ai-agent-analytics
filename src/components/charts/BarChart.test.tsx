@@ -24,9 +24,9 @@ it('each listitem has tabIndex=0', () => {
   })
 })
 
-it('role="status" live region is rendered in the list', () => {
+it('role="status" live region is rendered near the list', () => {
   const { container } = render(<BarChart bars={BARS} />)
-  const region = container.querySelector('[role="list"] [role="status"][aria-live="polite"]')
+  const region = container.querySelector('[role="status"][aria-live="polite"]')
   expect(region).not.toBeNull()
 })
 

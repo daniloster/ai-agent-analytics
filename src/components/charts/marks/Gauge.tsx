@@ -56,7 +56,6 @@ export function Gauge(props: GaugeProps): JSX.Element | null {
                   d={d}
                   fill={fill}
                   tabIndex={0}
-                  role="listitem"
                   aria-label={`${props.series}: ${value} of ${domainMax}`}
                 />
               )

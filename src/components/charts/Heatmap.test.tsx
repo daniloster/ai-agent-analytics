@@ -105,7 +105,7 @@ it('first cell has tabIndex=0, all others have tabIndex=-1', () => {
 it('ArrowRight on first cell moves focus to index 7 (second week, same day)', () => {
   const { container, rerender } = render(<Heatmap data={makeData(14)} colorScale="availability" />)
   const rects = container.querySelectorAll('rect')
-  fireEvent.keyDown(rects[0] as HTMLElement, { key: 'ArrowRight' })
+  fireEvent.keyDown(rects[0] as unknown as HTMLElement, { key: 'ArrowRight' })
   rerender(<Heatmap data={makeData(14)} colorScale="availability" />)
   const updatedRects = container.querySelectorAll('rect')
   expect(updatedRects[0]?.getAttribute('tabindex')).toBe('-1')
@@ -115,21 +115,21 @@ it('ArrowRight on first cell moves focus to index 7 (second week, same day)', ()
 it('Enter on a cell sets the live region text to the cell aria-label', () => {
   const data = [{ date: '2026-01-01', value: 99 }]
   const { container, rerender } = render(<Heatmap data={data} colorScale="availability" />)
-  const rect = container.querySelector('rect') as HTMLElement
+  const rect = container.querySelector('rect') as unknown as HTMLElement
   fireEvent.keyDown(rect, { key: 'Enter' })
   rerender(<Heatmap data={data} colorScale="availability" />)
-  const region = container.querySelector('[role="status"]') as HTMLElement
+  const region = container.querySelector('[role="status"]') as unknown as HTMLElement
   expect(region.textContent).toBe('2026-01-01: 99% uptime')
 })
 
 it('Escape on a cell clears the live region text', () => {
   const data = [{ date: '2026-01-01', value: 99 }]
   const { container, rerender } = render(<Heatmap data={data} colorScale="availability" />)
-  const rect = container.querySelector('rect') as HTMLElement
+  const rect = container.querySelector('rect') as unknown as HTMLElement
   fireEvent.keyDown(rect, { key: 'Enter' })
   rerender(<Heatmap data={data} colorScale="availability" />)
   fireEvent.keyDown(rect, { key: 'Escape' })
   rerender(<Heatmap data={data} colorScale="availability" />)
-  const region = container.querySelector('[role="status"]') as HTMLElement
+  const region = container.querySelector('[role="status"]') as unknown as HTMLElement
   expect(region.textContent).toBe('')
 })

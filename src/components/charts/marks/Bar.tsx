@@ -76,44 +76,46 @@ export function Bar(props: BarProps): JSX.Element | null {
         yScale={stackedYScale}
         color={() => color}
       >
-        {(barStacks) =>
-          barStacks.flatMap((barStack) =>
-            barStack.bars.map((bar) => (
-              <rect
-                key={`stack-${barStack.index}-${bar.index}`}
-                x={bar.x}
-                y={bar.y}
-                width={bar.width}
-                height={bar.height}
-                fill={bar.color}
-                tabIndex={0}
-                role="listitem"
-                aria-label={`${props.series}: ${(bar.bar.data as Record<string, unknown>)[props.series]}`}
-                onPointerEnter={() => {
-                  activePoint.value = computeActivePoint(props.series, props.axis, bar.bar.data as Record<string, unknown>, bar.x, bar.y)
-                }}
-                onPointerLeave={() => { activePoint.value = null }}
-                onFocus={() => {
-                  activePoint.value = computeActivePoint(props.series, props.axis, bar.bar.data as Record<string, unknown>, bar.x, bar.y)
-                }}
-                onBlur={() => { activePoint.value = null }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
+        {(barStacks) => (
+          <g role="list" aria-label={`${props.series} bars`}>
+            {barStacks.flatMap((barStack) =>
+              barStack.bars.map((bar) => (
+                <rect
+                  key={`stack-${barStack.index}-${bar.index}`}
+                  x={bar.x}
+                  y={bar.y}
+                  width={bar.width}
+                  height={bar.height}
+                  fill={bar.color}
+                  tabIndex={0}
+                  role="listitem"
+                  aria-label={`${props.series}: ${(bar.bar.data as Record<string, unknown>)[props.series]}`}
+                  onPointerEnter={() => {
                     activePoint.value = computeActivePoint(props.series, props.axis, bar.bar.data as Record<string, unknown>, bar.x, bar.y)
-                  } else if (e.key === 'Escape') {
-                    activePoint.value = null
-                  }
-                }}
-              />
-            )),
-          )
-        }
+                  }}
+                  onPointerLeave={() => { activePoint.value = null }}
+                  onFocus={() => {
+                    activePoint.value = computeActivePoint(props.series, props.axis, bar.bar.data as Record<string, unknown>, bar.x, bar.y)
+                  }}
+                  onBlur={() => { activePoint.value = null }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      activePoint.value = computeActivePoint(props.series, props.axis, bar.bar.data as Record<string, unknown>, bar.x, bar.y)
+                    } else if (e.key === 'Escape') {
+                      activePoint.value = null
+                    }
+                  }}
+                />
+              )),
+            )}
+          </g>
+        )}
       </BarStack>
     )
   }
 
   return (
-    <>
+    <g role="list" aria-label={`${props.series} bars`}>
       {sorted.map((datum, i) => {
         const x = getX(datum, i)
         const y = yScaleFn(datum[props.series])
@@ -148,6 +150,6 @@ export function Bar(props: BarProps): JSX.Element | null {
           />
         )
       })}
-    </>
+    </g>
   )
 }

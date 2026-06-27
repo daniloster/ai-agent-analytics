@@ -2,6 +2,7 @@ import { it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ReliabilityResponse } from '../../types/api'
+import { checkA11y } from '../../lib/a11y/axeConfig'
 
 vi.mock('@visx/responsive/lib/components/ParentSize', () => ({
   default: ({ children, className, style }: {
@@ -251,3 +252,13 @@ it('all 8 KpiCards have delta badges when data is loaded', async () => {
     expect(deltaBadges.length).toBeGreaterThanOrEqual(7)
   })
 })
+
+it('passes axe accessibility check after data loads', async () => {
+  mockFetch()
+  const { Reliability } = await import('./Reliability')
+  const { container } = render(<Reliability />, { wrapper: makeWrapper() })
+  await waitFor(() => {
+    expect(screen.getAllByRole('button', { name: /formula and example for/i }).length).toBeGreaterThan(0)
+  })
+  await checkA11y(container)
+}, 15000)

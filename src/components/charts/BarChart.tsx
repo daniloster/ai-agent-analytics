@@ -21,8 +21,9 @@ export function BarChart({ bars, maxValue, ariaLabel, barHeight = 28, formatValu
   const max = maxValue ?? (bars.length > 0 ? Math.max(...bars.map((b) => b.value)) : 1)
 
   return (
-    <div role="list" aria-label={ariaLabel ?? 'Bar chart'} className="space-y-2">
+    <div>
       <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">{announceText.value}</div>
+      <div role="list" aria-label={ariaLabel ?? 'Bar chart'} className="space-y-2">
       {bars.map((bar, i) => (
         <div
           key={i}
@@ -54,6 +55,7 @@ export function BarChart({ bars, maxValue, ariaLabel, barHeight = 28, formatValu
           </div>
         </div>
       ))}
+      </div>
     </div>
   )
 }

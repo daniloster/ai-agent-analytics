@@ -2,6 +2,7 @@ import { it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { teamId } from '../../lib/filters/filterSignals'
+import { checkA11y } from '../../lib/a11y/axeConfig'
 
 vi.mock('@visx/responsive/lib/components/ParentSize', () => ({
   default: ({ children, className, style }: {
@@ -202,3 +203,13 @@ it('quality KpiCard shows insufficientData in single-team view when avg_quality_
     expect(statusElements.some((el) => el.textContent?.includes('Insufficient data'))).toBe(true)
   })
 })
+
+it('passes axe accessibility check after data loads', async () => {
+  mockFetch(TEAMS_RESPONSE)
+  const { TeamBreakdown } = await import('./TeamBreakdown')
+  const { container } = render(<TeamBreakdown />, { wrapper: makeWrapper() })
+  await waitFor(() => {
+    expect(container.querySelector('table')).not.toBeNull()
+  })
+  await checkA11y(container)
+}, 15000)

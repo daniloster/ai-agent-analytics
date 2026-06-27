@@ -2,6 +2,7 @@ import { it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { BillingResponse } from '../../types/api'
+import { checkA11y } from '../../lib/a11y/axeConfig'
 
 vi.mock('@visx/responsive/lib/components/ParentSize', () => ({
   default: ({ children, className, style }: {
@@ -189,3 +190,13 @@ it('loading state renders Skeleton elements and no KpiCard buttons', async () =>
   expect(skeletons.length).toBeGreaterThan(0)
   expect(screen.queryAllByRole('button', { name: /formula and example for/i })).toHaveLength(0)
 })
+
+it('passes axe accessibility check after data loads', async () => {
+  mockFetch()
+  const { Billing } = await import('./Billing')
+  const { container } = render(<Billing />, { wrapper: makeWrapper() })
+  await waitFor(() => {
+    expect(screen.getByText('Budget Utilization')).toBeTruthy()
+  })
+  await checkA11y(container)
+}, 15000)

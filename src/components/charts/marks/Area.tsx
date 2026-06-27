@@ -1,14 +1,17 @@
-import { AreaClosed, LinePath } from '@visx/shape'
-import { LinearGradient } from '@visx/gradient'
-import { useVisualizationContext } from '../VisualizationContext'
-import type { ActivePoint, AnyD3Scale } from '../../../types/charts'
-import type { LineProps } from './Line'
+import { LinearGradient } from "@visx/gradient";
+import { AreaClosed, LinePath } from "@visx/shape";
+import type { ActivePoint, AnyD3Scale } from "../../../types/charts";
+import { useVisualizationContext } from "../VisualizationContext";
+import type { LineProps } from "./Line";
 
-export interface AreaProps<TSeries extends string = string, TAxisId extends string = string> extends LineProps<TSeries, TAxisId> {
-  fillOpacity?: number
-  dashed?: boolean
+export interface AreaProps<
+  TSeries extends string = string,
+  TAxisId extends string = string,
+> extends LineProps<TSeries, TAxisId> {
+  fillOpacity?: number;
+  dashed?: boolean;
   /** When true, offsets x positions by half the band width. Use when the x-axis is a band scale. */
-  centered?: boolean
+  centered?: boolean;
 }
 
 function makeActivePoint(
@@ -25,12 +28,12 @@ function makeActivePoint(
     datum,
     x: xFn(baseAxisAccessor(datum)),
     y: yScale(datum[series]),
-  }
+  };
 }
 
 function isDefined(datum: Record<string, unknown>, series: string): boolean {
-  const v = datum[series]
-  return v !== null && v !== undefined && !isNaN(Number(v))
+  const v = datum[series];
+  return v !== null && v !== undefined && !isNaN(Number(v));
 }
 
 export function Area(props: AreaProps): JSX.Element | null {
@@ -42,31 +45,44 @@ export function Area(props: AreaProps): JSX.Element | null {
     innerWidth,
     tokens,
     activePoint,
-  } = useVisualizationContext()
+  } = useVisualizationContext();
 
-  if (innerWidth.value === 0) return null
+  if (innerWidth.value === 0) return null;
 
-  const data = (dataSignal.value[props.series] ?? []) as Record<string, unknown>[]
-  const color = props.color ?? tokens.primary
-  const gradientId = `area-gradient-${props.series}`
+  const data = (dataSignal.value[props.series] ?? []) as Record<
+    string,
+    unknown
+  >[];
+  const color = props.color ?? tokens.primary;
+  const gradientId = `area-gradient-${props.series}`;
 
-  const yScale = scales.value[props.axis] as unknown as AnyD3Scale
-  const rawXScaleFn = baseScale.value as ((v: unknown) => number) | null
-  const yScaleFn = yScale as unknown as (v: unknown) => number
-  const accessor = baseAxisAccessor.value
+  const yScale = scales.value[props.axis] as unknown as AnyD3Scale;
+  const rawXScaleFn = baseScale.value as ((v: unknown) => number) | null;
+  const yScaleFn = yScale as unknown as (v: unknown) => number;
+  const accessor = baseAxisAccessor.value;
 
-  if (!rawXScaleFn || !accessor) return null
+  if (!rawXScaleFn || !accessor) return null;
 
   const bw =
-    props.centered && baseScale.value !== null && 'bandwidth' in (baseScale.value as object)
+    props.centered &&
+    baseScale.value !== null &&
+    "bandwidth" in (baseScale.value as object)
       ? (baseScale.value as { bandwidth: () => number }).bandwidth() / 2
-      : 0
+      : 0;
 
-  const xScaleFn = bw !== 0 ? (v: unknown) => rawXScaleFn(v) + bw : rawXScaleFn
+  const xScaleFn = bw !== 0 ? (v: unknown) => rawXScaleFn(v) + bw : rawXScaleFn;
 
   const buildPoint = (datum: Record<string, unknown>) =>
-    makeActivePoint(props.series, props.axis, datum, xScaleFn, yScaleFn, accessor)
+    makeActivePoint(
+      props.series,
+      props.axis,
+      datum,
+      xScaleFn,
+      yScaleFn,
+      accessor,
+    );
 
+  const strokeWidth = props.strokeWidth ?? 2;
   return (
     <>
       <defs aria-hidden="true">
@@ -83,7 +99,7 @@ export function Area(props: AreaProps): JSX.Element | null {
         data={data}
         x={(d) => xScaleFn(accessor(d))}
         y={(d) => yScaleFn(d[props.series])}
-        yScale={yScale as Parameters<typeof AreaClosed>[0]['yScale']}
+        yScale={yScale as Parameters<typeof AreaClosed>[0]["yScale"]}
         fill={`url(#${gradientId})`}
         stroke="none"
         defined={(d) => isDefined(d, props.series)}
@@ -93,24 +109,24 @@ export function Area(props: AreaProps): JSX.Element | null {
         x={(d) => xScaleFn(accessor(d))}
         y={(d) => yScaleFn(d[props.series])}
         stroke={color}
-        strokeWidth={props.strokeWidth ?? 2}
-        strokeDasharray={props.dashed ? '4 2' : undefined}
+        strokeWidth={strokeWidth}
+        strokeDasharray={props.dashed ? "4 2" : undefined}
         fill="none"
         defined={(d) => isDefined(d, props.series)}
       />
-      <g role="list" aria-label={props.series + ' data'}>
+      <g role="list" aria-label={props.series + " data"}>
         {data.map((datum, i) => {
-          if (!isDefined(datum, props.series)) return null
-          const cx = xScaleFn(accessor(datum))
-          const cy = yScaleFn(datum[props.series])
-          const xLabel = String(accessor(datum))
-          const yLabel = String(datum[props.series])
+          if (!isDefined(datum, props.series)) return null;
+          const cx = xScaleFn(accessor(datum));
+          const cy = yScaleFn(datum[props.series]);
+          const xLabel = String(accessor(datum));
+          const yLabel = String(datum[props.series]);
           const handleActivate = () => {
-            activePoint.value = buildPoint(datum)
-          }
+            activePoint.value = buildPoint(datum);
+          };
           const handleDeactivate = () => {
-            activePoint.value = null
-          }
+            activePoint.value = null;
+          };
           return (
             <circle
               key={i}
@@ -118,25 +134,26 @@ export function Area(props: AreaProps): JSX.Element | null {
               cy={cy}
               r={4}
               opacity={0}
-              fill={color}
+              stroke={color}
+              {...(props.dashed ? { fill: "transparent" } : { fill: color })}
               tabIndex={0}
               role="listitem"
-              aria-label={xLabel + ': ' + yLabel}
+              aria-label={xLabel + ": " + yLabel}
               onPointerEnter={handleActivate}
               onPointerLeave={handleDeactivate}
               onFocus={handleActivate}
               onBlur={handleDeactivate}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  activePoint.value = buildPoint(datum)
-                } else if (e.key === 'Escape') {
-                  activePoint.value = null
+                if (e.key === "Enter" || e.key === " ") {
+                  activePoint.value = buildPoint(datum);
+                } else if (e.key === "Escape") {
+                  activePoint.value = null;
                 }
               }}
             />
-          )
+          );
         })}
       </g>
     </>
-  )
+  );
 }

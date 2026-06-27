@@ -2,6 +2,7 @@ import { it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { dateRange } from '../../lib/filters/filterSignals'
+import { checkA11y } from '../../lib/a11y/axeConfig'
 
 vi.mock('@visx/responsive/lib/components/ParentSize', () => ({
   default: ({ children, className, style }: {
@@ -315,3 +316,13 @@ it('quality trend section title is "Quality Score Trend"', async () => {
     expect(screen.getByText('Quality Score Trend')).toBeTruthy()
   })
 })
+
+it('passes axe accessibility check after data loads', async () => {
+  mockFetch()
+  const { Overview } = await import('./Overview')
+  const { container } = render(<Overview />, { wrapper: makeWrapper() })
+  await waitFor(() => {
+    expect(screen.getAllByRole('button', { name: /formula and example for/i }).length).toBeGreaterThan(0)
+  })
+  await checkA11y(container)
+}, 15000)

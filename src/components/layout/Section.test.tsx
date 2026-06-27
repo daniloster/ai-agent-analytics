@@ -42,7 +42,7 @@ afterEach(() => {
 
 it('initial render shows SectionSkeleton, not children', () => {
   const { container, queryByText } = renderSection()
-  expect(container.querySelector('.animate-pulse')).not.toBeNull()
+  expect(container.querySelector('[class*="animate-pulse"]')).not.toBeNull()
   expect(queryByText('content')).toBeNull()
 })
 
@@ -56,7 +56,7 @@ it('after IntersectionObserver fires isIntersecting=true, children render', () =
     </Section>,
   )
   expect(getByText('content')).toBeTruthy()
-  expect(container.querySelector('.animate-pulse')).toBeNull()
+  expect(container.querySelector('[class*="animate-pulse"]')).toBeNull()
 })
 
 it('observer.disconnect called after intersection', () => {
@@ -86,5 +86,5 @@ it('isIntersecting=false does not mount children', () => {
     </Section>,
   )
   expect(queryByText('content')).toBeNull()
-  expect(container.querySelector('.animate-pulse')).not.toBeNull()
+  expect(container.querySelector('[class*="animate-pulse"]')).not.toBeNull()
 })

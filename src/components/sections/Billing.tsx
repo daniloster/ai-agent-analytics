@@ -107,9 +107,10 @@ export function Billing(): JSX.Element {
   const billingQuery = useQuery<BillingResponse>({
     queryKey: ["billing", params],
     queryFn: () =>
-      fetch("/api/analytics/billing?" + buildQueryParams(params)).then(
-        (r) => { if (!r.ok) throw new Error(r.statusText); return r.json() as Promise<BillingResponse> },
-      ),
+      fetch("/api/analytics/billing?" + buildQueryParams(params)).then((r) => {
+        if (!r.ok) throw new Error(r.statusText);
+        return r.json() as Promise<BillingResponse>;
+      }),
   });
 
   const billing = billingQuery.data;
@@ -151,7 +152,10 @@ export function Billing(): JSX.Element {
   // goes stale when the filter changes, forcing re-evaluation with fresh billing data.
   const spendDataSig = useDeepComputed(() => {
     void filterQueryParams.value;
-    const result: Record<string, Array<{ date: string; value: number; [k: string]: unknown }>> = {};
+    const result: Record<
+      string,
+      Array<{ date: string; value: number; [k: string]: unknown }>
+    > = {};
     for (const s of spendSeries) {
       result[s.id] = s.data.map((d) => ({ ...d, [s.id]: d.value }));
     }
@@ -228,7 +232,11 @@ export function Billing(): JSX.Element {
           <div className="grid grid-cols-3 gap-4">
             <KpiCard
               label="Budget Utilization"
-              value={billing ? formatPercent(billing.budget_utilization, 1) : undefined}
+              value={
+                billing
+                  ? formatPercent(billing.budget_utilization, 1)
+                  : undefined
+              }
               subValue={
                 billing
                   ? `${formatCurrency(billing.current_month_spend)} of ${formatCurrency(billing.monthly_budget)} budget`
@@ -244,7 +252,11 @@ export function Billing(): JSX.Element {
             />
             <KpiCard
               label="Projected Annual Spend"
-              value={billing ? formatCurrency(billing.projected_annual_spend) : undefined}
+              value={
+                billing
+                  ? formatCurrency(billing.projected_annual_spend)
+                  : undefined
+              }
               delta={billing ? annualDelta : undefined}
               deltaFormat="currency"
               deltaLabel={
@@ -304,7 +316,11 @@ export function Billing(): JSX.Element {
           <div className="grid grid-cols-3 gap-4 mt-4">
             <KpiCard
               label="Cost per Successful Run"
-              value={billing ? formatCurrency(billing.cost_per_successful_run) : undefined}
+              value={
+                billing
+                  ? formatCurrency(billing.cost_per_successful_run)
+                  : undefined
+              }
               delta={
                 billing
                   ? -computeDeltaPercent(
@@ -314,7 +330,9 @@ export function Billing(): JSX.Element {
                   : undefined
               }
               deltaLabel="WoW"
-              trend={billing ? billing.cost_per_successful_run_trend : undefined}
+              trend={
+                billing ? billing.cost_per_successful_run_trend : undefined
+              }
               trendColor="#7c3aed"
               formulaTooltip="Total cost divided by the number of successful runs."
               exampleTooltip="e.g. $1.21"
@@ -347,7 +365,11 @@ export function Billing(): JSX.Element {
             />
             <KpiCard
               label="Cost of Failed Runs"
-              value={billing ? formatCurrency(billing.cost_of_failed_runs) : undefined}
+              value={
+                billing
+                  ? formatCurrency(billing.cost_of_failed_runs)
+                  : undefined
+              }
               subValue={
                 billing && billing.current_month_spend > 0
                   ? `${formatPercent((billing.cost_of_failed_runs / billing.current_month_spend) * 100, 1)} of period spend`
@@ -492,7 +514,8 @@ export function Billing(): JSX.Element {
                         <>
                           <span>{t.percentage}%</span>
                           <span className="text-foreground font-medium">
-                            {" "}- {formatCurrency(t.total)}
+                            {" "}
+                            - {formatCurrency(t.total)}
                           </span>
                         </>
                       ),
@@ -533,21 +556,30 @@ export function Billing(): JSX.Element {
                   <span className="flex items-center gap-1">
                     <span
                       className="inline-block w-3 h-3 rounded-sm"
-                      style={{ background: "#f0fdf4", border: "1px solid #bbf7d0" }}
+                      style={{
+                        background: "#f0fdf4",
+                        border: "1px solid #bbf7d0",
+                      }}
                     />
                     Normal
                   </span>
                   <span className="flex items-center gap-1">
                     <span
                       className="inline-block w-3 h-3 rounded-sm"
-                      style={{ background: "#fefce8", border: "1px solid #fde68a" }}
+                      style={{
+                        background: "#fefce8",
+                        border: "1px solid #fde68a",
+                      }}
                     />
                     +20-50%
                   </span>
                   <span className="flex items-center gap-1">
                     <span
                       className="inline-block w-3 h-3 rounded-sm"
-                      style={{ background: "#fef2f2", border: "1px solid #fecaca" }}
+                      style={{
+                        background: "#fef2f2",
+                        border: "1px solid #fecaca",
+                      }}
                     />
                     &gt;+50%
                   </span>

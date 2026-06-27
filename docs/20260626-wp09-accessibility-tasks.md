@@ -877,5 +877,5 @@ Overview.tsx, Reliability.tsx, TeamBreakdown.tsx, Billing.tsx
 | [x]  | 3        | T-3: KpiCard ARIA remediation | - | Medium |
 | [x]  | 4        | T-4: Chart ARIA - Area, Visualization, DonutChart, BarChart | - | Medium |
 | [x]  | 5        | T-5: Heatmap ARIA + roving tabindex | WP-08 T-3 | Medium |
-| [ ]  | 6        | T-6: Section axe assertions + reduced-motion audit | T-1, T-2, T-3, T-4, T-5 | Medium |
+| [x]  | 6        | T-6: Section axe assertions + reduced-motion audit | T-1, T-2, T-3, T-4, T-5 | Medium |
 | [ ]  | 7        | T-7: Responsive layout - mobile and tablet breakpoints | - | Small |

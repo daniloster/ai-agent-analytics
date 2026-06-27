@@ -57,11 +57,11 @@ describe('Gauge mark', () => {
     expect(container.querySelector('g')).toBeNull()
   })
 
-  it('progress arc has tabIndex=0 and role="listitem"', () => {
+  it('progress arc has tabIndex=0 and aria-label', () => {
     const { container } = renderGauge()
     const paths = container.querySelectorAll('path')
     const progressPath = paths[0]
     expect(progressPath?.getAttribute('tabindex')).toBe('0')
-    expect(progressPath?.getAttribute('role')).toBe('listitem')
+    expect(progressPath?.getAttribute('aria-label')).toMatch(/pct: 50 of/)
   })
 })
