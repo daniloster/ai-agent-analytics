@@ -69,7 +69,7 @@ export function Area(props: AreaProps): JSX.Element | null {
 
   return (
     <>
-      <defs>
+      <defs aria-hidden="true">
         <LinearGradient
           id={gradientId}
           from={color}
@@ -98,41 +98,45 @@ export function Area(props: AreaProps): JSX.Element | null {
         fill="none"
         defined={(d) => isDefined(d, props.series)}
       />
-      {data.map((datum, i) => {
-        if (!isDefined(datum, props.series)) return null
-        const cx = xScaleFn(accessor(datum))
-        const cy = yScaleFn(datum[props.series])
-        const handleActivate = () => {
-          activePoint.value = buildPoint(datum)
-        }
-        const handleDeactivate = () => {
-          activePoint.value = null
-        }
-        return (
-          <circle
-            key={i}
-            cx={cx}
-            cy={cy}
-            r={4}
-            opacity={0}
-            fill={color}
-            tabIndex={0}
-            role="listitem"
-            aria-label={`${props.series}: ${datum[props.series]}`}
-            onPointerEnter={handleActivate}
-            onPointerLeave={handleDeactivate}
-            onFocus={handleActivate}
-            onBlur={handleDeactivate}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                activePoint.value = buildPoint(datum)
-              } else if (e.key === 'Escape') {
-                activePoint.value = null
-              }
-            }}
-          />
-        )
-      })}
+      <g role="list" aria-label={props.series + ' data'}>
+        {data.map((datum, i) => {
+          if (!isDefined(datum, props.series)) return null
+          const cx = xScaleFn(accessor(datum))
+          const cy = yScaleFn(datum[props.series])
+          const xLabel = String(accessor(datum))
+          const yLabel = String(datum[props.series])
+          const handleActivate = () => {
+            activePoint.value = buildPoint(datum)
+          }
+          const handleDeactivate = () => {
+            activePoint.value = null
+          }
+          return (
+            <circle
+              key={i}
+              cx={cx}
+              cy={cy}
+              r={4}
+              opacity={0}
+              fill={color}
+              tabIndex={0}
+              role="listitem"
+              aria-label={xLabel + ': ' + yLabel}
+              onPointerEnter={handleActivate}
+              onPointerLeave={handleDeactivate}
+              onFocus={handleActivate}
+              onBlur={handleDeactivate}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  activePoint.value = buildPoint(datum)
+                } else if (e.key === 'Escape') {
+                  activePoint.value = null
+                }
+              }}
+            />
+          )
+        })}
+      </g>
     </>
   )
 }

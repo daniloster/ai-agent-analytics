@@ -118,6 +118,28 @@ describe('Area mark', () => {
     })
   })
 
+  it('circles are wrapped in a <g role="list"> element', () => {
+    const { container } = renderArea()
+    const g = container.querySelector('g[role="list"]')
+    expect(g).not.toBeNull()
+    expect(g?.getAttribute('aria-label')).toBe('v data')
+  })
+
+  it('<defs> element has aria-hidden="true"', () => {
+    const { container } = renderArea()
+    const defs = container.querySelector('defs')
+    expect(defs?.getAttribute('aria-hidden')).toBe('true')
+  })
+
+  it('circle aria-label uses x-value prefix, not series name', () => {
+    const { container } = renderArea()
+    const circles = container.querySelectorAll('circle')
+    const firstLabel = circles[0]?.getAttribute('aria-label') ?? ''
+    // Old format: "v: 10", new format: "0: 10" (x-value: y-value)
+    expect(firstLabel.startsWith('v:')).toBe(false)
+    expect(firstLabel).toContain(': 10')
+  })
+
   it('dashed={true} renders AreaClosed with strokeDasharray="4 2"', () => {
     const { container } = renderArea({ dashed: true })
     const paths = container.querySelectorAll('path')

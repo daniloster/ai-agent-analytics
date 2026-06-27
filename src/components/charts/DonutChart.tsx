@@ -24,14 +24,15 @@ export function DonutChart({ slices, ariaLabel, size = 120, centerLine1, centerL
   const cx = size / 2
   const cy = size / 2
 
+  const total = slices.reduce((s, sl) => s + sl.value, 0)
+
   return (
     <svg
       width={size}
       height={size}
-      role="img"
       aria-label={ariaLabel ?? 'Donut chart'}
     >
-      <Group top={cy} left={cx}>
+      <Group role="list" aria-label={ariaLabel ?? 'Chart segments'} top={cy} left={cx}>
         <Pie
           data={slices}
           pieValue={(d) => d.value}
@@ -44,7 +45,18 @@ export function DonutChart({ slices, ariaLabel, size = 120, centerLine1, centerL
             arcs.map((arc, i) => {
               const fill = slices[i]?.color ?? fallbackColors[i] ?? tokens.border
               const d = path(arc) ?? ''
-              return <path key={i} d={d} fill={fill} />
+              const pct = total > 0 ? ((slices[i]?.value ?? 0) / total * 100).toFixed(1) : '0.0'
+              return (
+                <path
+                  key={i}
+                  d={d}
+                  fill={fill}
+                  role="listitem"
+                  tabIndex={0}
+                  aria-label={`${slices[i]?.label ?? ''}: ${pct}%`}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') e.preventDefault() }}
+                />
+              )
             })
           }
         </Pie>

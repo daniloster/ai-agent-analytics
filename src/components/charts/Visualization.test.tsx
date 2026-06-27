@@ -150,6 +150,20 @@ describe('Viz render-prop argument', () => {
   })
 })
 
+describe('aria-live region', () => {
+  it('renders a div[role="status"][aria-live="polite"] below the SVG', () => {
+    const data = signal({ y: [{ v: 50 }] })
+    const { container } = render(
+      <Visualization data={data} axes={linearAxes}>
+        {() => null}
+      </Visualization>
+    )
+    const liveRegion = container.querySelector('div[role="status"][aria-live="polite"]')
+    expect(liveRegion).not.toBeNull()
+    expect(liveRegion?.getAttribute('aria-atomic')).toBe('true')
+  })
+})
+
 describe('SVG pointer events', () => {
   it('mousePosition signal updated on SVG pointermove', async () => {
     const { localPoint } = await import('@visx/event')

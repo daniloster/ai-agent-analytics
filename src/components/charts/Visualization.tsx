@@ -339,6 +339,12 @@ function VisualizationInner({
             {children}
           </Group>
         </svg>
+        <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+          {activePoint.value
+            ? String(activePoint.value.datum['date'] ?? activePoint.value.datum[activePoint.value.series]) +
+              ': ' + String(activePoint.value.datum[activePoint.value.series])
+            : ''}
+        </div>
       </figure>
     </VisualizationContext.Provider>
   );

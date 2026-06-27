@@ -1,5 +1,5 @@
 import { it, expect } from 'vitest'
-import { render } from '@testing-library/react'
+import { render, fireEvent } from '@testing-library/react'
 import { BarChart } from './BarChart'
 
 const BARS = [
@@ -14,6 +14,38 @@ it('renders a div with role="list" and three role="listitem" items', () => {
   expect(list).not.toBeNull()
   const items = container.querySelectorAll('[role="listitem"]')
   expect(items.length).toBe(3)
+})
+
+it('each listitem has tabIndex=0', () => {
+  const { container } = render(<BarChart bars={BARS} />)
+  const items = container.querySelectorAll('[role="listitem"]')
+  items.forEach((item) => {
+    expect(item.getAttribute('tabindex')).toBe('0')
+  })
+})
+
+it('role="status" live region is rendered in the list', () => {
+  const { container } = render(<BarChart bars={BARS} />)
+  const region = container.querySelector('[role="list"] [role="status"][aria-live="polite"]')
+  expect(region).not.toBeNull()
+})
+
+it('focusing a listitem updates the live region text', () => {
+  const { container, rerender } = render(<BarChart bars={BARS} />)
+  const item = container.querySelectorAll('[role="listitem"]')[0] as HTMLElement
+  const region = container.querySelector('[role="status"]') as HTMLElement
+  fireEvent.focus(item)
+  rerender(<BarChart bars={BARS} />)
+  expect(region.textContent).toBe('Provisioned: 500')
+})
+
+it('pressing Enter on a listitem updates the live region text', () => {
+  const { container, rerender } = render(<BarChart bars={BARS} />)
+  const item = container.querySelectorAll('[role="listitem"]')[1] as HTMLElement
+  const region = container.querySelector('[role="status"]') as HTMLElement
+  fireEvent.keyDown(item, { key: 'Enter' })
+  rerender(<BarChart bars={BARS} />)
+  expect(region.textContent).toBe('Activated: 340')
 })
 
 it('first (largest) bar has width: 100%', () => {
