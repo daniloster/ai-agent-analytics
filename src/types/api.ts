@@ -74,6 +74,8 @@ export interface TeamMetrics {
   top_use_cases: Array<{ category: string; percentage: number }>
   churn_signal_count: number
   wow_cost_change: number
+  wow_runs_change: number
+  mau_prior: number
   cost_trend: Array<{ date: string; cost: number }>
 }
 

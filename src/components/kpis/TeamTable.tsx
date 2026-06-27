@@ -4,8 +4,8 @@ import {
   formatCurrency,
   formatNumber,
   formatPercent,
-  formatQuality,
 } from "../../lib/kpi/formatters";
+import { teamColor } from "../../lib/team/teamColors";
 import type { TeamMetrics } from "../../types/api";
 import { SparklineChart } from "../charts/SparklineChart";
 import { Visualization, defineAxes } from "../charts/Visualization";
@@ -69,13 +69,34 @@ function compareFn(
   };
 }
 
-function TeamRow({
-  team,
-  failedRateClass,
-}: {
-  team: TeamMetrics;
-  failedRateClass: string;
-}): JSX.Element {
+function failedRateColorClass(rate: number): string {
+  if (rate < 0.05) return "text-green-600";
+  if (rate < 0.1) return "text-orange-500";
+  return "text-red-600";
+}
+
+function StarRating({ score }: { score: number }): JSX.Element {
+  const filled = Math.round(score);
+  return (
+    <span className="flex items-center gap-0.5">
+      {Array.from({ length: 5 }, (_, i) => (
+        <span
+          key={i}
+          className="text-base leading-none"
+          style={{ color: i < filled ? "#f59e0b" : "#d1d5db" }}
+          aria-hidden="true"
+        >
+          &#9733;
+        </span>
+      ))}
+      <span className="text-xs text-muted-foreground ml-1">
+        {score.toFixed(1)}
+      </span>
+    </span>
+  );
+}
+
+function TeamRow({ team }: { team: TeamMetrics }): JSX.Element {
   const trendDataSig = useDeepComputed(() => ({
     trend: team.cost_trend.map((p) => ({
       date: p.date,
@@ -86,36 +107,86 @@ function TeamRow({
 
   return (
     <TableRow>
-      <TableCell>{team.team_name}</TableCell>
-      <TableCell>{formatNumber(team.runs)}</TableCell>
+      <TableCell>
+        <div className="flex flex-col gap-0.5">
+          <div className="flex items-center gap-1.5">
+            <span
+              className="inline-block w-2 h-2 rounded-full shrink-0"
+              style={{ backgroundColor: teamColor(team.team_id) }}
+            />
+            <span className="font-medium text-sm">{team.team_name}</span>
+          </div>
+          {team.churn_signal_count > 0 && (
+            <Badge
+              className="text-[10px] h-5 w-fit px-1.5 py-0 bg-amber-100 text-amber-700 border border-amber-200"
+              variant="secondary"
+            >
+              Churn Risk
+            </Badge>
+          )}
+        </div>
+      </TableCell>
+
+      <TableCell>
+        <div className="flex flex-col gap-0.5">
+          <span>{formatNumber(team.runs)}</span>
+          {team.wow_runs_change < 0 && (
+            <span className="text-[11px] text-orange-500 font-medium">
+              -{Math.abs(Math.round(team.wow_runs_change))}% WoW
+            </span>
+          )}
+        </div>
+      </TableCell>
+
       <TableCell>{formatCurrency(team.cost)}</TableCell>
+
       <TableCell>
-        {formatNumber(team.mau) + " / " + formatNumber(team.seat_count)}
+        <div className="flex flex-col gap-0.5">
+          <span>{formatNumber(team.mau)}</span>
+          {team.mau_prior !== team.mau && (
+            <span className="text-[11px] text-muted-foreground">
+              was {formatNumber(team.mau_prior)}
+            </span>
+          )}
+        </div>
       </TableCell>
+
       <TableCell>
-        <Progress value={team.adoption_rate} />
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground w-8 shrink-0">
+            {Math.round(team.adoption_rate)}%
+          </span>
+          <div className="flex-1 min-w-[60px]">
+            <Progress
+              value={team.adoption_rate}
+              fill={teamColor(team.team_id)}
+            />
+          </div>
+        </div>
       </TableCell>
+
       <TableCell>
-        {team.avg_quality_score !== null
-          ? formatQuality(team.avg_quality_score)
-          : "-"}
+        {team.avg_quality_score !== null ? (
+          <StarRating score={team.avg_quality_score} />
+        ) : (
+          <span className="text-muted-foreground">-</span>
+        )}
       </TableCell>
-      <TableCell className={failedRateClass}>
+
+      <TableCell className={failedRateColorClass(team.failed_run_rate)}>
         {formatPercent(team.failed_run_rate)}
       </TableCell>
-      <TableCell>
+
+      <TableCell style={{ maxWidth: "160px", width: "160px" }}>
         <Visualization data={trendDataSig} axes={SPARKLINE_AXES} height={40}>
-          {() => <SparklineChart series="trend" axis="y" color="#7c3aed" />}
+          {() => (
+            <SparklineChart
+              series="trend"
+              axis="y"
+              color={teamColor(team.team_id)}
+            />
+          )}
         </Visualization>
-      </TableCell>
-      <TableCell>
-        {team.churn_signal_count > 0 && (
-          <Badge variant="destructive">
-            {team.churn_signal_count === 1
-              ? "1 churn signal"
-              : `${team.churn_signal_count} churn signals`}
-          </Badge>
-        )}
       </TableCell>
     </TableRow>
   );
@@ -123,7 +194,7 @@ function TeamRow({
 
 export function TeamTable({
   teams,
-  orgAvgFailedRunRate,
+  orgAvgFailedRunRate: _orgAvgFailedRunRate,
 }: TeamTableProps): JSX.Element {
   const sortKey = useSignal<SortKey>("runs");
   const sortDir = useSignal<SortDirection>("desc");
@@ -144,14 +215,6 @@ export function TeamTable({
   function sortIndicator(key: SortKey): string {
     if (sortKey.value !== key) return "";
     return sortDir.value === "desc" ? " ▼" : " ▲";
-  }
-
-  function failedRateClass(team: TeamMetrics): string {
-    if (team.failed_run_rate > 2 * orgAvgFailedRunRate)
-      return "bg-red-100 text-red-700";
-    if (team.failed_run_rate > 1.5 * orgAvgFailedRunRate)
-      return "bg-amber-100 text-amber-700";
-    return "";
   }
 
   const rows = sortedTeams.value;
@@ -195,19 +258,14 @@ export function TeamTable({
             className="cursor-pointer"
             onClick={() => handleSort("failed_run_rate")}
           >
-            Failed Rate{sortIndicator("failed_run_rate")}
+            Failure Rate{sortIndicator("failed_run_rate")}
           </TableHead>
           <TableHead>WoW Trend</TableHead>
-          <TableHead>Churn</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {rows.map((team) => (
-          <TeamRow
-            key={team.team_id}
-            team={team}
-            failedRateClass={failedRateClass(team)}
-          />
+          <TeamRow key={team.team_id} team={team} />
         ))}
       </TableBody>
     </Table>

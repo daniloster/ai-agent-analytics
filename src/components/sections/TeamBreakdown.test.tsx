@@ -38,6 +38,7 @@ const TEAM_A = {
   runs: 200,
   cost: 1000,
   mau: 20,
+  mau_prior: 20,
   seat_count: 25,
   adoption_rate: 0.8,
   avg_runs_per_user: 10,
@@ -48,6 +49,7 @@ const TEAM_A = {
   top_use_cases: [{ category: 'Code', percentage: 60 }, { category: 'Docs', percentage: 40 }],
   churn_signal_count: 0,
   wow_cost_change: 0.05,
+  wow_runs_change: 2.1,
   cost_trend: [{ date: '2026-06-01', cost: 100 }, { date: '2026-06-02', cost: 120 }],
 }
 
@@ -57,6 +59,7 @@ const TEAM_B = {
   runs: 100,
   cost: 500,
   mau: 10,
+  mau_prior: 12,
   seat_count: 15,
   adoption_rate: 0.67,
   avg_runs_per_user: 10,
@@ -67,6 +70,7 @@ const TEAM_B = {
   top_use_cases: [{ category: 'Code', percentage: 80 }, { category: 'Review', percentage: 20 }],
   churn_signal_count: 1,
   wow_cost_change: -0.02,
+  wow_runs_change: -8.5,
   cost_trend: [{ date: '2026-06-01', cost: 50 }, { date: '2026-06-02', cost: 55 }],
 }
 

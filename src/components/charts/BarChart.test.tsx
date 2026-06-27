@@ -34,3 +34,29 @@ it('second bar width is proportional to its value', () => {
 it('empty bars array does not throw', () => {
   expect(() => render(<BarChart bars={[]} />)).not.toThrow()
 })
+
+it('formatValue is applied to value text inside bar', () => {
+  const { container } = render(
+    <BarChart bars={[{ label: 'Team', value: 1234 }]} formatValue={(v) => `$${v}`} />,
+  )
+  expect(container.textContent).toContain('$1234')
+})
+
+it('default formatValue uses toLocaleString', () => {
+  const { container } = render(<BarChart bars={[{ label: 'Team', value: 1234 }]} />)
+  expect(container.textContent).toContain('1,234')
+})
+
+it('barHeight is applied to fill div style', () => {
+  const { container } = render(<BarChart bars={[{ label: 'X', value: 100 }]} barHeight={40} />)
+  const fill = container.querySelector('[role="listitem"] [style]') as HTMLElement | null
+  expect(fill?.style.height).toBe('40px')
+})
+
+it('per-bar color is applied to fill div background', () => {
+  const { container } = render(
+    <BarChart bars={[{ label: 'X', value: 100, color: '#ff0000' }]} />,
+  )
+  const fill = container.querySelector('[role="listitem"] [style]') as HTMLElement | null
+  expect(fill?.style.background).toBe('rgb(255, 0, 0)')
+})

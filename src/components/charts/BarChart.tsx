@@ -10,10 +10,11 @@ export interface BarChartProps {
   bars: BarChartBar[]
   maxValue?: number
   ariaLabel?: string
-  height?: number
+  barHeight?: number
+  formatValue?: (v: number) => string
 }
 
-export function BarChart({ bars, maxValue, ariaLabel }: BarChartProps): JSX.Element {
+export function BarChart({ bars, maxValue, ariaLabel, barHeight = 28, formatValue }: BarChartProps): JSX.Element {
   const tokens = useChartTokens()
   const max = maxValue ?? (bars.length > 0 ? Math.max(...bars.map((b) => b.value)) : 1)
 
@@ -21,18 +22,25 @@ export function BarChart({ bars, maxValue, ariaLabel }: BarChartProps): JSX.Elem
     <div role="list" aria-label={ariaLabel ?? 'Bar chart'} className="space-y-2">
       {bars.map((bar, i) => (
         <div key={i} role="listitem" className="flex items-center gap-2">
-          <span className="w-24 shrink-0 text-sm text-muted-foreground">{bar.label}</span>
+          <span className="w-20 shrink-0 text-sm text-muted-foreground truncate">{bar.label}</span>
           <div className="flex-1">
             <div
               style={{
                 width: `${(bar.value / max) * 100}%`,
-                height: '8px',
+                height: `${barHeight}px`,
                 background: bar.color ?? tokens.primary,
-                borderRadius: '2px',
+                borderRadius: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                paddingLeft: '8px',
+                minWidth: '40px',
               }}
-            />
+            >
+              <span className="text-sm font-medium text-white whitespace-nowrap">
+                {formatValue ? formatValue(bar.value) : bar.value.toLocaleString('en-US')}
+              </span>
+            </div>
           </div>
-          <span className="w-16 text-right text-sm">{bar.value}</span>
         </div>
       ))}
     </div>
