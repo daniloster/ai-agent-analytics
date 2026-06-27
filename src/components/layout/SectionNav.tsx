@@ -61,7 +61,7 @@ export function SectionNav(): JSX.Element {
   return (
     <nav
       aria-label="Dashboard navigation"
-      className="flex border-b border-border bg-card px-8"
+      className="flex overflow-x-auto border-b border-border bg-card px-4 sm:px-8"
     >
       <ul aria-label="Dashboard sections" className="flex">
         {SECTIONS.map((s) => {

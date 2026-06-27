@@ -176,19 +176,19 @@ export function Reliability(): JSX.Element {
 
       {query.isLoading ? (
         <>
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Skeleton className="h-10 w-full" />
             <Skeleton className="h-10 w-full" />
             <Skeleton className="h-10 w-full" />
             <Skeleton className="h-10 w-full" />
           </div>
-          <div className="grid grid-cols-4 gap-4 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
             <Skeleton className="h-10 w-full" />
             <Skeleton className="h-10 w-full" />
             <Skeleton className="h-10 w-full" />
             <Skeleton className="h-10 w-full" />
           </div>
-          <div className="grid grid-cols-2 gap-4 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
             <Skeleton className="h-48 w-full" />
             <Skeleton className="h-48 w-full" />
           </div>
@@ -196,7 +196,7 @@ export function Reliability(): JSX.Element {
       ) : (
         <>
           {/* Row 1: Error Rate, Timeout Rate, P50, P95 */}
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <KpiCard
               label="Error Rate"
               value={d ? formatPercent(d.error_rate) : undefined}
@@ -280,7 +280,7 @@ export function Reliability(): JSX.Element {
           </div>
 
           {/* Row 2: P99, Retry Rate, MTTR, Cost of Failed Runs */}
-          <div className="grid grid-cols-4 gap-4 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
             <KpiCard
               label="P99 Duration"
               value={d ? formatDuration(d.p99_duration_ms) : undefined}
@@ -359,7 +359,7 @@ export function Reliability(): JSX.Element {
           </div>
 
           {/* Chart row: AreaChart + DonutChart */}
-          <div className="grid grid-cols-2 gap-4 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
             <figure
               className="rounded-lg border bg-card shadow-sm p-6"
               aria-label="Error rate trend"

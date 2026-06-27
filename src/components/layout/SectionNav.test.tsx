@@ -140,6 +140,12 @@ it('each link is wrapped in a li element', () => {
   }
 })
 
+it('nav className contains overflow-x-auto for mobile scrolling', () => {
+  const { container } = render(<SectionNav />)
+  const nav = container.querySelector('nav')
+  expect(nav?.className).toContain('overflow-x-auto')
+})
+
 it('reads initial active section from URL param', () => {
   window.history.replaceState({}, '', '?section=billing')
   const { getByText } = render(<SectionNav />)

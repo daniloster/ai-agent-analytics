@@ -74,6 +74,28 @@ it('main element has id="main-content" and tabIndex -1', () => {
   expect(main?.tabIndex).toBe(-1)
 })
 
+it('header className contains flex-wrap for mobile layout', () => {
+  const { container } = render(
+    <DashboardLayout>
+      <p>content</p>
+    </DashboardLayout>,
+  )
+  const header = container.querySelector('header')
+  expect(header?.className).toContain('flex-wrap')
+  expect(header?.className).toContain('sm:px-8')
+})
+
+it('main className contains px-4 and lg:px-8 for responsive padding', () => {
+  const { container } = render(
+    <DashboardLayout>
+      <p>content</p>
+    </DashboardLayout>,
+  )
+  const main = container.querySelector('main')
+  expect(main?.className).toContain('px-4')
+  expect(main?.className).toContain('lg:px-8')
+})
+
 it('two separate renders produce independent QueryClients', () => {
   const { unmount } = render(
     <DashboardLayout>

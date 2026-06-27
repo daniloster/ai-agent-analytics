@@ -163,7 +163,7 @@ export function TeamBreakdown(): JSX.Element {
           const COLORS = ["#6366f1", "#f59e0b", "#10b981", "#ef4444", "#3b82f6", "#8b5cf6"];
           return (
             <div className="space-y-4">
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <KpiCard
                   label="Runs"
                   value={formatNumber(team.runs)}
@@ -260,7 +260,7 @@ export function TeamBreakdown(): JSX.Element {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <figure
                 className="rounded-lg border bg-card shadow-sm p-6"
                 aria-label="Runs per team"

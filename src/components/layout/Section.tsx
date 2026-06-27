@@ -32,7 +32,7 @@ export function Section({ id, labelledBy, children }: SectionProps): JSX.Element
   }, [mounted])
 
   return (
-    <section id={id} aria-labelledby={labelledBy} ref={ref} style={{ scrollMarginTop: '104px' }}>
+    <section id={id} aria-labelledby={labelledBy} ref={ref} style={{ scrollMarginTop: '120px' }}>
       {mounted.value ? children : <SectionSkeleton />}
     </section>
   )

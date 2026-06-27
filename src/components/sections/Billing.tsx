@@ -211,17 +211,17 @@ export function Billing(): JSX.Element {
 
       {isLoading ? (
         <>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <Skeleton className="h-10 w-full" />
             <Skeleton className="h-10 w-full" />
             <Skeleton className="h-10 w-full" />
           </div>
-          <div className="grid grid-cols-3 gap-4 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
             <Skeleton className="h-10 w-full" />
             <Skeleton className="h-10 w-full" />
             <Skeleton className="h-10 w-full" />
           </div>
-          <div className="grid grid-cols-2 gap-4 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
             <Skeleton className="h-48 w-full" />
             <Skeleton className="h-48 w-full" />
           </div>
@@ -229,7 +229,7 @@ export function Billing(): JSX.Element {
       ) : (
         <>
           {/* Row 1: Budget Utilization, Projected Annual Spend, New User Activation Cost */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <KpiCard
               label="Budget Utilization"
               value={
@@ -313,7 +313,7 @@ export function Billing(): JSX.Element {
           </div>
 
           {/* Row 2: Cost per Successful Run, Token Rate Efficiency, Cost of Failed Runs */}
-          <div className="grid grid-cols-3 gap-4 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
             <KpiCard
               label="Cost per Successful Run"
               value={
@@ -392,7 +392,7 @@ export function Billing(): JSX.Element {
           </div>
 
           {/* Row 3: Cumulative Spend vs Budget + Invoice History */}
-          <div className="grid grid-cols-2 gap-4 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
             <figure
               className="rounded-lg border bg-card shadow-sm p-6"
               aria-label="Cumulative spend vs budget"
@@ -434,6 +434,7 @@ export function Billing(): JSX.Element {
                         id: s.id,
                         label: s.label,
                         color: s.color,
+                        dashed: s.dashed,
                         formatValue: s.formatValue,
                       }))}
                     />
@@ -478,7 +479,7 @@ export function Billing(): JSX.Element {
           </div>
 
           {/* Row 4: Team cost allocation DonutChart + ChargebackTable */}
-          <div className="grid grid-cols-2 gap-4 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
             <figure
               className="rounded-lg border bg-card shadow-sm p-6"
               aria-label="Cost by team"

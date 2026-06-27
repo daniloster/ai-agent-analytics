@@ -291,7 +291,7 @@ export function Overview(): JSX.Element {
       </div>
 
       {/* Row 1 */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard
           label="Total Runs"
           value={d ? formatNumber(d.total_runs) : undefined}
@@ -361,7 +361,7 @@ export function Overview(): JSX.Element {
       </div>
 
       {/* Row 2 */}
-      <div className="grid grid-cols-4 gap-4 mt-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
         <KpiCard
           label="7 Days Retention Cost"
           value={
@@ -497,7 +497,7 @@ export function Overview(): JSX.Element {
       </div>
 
       {/* Row 3 */}
-      <div className="grid grid-cols-2 gap-4 mt-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
         <figure
           className="rounded-lg border bg-card shadow-sm p-6"
           aria-label="Token usage over time"
