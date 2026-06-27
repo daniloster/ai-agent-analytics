@@ -65,3 +65,18 @@ export function computeCostPerSuccessfulRun(totalCost: number, successfulRunCoun
   if (successfulRunCount === 0) return 0
   return totalCost / successfulRunCount
 }
+
+export function computeBudgetUtilization(
+  currentSpend: number,
+  budget: number,
+): number | null {
+  if (budget === 0) return null
+  return (currentSpend / budget) * 100
+}
+
+export function computeChurnSignal(
+  recentRuns: number,
+  historicalRuns: number,
+): boolean {
+  return historicalRuns >= 5 && recentRuns === 0
+}

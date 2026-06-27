@@ -510,7 +510,7 @@ No test file is created for the CI workflow itself. Acceptance is verified by re
 | Done | Priority | Task                                               | Depends on | Effort |
 | ---- | -------- | -------------------------------------------------- | ---------- | ------ |
 | [x]  | 1        | T-1: vitest.config.ts coverage config              | -          | Small  |
-| [ ]  | 2        | T-2: computeBudgetUtilization + computeChurnSignal | -          | Small  |
+| [x]  | 2        | T-2: computeBudgetUtilization + computeChurnSignal | -          | Small  |
 | [ ]  | 3        | T-3: Scale test gaps + handlers team_id test       | -          | Small  |
 | [ ]  | 4        | T-4: Filter-to-fetch integration test              | T-2        | Medium |
 | [ ]  | 5        | ~T-5: GitHub Actions CI pipeline~                  | T-1        | Small  |

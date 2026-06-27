@@ -10,6 +10,8 @@ import {
   computeProjectedAnnualSpend,
   computeTokenRateEfficiency,
   computeCostPerSuccessfulRun,
+  computeBudgetUtilization,
+  computeChurnSignal,
 } from './formulas'
 
 describe('computeRetentionCost', () => {
@@ -150,5 +152,45 @@ describe('computeCostPerSuccessfulRun', () => {
 
   it('returns 0 when successfulRunCount is 0 (zero guard)', () => {
     expect(computeCostPerSuccessfulRun(0, 0)).toBe(0)
+  })
+})
+
+describe('computeBudgetUtilization', () => {
+  it('returns null when budget is 0', () => {
+    expect(computeBudgetUtilization(1000, 0)).toBeNull()
+  })
+
+  it('returns 65 when spend is 13000 and budget is 20000', () => {
+    expect(computeBudgetUtilization(13000, 20000)).toBe(65)
+  })
+
+  it('returns 0 when currentSpend is 0 and budget > 0', () => {
+    expect(computeBudgetUtilization(0, 20000)).toBe(0)
+  })
+
+  it('returns > 100 when over budget', () => {
+    expect(computeBudgetUtilization(25000, 20000)).toBe(125)
+  })
+})
+
+describe('computeChurnSignal', () => {
+  it('returns true when historicalRuns >= 5 and recentRuns === 0', () => {
+    expect(computeChurnSignal(0, 10)).toBe(true)
+  })
+
+  it('returns false when historicalRuns < 5 (insufficient history)', () => {
+    expect(computeChurnSignal(0, 3)).toBe(false)
+  })
+
+  it('returns false when recentRuns > 0 (still active)', () => {
+    expect(computeChurnSignal(1, 10)).toBe(false)
+  })
+
+  it('returns false when historicalRuns === 4 and recentRuns === 0 (boundary: 4 < 5)', () => {
+    expect(computeChurnSignal(0, 4)).toBe(false)
+  })
+
+  it('returns true when historicalRuns === 5 and recentRuns === 0 (boundary: exactly 5)', () => {
+    expect(computeChurnSignal(0, 5)).toBe(true)
   })
 })
