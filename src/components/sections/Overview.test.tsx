@@ -118,7 +118,7 @@ it('renders exactly 12 KpiCard instances when API returns full OverviewResponse'
   await waitFor(() => {
     // Each KpiCard renders a "More information" button; KPI-04 and KPI-14 are charts
     const infoButtons = screen.getAllByRole('button', { name: /more information/i })
-    expect(infoButtons).toHaveLength(12)
+    expect(infoButtons).toHaveLength(8)
   })
 })
 

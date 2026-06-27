@@ -1,132 +1,146 @@
-import { useQuery } from '@tanstack/react-query'
-import { filterQueryParams } from '../../lib/filters/filterSignals'
-import { Section } from '../layout/Section'
-import { KpiCard } from '../kpis/KpiCard'
-import { GaugeChart } from '../charts/GaugeChart'
-import { AreaChart } from '../charts/AreaChart'
-import { ColumnChart, ColumnTrendLine } from '../charts/ColumnChart'
-import { DonutChart } from '../charts/DonutChart'
-import { Heatmap } from '../charts/Heatmap'
-import { Annotation } from '../charts/overlays/Annotation'
-import { SeriesTooltip } from '../charts/overlays/SeriesTooltip'
-import { Visualization, defineAxes } from '../charts/Visualization'
-import { ChargebackTable } from '../kpis/ChargebackTable'
-import { Skeleton } from '../ui/skeleton'
-import { useChartTokens } from '../charts/primitives/useChartTokens'
-import { useDeepComputed } from '../../hooks/useDeepComputed'
-import { formatCurrency, formatPercent } from '../../lib/kpi/formatters'
-import { buildQueryParams } from '../../utils/buildQueryParams'
-import type { BillingResponse, OverviewResponse } from '../../types/api'
+import { useQuery } from "@tanstack/react-query";
+import { useDeepComputed } from "../../hooks/useDeepComputed";
+import { filterQueryParams } from "../../lib/filters/filterSignals";
+import { formatCurrency, formatPercent } from "../../lib/kpi/formatters";
+import type { BillingResponse, OverviewResponse } from "../../types/api";
+import { buildQueryParams } from "../../utils/buildQueryParams";
+import { AreaChart } from "../charts/AreaChart";
+import { ColumnChart, ColumnTrendLine } from "../charts/ColumnChart";
+import { DonutChart } from "../charts/DonutChart";
+import { GaugeChart } from "../charts/GaugeChart";
+import { Heatmap } from "../charts/Heatmap";
+import { Annotation } from "../charts/overlays/Annotation";
+import { SeriesTooltip } from "../charts/overlays/SeriesTooltip";
+import { useChartTokens } from "../charts/primitives/useChartTokens";
+import { Visualization, defineAxes } from "../charts/Visualization";
+import { ChargebackTable } from "../kpis/ChargebackTable";
+import { KpiCard } from "../kpis/KpiCard";
+import { Section } from "../layout/Section";
+import { Skeleton } from "../ui/skeleton";
 
 const AREA_AXES = defineAxes([
   {
-    id: 'x',
-    type: 'time' as const,
-    position: 'bottom' as const,
+    id: "x",
+    type: "time" as const,
+    position: "bottom" as const,
     accessor: (d) => new Date((d as { date: string }).date),
     numTicks: 5,
   },
   {
-    id: 'y',
-    type: 'linear' as const,
-    position: 'left' as const,
+    id: "y",
+    type: "linear" as const,
+    position: "left" as const,
     accessor: (d) => (d as { value: number }).value,
-    domain: 'auto' as const,
+    domain: "auto" as const,
     numTicks: 4,
   },
-])
+]);
 
 const BAND_AXES = defineAxes([
   {
-    id: 'x',
-    type: 'band' as const,
-    position: 'bottom' as const,
+    id: "x",
+    type: "band" as const,
+    position: "bottom" as const,
     accessor: (d) => (d as { label: string }).label,
   },
   {
-    id: 'y',
-    type: 'linear' as const,
-    position: 'left' as const,
+    id: "y",
+    type: "linear" as const,
+    position: "left" as const,
     accessor: (d) => (d as { value: number }).value,
-    domain: 'auto' as const,
+    domain: "auto" as const,
   },
-])
+]);
 
 export function Billing(): JSX.Element {
-  const params = filterQueryParams.value
-  const tokens = useChartTokens()
+  const params = filterQueryParams.value;
+  const tokens = useChartTokens();
 
   const billingQuery = useQuery<BillingResponse>({
-    queryKey: ['billing', params],
+    queryKey: ["billing", params],
     queryFn: () =>
-      fetch('/api/analytics/billing?' + buildQueryParams(params)).then(
+      fetch("/api/analytics/billing?" + buildQueryParams(params)).then(
         (r) => r.json() as Promise<BillingResponse>,
       ),
-  })
+  });
 
   const overviewQuery = useQuery<OverviewResponse>({
-    queryKey: ['overview', params],
+    queryKey: ["overview", params],
     queryFn: () =>
-      fetch('/api/analytics/overview?' + buildQueryParams(params)).then(
+      fetch("/api/analytics/overview?" + buildQueryParams(params)).then(
         (r) => r.json() as Promise<OverviewResponse>,
       ),
-  })
+  });
 
-  const billing = billingQuery.data
-  const overview = overviewQuery.data
-  const isLoading = billingQuery.isLoading || overviewQuery.isLoading
+  const billing = billingQuery.data;
+  const overview = overviewQuery.data;
+  const isLoading = billingQuery.isLoading || overviewQuery.isLoading;
 
   // Build spend area series config from billing data
   const spendSeries = (() => {
-    if (!billing) return []
-    const ih = billing.invoice_history
-    const last = ih[ih.length - 1]
-    const currentMonthStart = billing.period.to.slice(0, 7) + '-01'
+    if (!billing) return [];
+    const ih = billing.invoice_history;
+    const last = ih[ih.length - 1];
+    const currentMonthStart = billing.period.to.slice(0, 7) + "-01";
     const actualSeries = {
-      id: 'actual',
-      label: 'Actual',
+      id: "actual",
+      label: "Actual",
       color: undefined as string | undefined,
       formatValue: formatCurrency,
       dashed: undefined as boolean | undefined,
       fillOpacity: undefined as number | undefined,
-      data: ih.map((h) => ({ date: h.month + '-01', value: h.total_billed })),
-    }
+      data: ih.map((h) => ({ date: h.month + "-01", value: h.total_billed })),
+    };
     const projectedSeries = last
       ? {
-          id: 'projected',
-          label: 'Projected',
+          id: "projected",
+          label: "Projected",
           color: undefined as string | undefined,
           formatValue: formatCurrency,
           dashed: true,
           fillOpacity: undefined as number | undefined,
           data: [
-            { date: last.month + '-01', value: last.total_billed },
+            { date: last.month + "-01", value: last.total_billed },
             { date: currentMonthStart, value: billing.projected_month_end },
           ],
         }
-      : null
-    return projectedSeries ? [actualSeries, projectedSeries] : [actualSeries]
-  })()
+      : null;
+    return projectedSeries ? [actualSeries, projectedSeries] : [actualSeries];
+  })();
 
   const spendDataSig = useDeepComputed(() => {
-    const result: Record<string, Array<{ date: string; value: number; [k: string]: unknown }>> = {}
+    const result: Record<
+      string,
+      Array<{ date: string; value: number; [k: string]: unknown }>
+    > = {};
     for (const s of spendSeries) {
-      result[s.id] = s.data.map((d) => ({ ...d, [s.id]: d.value }))
+      result[s.id] = s.data.map((d) => ({ ...d, [s.id]: d.value }));
     }
-    return result
-  })
+    return result;
+  });
 
   const invoiceDataSig = useDeepComputed(() => ({
     bars: billing
-      ? billing.invoice_history.map((h) => ({ label: h.month, value: h.total_billed, bars: h.total_billed }))
-      : [] as Array<{ label: string; value: number; bars: number }>,
-  }))
+      ? billing.invoice_history.map((h) => ({
+          label: h.month,
+          value: h.total_billed,
+          bars: h.total_billed,
+        }))
+      : ([] as Array<{ label: string; value: number; bars: number }>),
+  }));
 
   return (
     <Section id="billing" labelledBy="billing-heading">
       <div className="mb-6">
-        <h2 id="billing-heading" className="text-[22px] font-bold tracking-tight text-foreground">Billing & Financial</h2>
-        <p className="text-[13px] text-muted-foreground mt-1">Spend tracking, budget utilization, and cost analysis</p>
+        <h2
+          id="billing-heading"
+          className="text-[22px] font-bold tracking-tight text-foreground"
+        >
+          Billing & Financial
+        </h2>
+        <p className="text-[13px] text-muted-foreground mt-1">
+          Spend tracking, budget utilization, and cost analysis
+        </p>
       </div>
 
       {isLoading ? (
@@ -148,17 +162,35 @@ export function Billing(): JSX.Element {
           <div className="grid grid-cols-4 gap-4">
             <KpiCard
               label="Current Month Spend"
-              value={billing ? formatCurrency(billing.current_month_spend) : undefined}
-              subValue={billing ? `of ${formatCurrency(billing.monthly_budget)} budget` : undefined}
+              value={
+                billing
+                  ? formatCurrency(billing.current_month_spend)
+                  : undefined
+              }
+              subValue={
+                billing
+                  ? `of ${formatCurrency(billing.monthly_budget)} budget`
+                  : undefined
+              }
               formulaTooltip="Total API spend so far this month."
               exampleTooltip="e.g. $9,800"
+              trendColor="#7c3aed"
             />
             <KpiCard
               label="Projected Month-End"
-              value={billing ? formatCurrency(billing.projected_month_end) : undefined}
-              subValue={billing ? `Day ${billing.days_elapsed} of ${billing.days_in_month}` : undefined}
+              value={
+                billing
+                  ? formatCurrency(billing.projected_month_end)
+                  : undefined
+              }
+              subValue={
+                billing
+                  ? `Day ${billing.days_elapsed} of ${billing.days_in_month}`
+                  : undefined
+              }
               formulaTooltip="Projected total spend by end of month at current burn rate."
               exampleTooltip="e.g. $14,200"
+              trendColor="#7c3aed"
             />
             {billing && (
               <GaugeChart
@@ -170,20 +202,36 @@ export function Billing(): JSX.Element {
             )}
             <KpiCard
               label="Projected Annual Spend"
-              value={billing ? formatCurrency(billing.projected_annual_spend) : undefined}
+              value={
+                billing
+                  ? formatCurrency(billing.projected_annual_spend)
+                  : undefined
+              }
               formulaTooltip="Annualized spend based on current 90-day average."
               exampleTooltip="e.g. $157,300"
+              trendColor="#7c3aed"
             />
           </div>
 
           {/* Row 2: Cumulative Spend vs Budget + Invoice History */}
           <div className="grid grid-cols-2 gap-4 mt-4">
-            <figure className="rounded-lg border bg-card shadow-sm p-6" aria-label="Cumulative spend vs budget">
+            <figure
+              className="rounded-lg border bg-card shadow-sm p-6"
+              aria-label="Cumulative spend vs budget"
+            >
               <div className="mb-4">
-                <p className="text-[14px] font-semibold text-foreground">Cumulative spend vs budget</p>
-                <p className="text-[12px] text-muted-foreground mt-0.5">Monthly actual and projected spend</p>
+                <p className="text-[14px] font-semibold text-foreground">
+                  Cumulative spend vs budget
+                </p>
+                <p className="text-[12px] text-muted-foreground mt-0.5">
+                  Monthly actual and projected spend
+                </p>
               </div>
-              <Visualization data={spendDataSig} axes={AREA_AXES} ariaLabel="Cumulative spend vs budget">
+              <Visualization
+                data={spendDataSig}
+                axes={AREA_AXES}
+                ariaLabel="Cumulative spend vs budget"
+              >
                 {() => (
                   <>
                     {spendSeries.map((s) => (
@@ -197,7 +245,11 @@ export function Billing(): JSX.Element {
                       />
                     ))}
                     {billing && (
-                      <Annotation axis="y" value={billing.monthly_budget} label="Budget" />
+                      <Annotation
+                        axis="y"
+                        value={billing.monthly_budget}
+                        label="Budget"
+                      />
                     )}
                     <SeriesTooltip
                       series={spendSeries.map((s) => ({
@@ -211,12 +263,23 @@ export function Billing(): JSX.Element {
                 )}
               </Visualization>
             </figure>
-            <figure className="rounded-lg border bg-card shadow-sm p-6" aria-label="Invoice history">
+            <figure
+              className="rounded-lg border bg-card shadow-sm p-6"
+              aria-label="Invoice history"
+            >
               <div className="mb-4">
-                <p className="text-[14px] font-semibold text-foreground">Invoice history</p>
-                <p className="text-[12px] text-muted-foreground mt-0.5">Monthly billed amounts</p>
+                <p className="text-[14px] font-semibold text-foreground">
+                  Invoice history
+                </p>
+                <p className="text-[12px] text-muted-foreground mt-0.5">
+                  Monthly billed amounts
+                </p>
               </div>
-              <Visualization data={invoiceDataSig} axes={BAND_AXES} ariaLabel="Invoice history">
+              <Visualization
+                data={invoiceDataSig}
+                axes={BAND_AXES}
+                ariaLabel="Invoice history"
+              >
                 {() => (
                   <>
                     <ColumnChart series="bars" axis="y" />
@@ -229,13 +292,27 @@ export function Billing(): JSX.Element {
 
           {/* Row 3: Team cost allocation DonutChart + ChargebackTable */}
           <div className="grid grid-cols-2 gap-4 mt-4">
-            <figure className="rounded-lg border bg-card shadow-sm p-6" aria-label="Cost by team">
+            <figure
+              className="rounded-lg border bg-card shadow-sm p-6"
+              aria-label="Cost by team"
+            >
               <div className="mb-4">
-                <p className="text-[14px] font-semibold text-foreground">Cost by team</p>
-                <p className="text-[12px] text-muted-foreground mt-0.5">Token and seat cost allocation</p>
+                <p className="text-[14px] font-semibold text-foreground">
+                  Cost by team
+                </p>
+                <p className="text-[12px] text-muted-foreground mt-0.5">
+                  Token and seat cost allocation
+                </p>
               </div>
               <DonutChart
-                slices={billing ? billing.cost_by_team.map((t) => ({ label: t.team_name, value: t.total })) : []}
+                slices={
+                  billing
+                    ? billing.cost_by_team.map((t) => ({
+                        label: t.team_name,
+                        value: t.total,
+                      }))
+                    : []
+                }
                 ariaLabel="Cost by team"
               />
             </figure>
@@ -244,10 +321,17 @@ export function Billing(): JSX.Element {
 
           {/* Row 4: Cost anomaly Heatmap */}
           <div className="mt-4">
-            <figure className="rounded-lg border bg-card shadow-sm p-6" aria-label="Cost anomaly calendar">
+            <figure
+              className="rounded-lg border bg-card shadow-sm p-6"
+              aria-label="Cost anomaly calendar"
+            >
               <div className="mb-4">
-                <p className="text-[14px] font-semibold text-foreground">Cost anomaly calendar</p>
-                <p className="text-[12px] text-muted-foreground mt-0.5">Days with anomalous spend highlighted</p>
+                <p className="text-[14px] font-semibold text-foreground">
+                  Cost anomaly calendar
+                </p>
+                <p className="text-[12px] text-muted-foreground mt-0.5">
+                  Days with anomalous spend highlighted
+                </p>
               </div>
               <Heatmap
                 data={
@@ -273,9 +357,14 @@ export function Billing(): JSX.Element {
           <div className="grid grid-cols-3 gap-4 mt-4">
             <KpiCard
               label="Cost per Successful Run"
-              value={billing ? formatCurrency(billing.cost_per_successful_run) : undefined}
+              value={
+                billing
+                  ? formatCurrency(billing.cost_per_successful_run)
+                  : undefined
+              }
               formulaTooltip="Total cost divided by the number of successful runs."
               exampleTooltip="e.g. $1.21"
+              trendColor="#7c3aed"
             />
             <KpiCard
               label="Token Rate Efficiency"
@@ -291,17 +380,23 @@ export function Billing(): JSX.Element {
               }
               formulaTooltip="Effective token rate vs. list price."
               exampleTooltip="e.g. $2.40/1M"
+              trendColor="#7c3aed"
             />
             <KpiCard
               label="Cost of Failed Runs"
-              value={billing ? formatCurrency(billing.cost_of_failed_runs) : undefined}
+              value={
+                billing
+                  ? formatCurrency(billing.cost_of_failed_runs)
+                  : undefined
+              }
               subValue={
                 billing && billing.current_month_spend > 0
                   ? `${formatPercent((billing.cost_of_failed_runs / billing.current_month_spend) * 100, 1)} of monthly spend`
-                  : '0.0% of monthly spend'
+                  : "0.0% of monthly spend"
               }
               formulaTooltip="API spend on runs that ultimately failed."
               exampleTooltip="e.g. $1,420"
+              trendColor="#7c3aed"
             />
           </div>
 
@@ -313,18 +408,22 @@ export function Billing(): JSX.Element {
                 overview && overview.quality_cost_efficiency !== null
                   ? overview.quality_cost_efficiency.toFixed(2)
                   : overview
-                  ? ''
-                  : undefined
+                    ? ""
+                    : undefined
               }
-              insufficientData={overview ? overview.quality_cost_efficiency === null : undefined}
+              insufficientData={
+                overview ? overview.quality_cost_efficiency === null : undefined
+              }
               formulaTooltip="(avg_quality * acceptance_rate) / cost_per_run."
               exampleTooltip="e.g. 1.60"
+              trendColor="#7c3aed"
             />
             <KpiCard
               label="Churn Risk Users"
               value={overview ? String(overview.churn_risk_count) : undefined}
               formulaTooltip="Users showing declining engagement patterns."
               exampleTooltip="e.g. 5"
+              trendColor="#7c3aed"
             />
             <KpiCard
               label="New User Activation Cost"
@@ -332,16 +431,21 @@ export function Billing(): JSX.Element {
                 overview && overview.new_user_activation_cost !== null
                   ? formatCurrency(overview.new_user_activation_cost)
                   : overview
-                  ? ''
+                    ? ""
+                    : undefined
+              }
+              insufficientData={
+                overview
+                  ? overview.new_user_activation_cost === null
                   : undefined
               }
-              insufficientData={overview ? overview.new_user_activation_cost === null : undefined}
               formulaTooltip="Total cost attributed to onboarding new users."
               exampleTooltip="e.g. $50.00"
+              trendColor="#7c3aed"
             />
           </div>
         </>
       )}
     </Section>
-  )
+  );
 }

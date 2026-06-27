@@ -3,14 +3,12 @@ import { useDeepComputed } from "../../hooks/useDeepComputed";
 import { filterQueryParams } from "../../lib/filters/filterSignals";
 import {
   formatCurrency,
-  formatDuration,
   formatNumber,
   formatPercent,
   formatQuality,
   formatTokens,
 } from "../../lib/kpi/formatters";
 import {
-  computeCostPerAcceptedOutput,
   computeCostPerQualityPoint,
   computeDeltaPercent,
   computeRetentionCost,
@@ -22,8 +20,6 @@ import type {
 } from "../../types/api";
 import { buildQueryParams } from "../../utils/buildQueryParams";
 import { AreaChart } from "../charts/AreaChart";
-import { BarChart } from "../charts/BarChart";
-import { DonutChart } from "../charts/DonutChart";
 import { Annotation } from "../charts/overlays/Annotation";
 import { SeriesTooltip } from "../charts/overlays/SeriesTooltip";
 import { Visualization, defineAxes } from "../charts/Visualization";
@@ -89,14 +85,6 @@ export function Overview(): JSX.Element {
         d.avg_quality_score,
       )
     : null;
-  const costPerAcceptedOutput = d
-    ? computeCostPerAcceptedOutput(
-        d.total_cost,
-        d.total_runs,
-        d.acceptance_rate,
-      )
-    : null;
-
   const todayStr = new Date().toISOString().slice(0, 10);
 
   const tokenSeries = ts
@@ -237,10 +225,6 @@ export function Overview(): JSX.Element {
     return result;
   });
 
-  const activatedCount = d
-    ? Math.round((d.seat_count * d.user_activation_rate) / 100)
-    : 0;
-
   return (
     <Section id="overview" labelledBy="overview-heading">
       <div className="mb-6">
@@ -267,7 +251,7 @@ export function Overview(): JSX.Element {
           }
           deltaLabel="vs last month"
           trend={ts?.points.map((p) => ({ date: p.date, value: p.runs }))}
-          trendColor="#2563eb"
+          trendColor="#7c3aed"
           formulaTooltip="Total number of AI agent runs in the selected period."
           exampleTooltip="e.g. 12,450 runs"
         />
@@ -277,7 +261,7 @@ export function Overview(): JSX.Element {
           delta={d ? computeDeltaPercent(d.mau, d.mau_prior) : undefined}
           deltaLabel="vs previous period"
           trend={ts?.points.map((p) => ({ date: p.date, value: p.dau }))}
-          trendColor="#0d9488"
+          trendColor="#7c3aed"
           formulaTooltip="Unique users who ran at least one request this period."
           exampleTooltip="e.g. 340 users"
         />
@@ -319,7 +303,7 @@ export function Overview(): JSX.Element {
           }
           deltaLabel="vs prior period"
           trend={ts?.points.map((p) => ({ date: p.date, value: p.cost }))}
-          trendColor="#ea580c"
+          trendColor="#7c3aed"
           formulaTooltip="Total API spend in the selected period."
           exampleTooltip="e.g. $14,200"
         />
@@ -343,15 +327,15 @@ export function Overview(): JSX.Element {
           deltaLabel={
             d && retentionCost !== null
               ? retentionCost <= d.retention_cost_prior
-                ? 'improving efficiency'
-                : 'degrading efficiency'
+                ? "improving efficiency"
+                : "degrading efficiency"
               : undefined
           }
           trend={ts?.points.map((p) => ({
             date: p.date,
             value: p.dau > 0 ? p.cost / p.dau : 0,
           }))}
-          trendColor="#0d9488"
+          trendColor="#7c3aed"
           formulaTooltip="Total cost / users retained in the last 7 days of the period."
           exampleTooltip="e.g. $100.00 / user"
         />
@@ -366,15 +350,15 @@ export function Overview(): JSX.Element {
           deltaLabel={
             d
               ? d.success_rate >= d.success_rate_prior
-                ? 'watch requests count'
-                : 'watch errors'
+                ? "watch requests count"
+                : "watch errors"
               : undefined
           }
           trend={ts?.points.map((p) => ({
             date: p.date,
             value: 100 - p.error_rate,
           }))}
-          trendColor="#16a34a"
+          trendColor="#7c3aed"
           formulaTooltip="Percentage of runs that completed successfully."
           exampleTooltip="e.g. 94.2%"
         />
@@ -394,12 +378,16 @@ export function Overview(): JSX.Element {
               : undefined
           }
           delta={
-            d && d.avg_quality_score !== null && d.avg_quality_score_prior !== null
+            d &&
+            d.avg_quality_score !== null &&
+            d.avg_quality_score_prior !== null
               ? d.avg_quality_score - d.avg_quality_score_prior
               : undefined
           }
           deltaFormat="decimal"
-          deltaLabel={d && d.avg_quality_score !== null ? 'vs previous period' : undefined}
+          deltaLabel={
+            d && d.avg_quality_score !== null ? "vs previous period" : undefined
+          }
           starRating={d ? d.avg_quality_score : undefined}
           starRatingSubtext={
             d && d.avg_quality_score !== null
@@ -425,15 +413,22 @@ export function Overview(): JSX.Element {
               : undefined
           }
           delta={
-            d && costPerQualityPoint !== null && d.cost_per_quality_point_prior !== null
-              ? -computeDeltaPercent(costPerQualityPoint, d.cost_per_quality_point_prior)
+            d &&
+            costPerQualityPoint !== null &&
+            d.cost_per_quality_point_prior !== null
+              ? -computeDeltaPercent(
+                  costPerQualityPoint,
+                  d.cost_per_quality_point_prior,
+                )
               : undefined
           }
           deltaLabel={
-            d && costPerQualityPoint !== null && d.cost_per_quality_point_prior !== null
+            d &&
+            costPerQualityPoint !== null &&
+            d.cost_per_quality_point_prior !== null
               ? costPerQualityPoint <= d.cost_per_quality_point_prior
-                ? 'improving efficiency'
-                : 'degrading efficiency'
+                ? "improving efficiency"
+                : "degrading efficiency"
               : undefined
           }
           trend={ts?.points
@@ -595,113 +590,6 @@ export function Overview(): JSX.Element {
       </div>
 
       {/* Row 4 */}
-      <div className="grid grid-cols-2 gap-4 mt-4">
-        <figure
-          className="rounded-lg border bg-card shadow-sm p-6"
-          aria-label="Seat adoption"
-        >
-          <div className="mb-4">
-            <p className="text-[14px] font-semibold text-foreground">
-              Seat adoption
-            </p>
-            <p className="text-[12px] text-muted-foreground mt-0.5">
-              Active users vs. provisioned seats
-            </p>
-          </div>
-          {loading ? (
-            <Skeleton className="h-48 w-full" />
-          ) : (
-            <DonutChart
-              slices={
-                d
-                  ? [
-                      { label: "Active", value: d.mau },
-                      {
-                        label: "Unused",
-                        value: Math.max(0, d.seat_count - d.mau),
-                      },
-                    ]
-                  : []
-              }
-              ariaLabel="Seat adoption"
-            />
-          )}
-        </figure>
-        <figure
-          className="rounded-lg border bg-card shadow-sm p-6"
-          aria-label="Activation funnel"
-        >
-          <div className="mb-4">
-            <p className="text-[14px] font-semibold text-foreground">
-              Activation funnel
-            </p>
-            <p className="text-[12px] text-muted-foreground mt-0.5">
-              Provisioned seats to active users
-            </p>
-          </div>
-          {loading ? (
-            <Skeleton className="h-48 w-full" />
-          ) : (
-            <BarChart
-              bars={
-                d
-                  ? [
-                      { label: "Provisioned", value: d.seat_count },
-                      { label: "Activated", value: activatedCount },
-                      { label: "MAU", value: d.mau },
-                    ]
-                  : []
-              }
-              ariaLabel="Activation funnel"
-            />
-          )}
-        </figure>
-      </div>
-
-      {/* Row 5 */}
-      <div className="grid grid-cols-4 gap-4 mt-4">
-        <KpiCard
-          label="Acceptance Rate"
-          value={
-            d && d.acceptance_rate !== null
-              ? formatPercent(d.acceptance_rate)
-              : d
-                ? ""
-                : undefined
-          }
-          insufficientData={d ? d.acceptance_rate === null : undefined}
-          formulaTooltip="Percentage of AI outputs accepted by users."
-          exampleTooltip="e.g. 72.5%"
-        />
-        <KpiCard
-          label="Cost / Accepted Output"
-          value={
-            d && costPerAcceptedOutput !== null
-              ? formatCurrency(costPerAcceptedOutput)
-              : d
-                ? ""
-                : undefined
-          }
-          insufficientData={d ? costPerAcceptedOutput === null : undefined}
-          formulaTooltip="Total cost / (run_count * acceptance_rate)."
-          exampleTooltip="e.g. $0.18 / output"
-        />
-        <KpiCard
-          label="Avg Run Duration"
-          value={d ? formatDuration(d.avg_run_duration_ms) : undefined}
-          formulaTooltip="Average time from run start to completion."
-          exampleTooltip="e.g. 47s"
-        />
-        <KpiCard
-          label="MoM Usage Growth"
-          value={d ? formatPercent(d.mom_usage_growth) : undefined}
-          delta={d ? d.mom_usage_growth : undefined}
-          formulaTooltip="Month-over-month change in total runs."
-          exampleTooltip="e.g. +12.5%"
-        />
-      </div>
-
-      {/* Row 6 */}
       <div className="mt-4">
         <figure
           className="rounded-lg border bg-card shadow-sm p-6"
