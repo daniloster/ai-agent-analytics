@@ -16,14 +16,14 @@ export function TeamSelector(): JSX.Element {
 
   return (
     <Select
-      value={teamId.value ?? ''}
-      onValueChange={(v) => { teamId.value = v || undefined }}
+      value={teamId.value ?? '__all__'}
+      onValueChange={(v) => { teamId.value = v === '__all__' ? undefined : v }}
     >
       <SelectTrigger className="h-9 w-36">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="">All teams</SelectItem>
+        <SelectItem value="__all__">All teams</SelectItem>
         {data?.map((team) => (
           <SelectItem key={team.id} value={team.id}>
             {team.name}

@@ -1,3 +1,4 @@
+import { forwardRef } from 'react'
 import { cn } from '../../lib/utils'
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -10,15 +11,19 @@ const variantClasses: Record<NonNullable<ButtonProps['variant']>, string> = {
   ghost: 'bg-transparent hover:bg-muted',
 }
 
-export function Button({ variant = 'default', className, ...props }: ButtonProps): JSX.Element {
-  return (
-    <button
-      className={cn(
-        'inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-3 transition-colors disabled:opacity-50',
-        variantClasses[variant],
-        className,
-      )}
-      {...props}
-    />
-  )
-}
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+  function Button({ variant = 'default', className, ...props }, ref) {
+    return (
+      <button
+        ref={ref}
+        className={cn(
+          'inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-3 transition-colors disabled:opacity-50',
+          variantClasses[variant],
+          className,
+        )}
+        {...props}
+      />
+    )
+  }
+)
+Button.displayName = 'Button'

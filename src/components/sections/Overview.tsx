@@ -564,7 +564,7 @@ export function Overview(): JSX.Element {
               <p className="text-[12px] text-muted-foreground mt-0.5">
                 MTD actual
                 {budgetPct !== null
-                  ? `, projected, ${budgetPct.toFixed(1)}% of budget`
+                  ? `, ${budgetPct.toFixed(1)}% of budget`
                   : ""}
               </p>
             </div>

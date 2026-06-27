@@ -60,15 +60,7 @@ it('selecting a team sets teamId.value', async () => {
   expect(teamId.value).toBe('team_001')
 })
 
-it('selecting all teams sets teamId.value to undefined', () => {
-  teamId.value = 'team_001'
-  // simulate onValueChange('') which sets teamId.value = '' || undefined = undefined
-  const v = ''
-  teamId.value = v || undefined
-  expect(teamId.value).toBeUndefined()
-})
-
-it('when teamId is undefined, Select value is empty string (All teams)', async () => {
+it('trigger shows "All teams" label when teamId is undefined', async () => {
   vi.stubGlobal(
     'fetch',
     vi.fn(() =>
@@ -78,8 +70,15 @@ it('when teamId is undefined, Select value is empty string (All teams)', async (
   teamId.value = undefined
   render(<TeamSelector />, { wrapper: makeWrapper() })
   await waitFor(() => {
-    const trigger = screen.queryByRole('combobox')
-    // combobox renders with value="" when teamId is undefined
-    expect(trigger).toBeTruthy()
+    const trigger = screen.getByRole('combobox')
+    expect(trigger.textContent).toContain('All teams')
   })
+})
+
+it('selecting all teams sets teamId.value to undefined', () => {
+  teamId.value = 'team_001'
+  // simulate onValueChange('__all__') which maps to undefined
+  const v = '__all__'
+  teamId.value = v === '__all__' ? undefined : v
+  expect(teamId.value).toBeUndefined()
 })
