@@ -16,6 +16,7 @@ function buildPoint(faker: Faker, date: string): TimeseriesPoint {
     output_tokens: outputTokens,
     tokens: inputTokens + outputTokens,
     cost: faker.number.float({ min: 5, max: 2000, fractionDigits: 2 }),
+    dau: faker.number.int({ min: 1, max: 200 }),
     avg_quality_score: isNull ? null : faker.number.float({ min: 1, max: 5, fractionDigits: 2 }),
     error_rate: clamp(faker.number.float({ min: 0, max: 20, fractionDigits: 2 }), 0, 100),
   }

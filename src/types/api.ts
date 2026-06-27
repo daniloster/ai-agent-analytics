@@ -144,6 +144,7 @@ export interface TimeseriesPoint {
   input_tokens: number
   output_tokens: number
   cost: number
+  dau: number
   avg_quality_score: number | null
   error_rate: number
 }

@@ -1,10 +1,7 @@
 import { useSignal } from '@preact/signals-react'
-import { useDeepComputed } from '../../hooks/useDeepComputed'
 import { Card, CardHeader, CardContent } from '../ui/card'
 import { Skeleton } from '../ui/skeleton'
 import { Popover, PopoverTrigger, PopoverContent } from '../ui/popover'
-import { SparklineChart } from '../charts/SparklineChart'
-import { Visualization, defineAxes } from '../charts/Visualization'
 import { formatPercent } from '../../lib/kpi/formatters'
 
 const STATUS_DOT_COLORS: Record<'good' | 'warning' | 'critical', string> = {
@@ -12,23 +9,6 @@ const STATUS_DOT_COLORS: Record<'good' | 'warning' | 'critical', string> = {
   warning: 'bg-amber-500',
   critical: 'bg-red-500',
 }
-
-const SPARKLINE_AXES = defineAxes([
-  {
-    id: 'x',
-    type: 'time' as const,
-    position: 'bottom' as const,
-    accessor: (d) => new Date((d as { date: string }).date),
-    hidden: true,
-  },
-  {
-    id: 'y',
-    type: 'linear' as const,
-    position: 'left' as const,
-    accessor: (d) => (d as { value: number }).value,
-    hidden: true,
-  },
-])
 
 export interface KpiCardProps {
   label: string
@@ -38,11 +18,92 @@ export interface KpiCardProps {
   deltaLabel?: string
   trend?: Array<{ date: string; value: number }>
   trendColor?: string
+  starRating?: number | null
+  starRatingSubtext?: string
   statusDot?: 'good' | 'warning' | 'critical'
   formulaTooltip: string
   exampleTooltip: string
   insufficientData?: boolean
   insufficientDataReason?: string
+}
+
+// Pure SVG sparkline - no ResizeObserver, no visx, fixed 40px height.
+function Sparkline({
+  data,
+  color = '#2563eb',
+}: {
+  data: Array<{ date: string; value: number }>
+  color?: string
+}): JSX.Element | null {
+  if (data.length < 2) return null
+  const values = data.map((d) => d.value)
+  const min = Math.min(...values)
+  const max = Math.max(...values)
+  const range = max - min || 1
+  const W = 200
+  const H = 40
+  const PAD = 2
+  const pts = data.map((d, i) => ({
+    x: (i / (data.length - 1)) * W,
+    y: PAD + (H - PAD * 2) * (1 - (d.value - min) / range),
+  }))
+  const linePoints = pts.map((p) => `${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(' ')
+  const first = pts[0]!
+  const last = pts[pts.length - 1]!
+  const area = [
+    `M${first.x.toFixed(2)},${first.y.toFixed(2)}`,
+    ...pts.slice(1).map((p) => `L${p.x.toFixed(2)},${p.y.toFixed(2)}`),
+    `L${last.x.toFixed(2)},${H}`,
+    `L${first.x.toFixed(2)},${H}`,
+    'Z',
+  ].join(' ')
+  // Gradient ID derived from color - duplicate definitions across cards are identical and harmless.
+  const gradId = `kpi-spark-${color.replace(/[^a-z0-9]/gi, '')}`
+  return (
+    <svg
+      width="100%"
+      height={H}
+      viewBox={`0 0 ${W} ${H}`}
+      preserveAspectRatio="none"
+      aria-hidden="true"
+      style={{ display: 'block' }}
+    >
+      <defs>
+        <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity={0.15} />
+          <stop offset="100%" stopColor={color} stopOpacity={0} />
+        </linearGradient>
+      </defs>
+      <path d={area} fill={`url(#${gradId})`} />
+      <polyline
+        points={linePoints}
+        fill="none"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+function StarRating({ rating, subtext }: { rating: number; subtext?: string }): JSX.Element {
+  const pct = Math.max(0, Math.min(100, (rating / 5) * 100))
+  return (
+    <div className="mt-2" aria-label={`${rating.toFixed(1)} out of 5 stars`}>
+      <div className="relative inline-block text-[18px] leading-none select-none" aria-hidden="true">
+        <span style={{ color: '#d4d4d8' }}>&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+        <span
+          data-star-fill
+          className="absolute inset-0 overflow-hidden"
+          style={{ color: '#f59e0b', width: `${pct}%` }}
+        >
+          &#9733;&#9733;&#9733;&#9733;&#9733;
+        </span>
+      </div>
+      {subtext && <p className="text-[11px] text-muted-foreground mt-1">{subtext}</p>}
+    </div>
+  )
 }
 
 function DeltaBadge({ delta, deltaLabel }: { delta: number; deltaLabel?: string }): JSX.Element {
@@ -69,13 +130,10 @@ function DeltaBadge({ delta, deltaLabel }: { delta: number; deltaLabel?: string 
 
 export function KpiCard(props: KpiCardProps): JSX.Element {
   const open = useSignal(false)
-  const trendDataSig = useDeepComputed(() => ({
-    trend: (props.trend ?? []).map((d) => ({ ...d, trend: d.value })),
-  }))
 
   return (
     <Card>
-      <CardHeader className="p-5 pb-3">
+      <CardHeader className="p-4 pb-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             {props.statusDot && (
@@ -102,8 +160,8 @@ export function KpiCard(props: KpiCardProps): JSX.Element {
           </Popover>
         </div>
       </CardHeader>
-      <CardContent className="px-5 pb-5 pt-0">
-        <div className="space-y-1.5">
+      <CardContent className="px-4 pb-4 pt-0">
+        <div className="space-y-1">
           {props.value === undefined ? (
             <Skeleton className="h-8 w-24" />
           ) : props.insufficientData ? (
@@ -123,12 +181,13 @@ export function KpiCard(props: KpiCardProps): JSX.Element {
             <DeltaBadge delta={props.delta} deltaLabel={props.deltaLabel} />
           )}
         </div>
-        {props.trend && (
-          <div className="mt-3">
-            <Visualization data={trendDataSig} axes={SPARKLINE_AXES} height={40}>
-              {() => <SparklineChart series="trend" axis="y" color={props.trendColor} />}
-            </Visualization>
+        {props.trend && props.trend.length >= 2 && (
+          <div className="mt-2">
+            <Sparkline data={props.trend} color={props.trendColor} />
           </div>
+        )}
+        {typeof props.starRating === 'number' && (
+          <StarRating rating={props.starRating} subtext={props.starRatingSubtext} />
         )}
       </CardContent>
     </Card>

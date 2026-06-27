@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useDeepComputed } from "../../hooks/useDeepComputed";
 import { filterQueryParams } from "../../lib/filters/filterSignals";
 import {
   formatCurrency,
@@ -20,34 +21,33 @@ import type {
   TimeseriesResponse,
 } from "../../types/api";
 import { buildQueryParams } from "../../utils/buildQueryParams";
-import { useDeepComputed } from "../../hooks/useDeepComputed";
 import { AreaChart } from "../charts/AreaChart";
-import { SeriesTooltip } from '../charts/overlays/SeriesTooltip';
-import { Annotation } from "../charts/overlays/Annotation";
-import { Visualization, defineAxes } from "../charts/Visualization";
 import { BarChart } from "../charts/BarChart";
 import { DonutChart } from "../charts/DonutChart";
+import { Annotation } from "../charts/overlays/Annotation";
+import { SeriesTooltip } from "../charts/overlays/SeriesTooltip";
+import { Visualization, defineAxes } from "../charts/Visualization";
 import { KpiCard } from "../kpis/KpiCard";
 import { Section } from "../layout/Section";
 import { Skeleton } from "../ui/skeleton";
 
 const AREA_AXES = defineAxes([
   {
-    id: 'x',
-    type: 'time' as const,
-    position: 'bottom' as const,
+    id: "x",
+    type: "time" as const,
+    position: "bottom" as const,
     accessor: (d) => new Date((d as { date: string }).date),
     numTicks: 5,
   },
   {
-    id: 'y',
-    type: 'linear' as const,
-    position: 'left' as const,
+    id: "y",
+    type: "linear" as const,
+    position: "left" as const,
     accessor: (d) => (d as { value: number }).value,
-    domain: 'auto' as const,
+    domain: "auto" as const,
     numTicks: 4,
   },
-])
+]);
 
 export function Overview(): JSX.Element {
   const params = filterQueryParams.value;
@@ -113,14 +113,21 @@ export function Overview(): JSX.Element {
           label: "Output Tokens",
           color: "#2563eb",
           formatValue: formatTokens,
-          data: ts.points.map((p) => ({ date: p.date, value: p.output_tokens })),
+          data: ts.points.map((p) => ({
+            date: p.date,
+            value: p.output_tokens,
+          })),
         },
       ]
     : [];
 
   const { costSeries, projectedCostData, budgetPct } = (() => {
     if (!ts)
-      return { costSeries: [], projectedCostData: [] as Array<{ date: string; value: number }>, budgetPct: null };
+      return {
+        costSeries: [],
+        projectedCostData: [] as Array<{ date: string; value: number }>,
+        budgetPct: null,
+      };
 
     let cumCost = 0;
     const actualData: Array<{ date: string; value: number }> = [];
@@ -134,7 +141,8 @@ export function Overview(): JSX.Element {
 
     const daysActual = Math.max(1, actualData.length);
     const dailyAvg = cumCost / daysActual;
-    let projCum = actualData.length > 0 ? actualData[actualData.length - 1]!.value : 0;
+    let projCum =
+      actualData.length > 0 ? actualData[actualData.length - 1]!.value : 0;
     const futurePoints = ts.points.filter((p) => p.date > todayStr);
     const projected: Array<{ date: string; value: number }> = [];
 
@@ -146,14 +154,23 @@ export function Overview(): JSX.Element {
       }
     }
 
-    const lastActualCost = actualData.length > 0 ? actualData[actualData.length - 1]!.value : cumCost;
+    const lastActualCost =
+      actualData.length > 0
+        ? actualData[actualData.length - 1]!.value
+        : cumCost;
     const pct =
       orgConfig && orgConfig.monthly_budget > 0
         ? (lastActualCost / orgConfig.monthly_budget) * 100
         : null;
 
     const series = [
-      { id: "cost", label: "Actual", color: "#2563eb" as const, formatValue: formatCurrency, data: actualData },
+      {
+        id: "cost",
+        label: "Actual",
+        color: "#2563eb" as const,
+        formatValue: formatCurrency,
+        data: actualData,
+      },
       ...(projected.length > 1
         ? [
             {
@@ -188,28 +205,37 @@ export function Overview(): JSX.Element {
 
   // Data signals for Visualization consumers
   const tokenDataSig = useDeepComputed(() => {
-    const result: Record<string, Array<{ date: string; value: number; [k: string]: unknown }>> = {}
+    const result: Record<
+      string,
+      Array<{ date: string; value: number; [k: string]: unknown }>
+    > = {};
     for (const s of tokenSeries) {
-      result[s.id] = s.data.map((d) => ({ ...d, [s.id]: d.value }))
+      result[s.id] = s.data.map((d) => ({ ...d, [s.id]: d.value }));
     }
-    return result
-  })
+    return result;
+  });
 
   const costDataSig = useDeepComputed(() => {
-    const result: Record<string, Array<{ date: string; value: number; [k: string]: unknown }>> = {}
+    const result: Record<
+      string,
+      Array<{ date: string; value: number; [k: string]: unknown }>
+    > = {};
     for (const s of costSeries) {
-      result[s.id] = s.data.map((d) => ({ ...d, [s.id]: d.value }))
+      result[s.id] = s.data.map((d) => ({ ...d, [s.id]: d.value }));
     }
-    return result
-  })
+    return result;
+  });
 
   const qualityDataSig = useDeepComputed(() => {
-    const result: Record<string, Array<{ date: string; value: number; [k: string]: unknown }>> = {}
+    const result: Record<
+      string,
+      Array<{ date: string; value: number; [k: string]: unknown }>
+    > = {};
     for (const s of qualitySeries) {
-      result[s.id] = s.data.map((d) => ({ ...d, [s.id]: d.value }))
+      result[s.id] = s.data.map((d) => ({ ...d, [s.id]: d.value }));
     }
-    return result
-  })
+    return result;
+  });
 
   const activatedCount = d
     ? Math.round((d.seat_count * d.user_activation_rate) / 100)
@@ -239,6 +265,8 @@ export function Overview(): JSX.Element {
               ? computeDeltaPercent(d.total_runs, d.total_runs_prior)
               : undefined
           }
+          trend={ts?.points.map((p) => ({ date: p.date, value: p.runs }))}
+          trendColor="#2563eb"
           formulaTooltip="Total number of AI agent runs in the selected period."
           exampleTooltip="e.g. 12,450 runs"
         />
@@ -246,6 +274,8 @@ export function Overview(): JSX.Element {
           label="Monthly Active Users"
           value={d ? formatNumber(d.mau) : undefined}
           subValue={d ? `DAU: ${formatNumber(d.dau)}` : undefined}
+          trend={ts?.points.map((p) => ({ date: p.date, value: p.dau }))}
+          trendColor="#0d9488"
           formulaTooltip="Unique users who ran at least one request this month."
           exampleTooltip="e.g. 340 MAU"
         />
@@ -258,6 +288,15 @@ export function Overview(): JSX.Element {
                 )
               : undefined
           }
+          trend={
+            ts && d
+              ? ts.points.map((p) => ({
+                  date: p.date,
+                  value: d.seat_count > 0 ? (p.dau / d.seat_count) * 100 : 0,
+                }))
+              : undefined
+          }
+          trendColor="#7c3aed"
           formulaTooltip="MAU / seat_count - percentage of provisioned seats actively used."
           exampleTooltip="e.g. 85.0%"
         />
@@ -270,6 +309,8 @@ export function Overview(): JSX.Element {
               : undefined
           }
           deltaLabel="vs prior period"
+          trend={ts?.points.map((p) => ({ date: p.date, value: p.cost }))}
+          trendColor="#ea580c"
           formulaTooltip="Total API spend in the selected period."
           exampleTooltip="e.g. $14,200"
         />
@@ -284,6 +325,11 @@ export function Overview(): JSX.Element {
               ? formatCurrency(retentionCost)
               : undefined
           }
+          trend={ts?.points.map((p) => ({
+            date: p.date,
+            value: p.dau > 0 ? p.cost / p.dau : 0,
+          }))}
+          trendColor="#0d9488"
           formulaTooltip="Total cost / users retained in the last 7 days of the period."
           exampleTooltip="e.g. $100.00 / user"
         />
@@ -295,6 +341,11 @@ export function Overview(): JSX.Element {
               ? computeDeltaPercent(d.success_rate, d.success_rate_prior)
               : undefined
           }
+          trend={ts?.points.map((p) => ({
+            date: p.date,
+            value: 100 - p.error_rate,
+          }))}
+          trendColor="#16a34a"
           formulaTooltip="Percentage of runs that completed successfully."
           exampleTooltip="e.g. 94.2%"
         />
@@ -311,6 +362,12 @@ export function Overview(): JSX.Element {
           insufficientDataReason={
             d && d.avg_quality_score === null
               ? "Fewer than 10 rated runs"
+              : undefined
+          }
+          starRating={d ? d.avg_quality_score : undefined}
+          starRatingSubtext={
+            d && d.avg_quality_score !== null
+              ? `Based on ${formatNumber(d.rated_run_count)} rated runs`
               : undefined
           }
           formulaTooltip="Average quality score from rated runs (1-5 scale)."
@@ -331,6 +388,15 @@ export function Overview(): JSX.Element {
               ? "Fewer than 10 rated runs"
               : undefined
           }
+          trend={ts?.points
+            .filter(
+              (p) => p.avg_quality_score !== null && p.avg_quality_score > 0,
+            )
+            .map((p) => ({
+              date: p.date,
+              value: p.cost / p.avg_quality_score!,
+            }))}
+          trendColor="#7c3aed"
           formulaTooltip="Total cost / (rated_run_count * avg_quality_score)."
           exampleTooltip="e.g. $0.42 / point"
         />
@@ -353,8 +419,14 @@ export function Overview(): JSX.Element {
             </div>
             <div className="flex items-center gap-4">
               {tokenSeries.map((s) => (
-                <span key={s.id} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                  <span className="inline-block h-2 w-2 rounded-full" style={{ background: s.color }} />
+                <span
+                  key={s.id}
+                  className="flex items-center gap-1.5 text-[11px] text-muted-foreground"
+                >
+                  <span
+                    className="inline-block h-2 w-2 rounded-full"
+                    style={{ background: s.color }}
+                  />
                   {s.label}
                 </span>
               ))}
@@ -363,11 +435,20 @@ export function Overview(): JSX.Element {
           {loading ? (
             <Skeleton className="h-48 w-full" />
           ) : (
-            <Visualization data={tokenDataSig} axes={AREA_AXES} ariaLabel="Token usage over time">
+            <Visualization
+              data={tokenDataSig}
+              axes={AREA_AXES}
+              ariaLabel="Token usage over time"
+            >
               {() => (
                 <>
                   {tokenSeries.map((s) => (
-                    <AreaChart key={s.id} series={s.id} axis="y" color={s.color} />
+                    <AreaChart
+                      key={s.id}
+                      series={s.id}
+                      axis="y"
+                      color={s.color}
+                    />
                   ))}
                   <SeriesTooltip
                     series={tokenSeries.map((s) => ({
@@ -425,7 +506,11 @@ export function Overview(): JSX.Element {
           {loading ? (
             <Skeleton className="h-48 w-full" />
           ) : (
-            <Visualization data={costDataSig} axes={AREA_AXES} ariaLabel="Cost vs. budget">
+            <Visualization
+              data={costDataSig}
+              axes={AREA_AXES}
+              ariaLabel="Cost vs. budget"
+            >
               {() => (
                 <>
                   {costSeries.map((s) => (
@@ -585,12 +670,16 @@ export function Overview(): JSX.Element {
           {loading ? (
             <Skeleton className="h-48 w-full" />
           ) : (
-            <Visualization data={qualityDataSig} axes={AREA_AXES} ariaLabel="Quality score 30-day trend">
+            <Visualization
+              data={qualityDataSig}
+              axes={AREA_AXES}
+              ariaLabel="Quality score 30-day trend"
+            >
               {() => (
                 <>
                   <AreaChart series="quality" axis="y" />
                   <SeriesTooltip
-                    series={[{ id: 'quality', label: 'Quality Score Trend' }]}
+                    series={[{ id: "quality", label: "Quality Score Trend" }]}
                   />
                 </>
               )}

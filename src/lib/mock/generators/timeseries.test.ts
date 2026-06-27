@@ -38,6 +38,7 @@ describe('generateTimeseries', () => {
       expect(point.output_tokens).toBeDefined()
       expect(point.tokens).toBeDefined()
       expect(point.cost).toBeDefined()
+      expect(point.dau).toBeDefined()
       expect(point.error_rate).toBeDefined()
       // avg_quality_score is allowed to be null but must be defined (not undefined)
       expect('avg_quality_score' in point).toBe(true)

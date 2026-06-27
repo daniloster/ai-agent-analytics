@@ -70,8 +70,8 @@ const TIMESERIES = {
   period: { from: '2026-06-01', to: '2026-06-30' },
   granularity: 'day',
   points: [
-    { date: '2026-06-01', runs: 100, tokens: 50000, input_tokens: 35000, output_tokens: 15000, cost: 450, avg_quality_score: 4.1, error_rate: 2.0 },
-    { date: '2026-06-02', runs: 120, tokens: 60000, input_tokens: 42000, output_tokens: 18000, cost: 520, avg_quality_score: 4.2, error_rate: 1.5 },
+    { date: '2026-06-01', runs: 100, tokens: 50000, input_tokens: 35000, output_tokens: 15000, cost: 450, dau: 85, avg_quality_score: 4.1, error_rate: 2.0 },
+    { date: '2026-06-02', runs: 120, tokens: 60000, input_tokens: 42000, output_tokens: 18000, cost: 520, dau: 90, avg_quality_score: 4.2, error_rate: 1.5 },
   ],
 }
 

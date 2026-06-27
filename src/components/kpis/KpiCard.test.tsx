@@ -2,29 +2,6 @@ import { it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { KpiCard } from './KpiCard'
 
-vi.mock('@visx/responsive/lib/components/ParentSize', () => ({
-  default: ({ children, className, style }: {
-    children: (args: { width: number; height: number }) => React.ReactNode
-    className?: string
-    style?: React.CSSProperties
-  }) => (
-    <div className={className} style={style}>
-      {children({ width: 400, height: 40 })}
-    </div>
-  ),
-}))
-
-vi.mock('@visx/axis', () => ({
-  AxisBottom: vi.fn(() => null),
-  AxisLeft: vi.fn(() => null),
-  AxisRight: vi.fn(() => null),
-}))
-
-vi.mock('@visx/grid', () => ({
-  GridRows: vi.fn(() => null),
-  GridColumns: vi.fn(() => null),
-}))
-
 beforeEach(() => {
   vi.clearAllMocks()
 })
@@ -95,7 +72,7 @@ it('clicking info button renders formulaTooltip text in the DOM', () => {
   expect(screen.getByText('Total runs formula')).toBeTruthy()
 })
 
-it('trend array renders a SparklineChart SVG element', () => {
+it('trend array with 2+ points renders an SVG sparkline', () => {
   const trend = [{ date: '2026-06-01', value: 10 }, { date: '2026-06-02', value: 20 }]
   const { container } = render(<KpiCard {...BASE_PROPS} trend={trend} />)
   expect(container.querySelector('svg')).not.toBeNull()
@@ -132,4 +109,38 @@ it('dot span has aria-hidden="true"', () => {
   const { container } = render(<KpiCard {...BASE_PROPS} statusDot="good" />)
   const dot = container.querySelector('.bg-emerald-500')
   expect(dot?.getAttribute('aria-hidden')).toBe('true')
+})
+
+it('starRating=4.1 fills 82% of the star container', () => {
+  const { container } = render(<KpiCard {...BASE_PROPS} starRating={4.1} />)
+  const overlay = container.querySelector('[data-star-fill]') as HTMLElement | null
+  expect(overlay).not.toBeNull()
+  expect(overlay?.style.width).toBe('82%')
+})
+
+it('starRating=1.2 fills 24% (1 full + 20% of 2nd star)', () => {
+  const { container } = render(<KpiCard {...BASE_PROPS} starRating={1.2} />)
+  const overlay = container.querySelector('[data-star-fill]') as HTMLElement | null
+  expect(overlay).not.toBeNull()
+  expect(overlay?.style.width).toBe('24%')
+})
+
+it('starRating renders wrapper with aria-label containing the score', () => {
+  render(<KpiCard {...BASE_PROPS} starRating={4.1} />)
+  expect(screen.getByLabelText(/4\.1 out of 5/i)).toBeTruthy()
+})
+
+it('starRatingSubtext renders below stars when provided', () => {
+  render(<KpiCard {...BASE_PROPS} starRating={4.1} starRatingSubtext="Based on 8,200 rated runs" />)
+  expect(screen.getByText('Based on 8,200 rated runs')).toBeTruthy()
+})
+
+it('starRating=null renders no stars', () => {
+  const { container } = render(<KpiCard {...BASE_PROPS} starRating={null} />)
+  expect(container.querySelectorAll('[data-star-fill]').length).toBe(0)
+})
+
+it('no starRating prop renders no stars', () => {
+  const { container } = render(<KpiCard {...BASE_PROPS} />)
+  expect(container.querySelectorAll('[data-star-fill]').length).toBe(0)
 })
