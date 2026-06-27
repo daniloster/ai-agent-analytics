@@ -763,6 +763,111 @@ it('passes axe accessibility check', async () => {
 
 ---
 
+## T-7: Responsive layout - mobile and tablet breakpoints
+
+**Context**
+
+Added 2026-06-27. The mobile view (sub-640px) is broken: the sticky header overflows, the SectionNav clips, and all KpiCard grids render in fixed desktop column counts. This task applies Tailwind responsive variants to existing class strings only - no new components, no structural JSX changes.
+
+Before starting, read every file listed in "Files" below in full. The exact class strings to replace are documented in the SPEC §3 "Responsive layout audit" section. Replace them exactly as documented.
+
+**Requirements**
+
+1. `DashboardLayout.tsx` header: change `"bg-card border-b border-border h-14 px-8 flex items-center justify-between"` to `"bg-card border-b border-border min-h-14 h-auto flex flex-wrap items-center justify-between gap-x-4 px-4 py-2 sm:px-8 sm:h-14 sm:flex-nowrap sm:py-0"`.
+2. `DashboardLayout.tsx` main: change `"px-8 py-7 max-w-[1440px] mx-auto flex flex-col gap-8"` to `"px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-7 max-w-[1440px] mx-auto flex flex-col gap-4 sm:gap-6 lg:gap-8"`.
+3. `SectionNav.tsx` nav: change `"flex border-b border-border bg-card px-8"` to `"flex overflow-x-auto border-b border-border bg-card px-4 sm:px-8"`.
+4. `FilterBar.tsx` wrapper: change `"flex items-center gap-3"` to `"flex flex-wrap items-center gap-2 sm:gap-3"`.
+5. `Section.tsx`: change `scrollMarginTop: '104px'` to `scrollMarginTop: '120px'` to account for the taller wrapped header on mobile.
+6. In all four section files (`Overview.tsx`, `Reliability.tsx`, `TeamBreakdown.tsx`, `Billing.tsx`): replace every occurrence of `"grid grid-cols-4 gap-4"` (with or without trailing `mt-4`) with `"grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"` (preserving any `mt-4`).
+7. In all four section files: replace every occurrence of `"grid grid-cols-3 gap-4"` (with or without trailing `mt-4`) with `"grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"` (preserving any `mt-4`).
+8. In all four section files: replace every occurrence of `"grid grid-cols-2 gap-4"` (with or without trailing `mt-4`) with `"grid grid-cols-1 sm:grid-cols-2 gap-4"` (preserving any `mt-4`).
+9. Do not change any `gap-4` spacing, `mt-4` margins, or any class not listed in requirements 1-8. Scope is strictly the responsive variants.
+10. Run `npm run test` and fix any test failures introduced by this task before marking it complete.
+
+**Technical decisions**
+
+- Three-tier breakpoint strategy (`sm`=640px, `lg`=1024px, none=mobile): adding a `md` tier would double the variant count with minimal visual benefit. The jump from 1 to 2 columns at `sm` covers tablets; the jump from 2 to 4 at `lg` covers desktop.
+- `grid-cols-2` grids only go to `grid-cols-1` at mobile and stay `grid-cols-2` at `sm` and above. These grids hold wide charts (two side-by-side figures); making them 1-col on mobile is necessary.
+- Header `flex-wrap sm:flex-nowrap`: at mobile the brand name and FilterBar can wrap to a second line. At `sm` and above they lock to a single row at the fixed `h-14` height.
+- `overflow-x-auto` on SectionNav: the four links are 90-120px each; at 320-375px they will overflow the available width. Horizontal scroll is the correct pattern for a pill-tab nav - it does not require any JS, is accessible, and preserves the active indicator underline.
+- `scrollMarginTop: '120px'`: the current value of `104px` (56px header + 48px SectionNav) is exact for desktop. The wrapped mobile header can be up to ~112px (two rows). `120px` gives 8px buffer without hiding too much section content.
+- **Do not change `TeamBreakdown.test.tsx` test** at line 149 which asserts `className.contains('grid-cols-2')` - the responsive class string `"grid-cols-1 sm:grid-cols-2 gap-4"` still contains `grid-cols-2` as a substring, so this test continues to pass without modification.
+
+**Design**
+
+No new types or components. The changes are class-string substitutions on existing elements.
+
+Files modified and which class strings change:
+
+```
+DashboardLayout.tsx
+  <header>: h-14 px-8 flex items-center justify-between
+         -> min-h-14 h-auto flex flex-wrap items-center justify-between gap-x-4 px-4 py-2 sm:px-8 sm:h-14 sm:flex-nowrap sm:py-0
+  <main>:  px-8 py-7 ... gap-8
+        -> px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-7 ... gap-4 sm:gap-6 lg:gap-8
+
+SectionNav.tsx
+  <nav>: flex border-b border-border bg-card px-8
+      -> flex overflow-x-auto border-b border-border bg-card px-4 sm:px-8
+
+FilterBar.tsx
+  <div>: flex items-center gap-3
+      -> flex flex-wrap items-center gap-2 sm:gap-3
+
+Section.tsx
+  style: scrollMarginTop: '104px'  ->  scrollMarginTop: '120px'
+
+Overview.tsx, Reliability.tsx, TeamBreakdown.tsx, Billing.tsx
+  grid grid-cols-4 [gap-4|gap-4 mt-4]
+  -> grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 [gap-4|gap-4 mt-4]
+
+  grid grid-cols-3 [gap-4|gap-4 mt-4]
+  -> grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 [gap-4|gap-4 mt-4]
+
+  grid grid-cols-2 [gap-4|gap-4 mt-4]
+  -> grid grid-cols-1 sm:grid-cols-2 [gap-4|gap-4 mt-4]
+```
+
+**Acceptance criteria**
+
+1. `DashboardLayout.tsx` header class string contains `flex-wrap` and `sm:px-8`.
+2. `DashboardLayout.tsx` main class string contains `px-4` and `lg:px-8`.
+3. `SectionNav.tsx` nav class string contains `overflow-x-auto`.
+4. `FilterBar.tsx` wrapper class string contains `flex-wrap`.
+5. `Section.tsx` `scrollMarginTop` is `'120px'`.
+6. `Overview.tsx` contains no bare `grid-cols-4` (all occurrences have `lg:grid-cols-4`).
+7. `Reliability.tsx` contains no bare `grid-cols-4`.
+8. `TeamBreakdown.tsx` contains no bare `grid-cols-4`.
+9. `Billing.tsx` contains no bare `grid-cols-3`.
+10. No `grid-cols-2` without `grid-cols-1` as its smaller-viewport predecessor exists in any section file.
+11. Manual verification at 375px viewport: header does not scroll horizontally; SectionNav shows all four links via horizontal scroll; KpiCard grids are single-column.
+
+**Test Plan**
+
+- `src/components/layout/DashboardLayout.test.tsx` (modified)
+  - Scenario: rendered `<header>` className contains `flex-wrap`.
+  - Scenario: rendered `<main>` className contains `px-4`.
+
+- `src/components/layout/SectionNav.test.tsx` (modified)
+  - Scenario: rendered `<nav>` className contains `overflow-x-auto`.
+
+- No grid class tests needed: Tailwind class presence is verified by requirements 6-10 via code review. Existing tests (including the `grid-cols-2` assertion in TeamBreakdown.test.tsx) continue to pass without modification.
+
+**Files**
+
+- `src/components/layout/DashboardLayout.tsx` (modified) - responsive header and main classes
+- `src/components/layout/SectionNav.tsx` (modified) - overflow-x-auto and responsive padding on nav
+- `src/components/filters/FilterBar.tsx` (modified) - flex-wrap on wrapper
+- `src/components/layout/Section.tsx` (modified) - scrollMarginTop 104px -> 120px
+- `src/components/sections/Overview.tsx` (modified) - responsive grid-cols variants
+- `src/components/sections/Reliability.tsx` (modified) - responsive grid-cols variants
+- `src/components/sections/TeamBreakdown.tsx` (modified) - responsive grid-cols variants
+- `src/components/sections/Billing.tsx` (modified) - responsive grid-cols variants
+- `src/components/layout/DashboardLayout.test.tsx` (modified) - flex-wrap and px-4 assertions
+- `src/components/layout/SectionNav.test.tsx` (modified) - overflow-x-auto assertion
+
+---
+
 ## Implementation order table
 
 | Done | Priority | Task | Depends on | Effort |
@@ -773,3 +878,4 @@ it('passes axe accessibility check', async () => {
 | [ ]  | 4        | T-4: Chart ARIA - Area, Visualization, DonutChart, BarChart | - | Medium |
 | [ ]  | 5        | T-5: Heatmap ARIA + roving tabindex | WP-08 T-3 | Medium |
 | [ ]  | 6        | T-6: Section axe assertions + reduced-motion audit | T-1, T-2, T-3, T-4, T-5 | Medium |
+| [ ]  | 7        | T-7: Responsive layout - mobile and tablet breakpoints | - | Small |

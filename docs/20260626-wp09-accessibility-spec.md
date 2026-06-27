@@ -1,9 +1,9 @@
-# SPEC: WP-09 - Accessibility & Quality Pass
+# SPEC: WP-09 - Accessibility, Responsive Layout & Quality Pass
 
-**Date:** 2026-06-26
+**Date:** 2026-06-26 (revised 2026-06-27: responsive layout added to scope)
 **Working Package:** WP-09
 **Depends on:** WP-05, WP-06, WP-07, WP-08
-**Effort:** Medium
+**Effort:** Medium-Large
 
 ---
 
@@ -16,16 +16,25 @@
 - Color contrast target: WCAG AA 4.5:1 for all text (axis labels, tick labels, KPI values) against chart backgrounds in both light and dark mode.
 - `prefers-reduced-motion: reduce` disables all chart mount animations.
 - This WP audits and fixes - it does not add new features. Most ARIA work should already be present from WP-03 through WP-08.
+- **Responsive breakpoints (Tailwind defaults):**
+
+| Token | Min-width | Target devices |
+|-------|-----------|----------------|
+| (none) | 0px | Mobile portrait (320-639px) |
+| `sm` | 640px | Mobile landscape / small tablet |
+| `lg` | 1024px | Desktop |
+
+Only three tiers are required. The `md` (768px) tier is not used to keep variants minimal. All bare grid/flex/padding classes must be audited for mobile impact.
 
 ---
 
 ## 1. Context
 
-This WP implements the accessibility audit and remediation described in WP-09 of `docs/20260626-analytics-dashboard-plan.md`.
+This WP implements the accessibility audit and remediation described in WP-09 of `docs/20260626-analytics-dashboard-plan.md`. Scope was revised on 2026-06-27 to also include responsive layout fixes - the mobile view at sub-640px widths is broken because all grid columns, paddings, and the sticky header use fixed desktop values.
 
 It AUDITS every chart component (from WP-03) and every section component (from WP-05 through WP-08) against WCAG 2.1 AA. It then FIXES any gap found. It also adds `@axe-core/react` automated assertions to the existing Vitest suite so that future regressions are caught in CI.
 
-No new features, no new KPIs, no new chart types.
+The responsive layout work adds Tailwind breakpoint variants to existing Tailwind classes only. No new components, no new routes, no new KPIs or chart types.
 
 **Files that will definitely be created:**
 - `src/lib/a11y/axeConfig.ts` - axe-core configuration helper
@@ -149,6 +158,60 @@ export function useAriaLive(): { ref: React.RefObject<HTMLDivElement>; announce:
 - Each chart usage must be wrapped in `<figure aria-labelledby="..."><figcaption id="...">...</figcaption><ChartComponent .../></figure>`
 - Each section `<section>` must have `id="section-executive"` (etc.) and `aria-labelledby` pointing to its heading
 
+### Responsive layout audit (new scope)
+
+Current state (read from files, 2026-06-27):
+
+**`DashboardLayout.tsx`** (`<header>` and `<main>`):
+- `<header className="bg-card border-b border-border h-14 px-8 flex items-center justify-between">` - rigid `h-14`, fixed `px-8`, no wrap. On 375px the brand name + two filter controls overflow.
+- `<main className="px-8 py-7 max-w-[1440px] mx-auto flex flex-col gap-8">` - fixed `px-8`, no responsive variants.
+
+**`SectionNav.tsx`**:
+- `<nav className="flex border-b border-border bg-card px-8">` - no `overflow-x-auto`; four links overflow on narrow screens. Fixed `px-8`.
+
+**`FilterBar.tsx`**:
+- `<div className="flex items-center gap-3">` - always horizontal. Two controls side by side; they can wrap if the header allows it.
+
+**Section grid layouts** (all bare, no responsive variants):
+- `Overview.tsx`: `grid-cols-4` (x2), `grid-cols-2`
+- `Reliability.tsx`: `grid-cols-4` (x4), `grid-cols-2` (x2)
+- `TeamBreakdown.tsx`: `grid-cols-4`, `grid-cols-2`
+- `Billing.tsx`: `grid-cols-3` (x4), `grid-cols-2` (x3)
+
+**Required changes:**
+
+```tsx
+// DashboardLayout.tsx - header
+// from: "bg-card border-b border-border h-14 px-8 flex items-center justify-between"
+// to:   "bg-card border-b border-border min-h-14 h-auto flex flex-wrap items-center justify-between gap-x-4 px-4 py-2 sm:px-8 sm:h-14 sm:flex-nowrap sm:py-0"
+
+// DashboardLayout.tsx - main
+// from: "px-8 py-7 max-w-[1440px] mx-auto flex flex-col gap-8"
+// to:   "px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-7 max-w-[1440px] mx-auto flex flex-col gap-4 sm:gap-6 lg:gap-8"
+
+// SectionNav.tsx - nav
+// from: "flex border-b border-border bg-card px-8"
+// to:   "flex overflow-x-auto border-b border-border bg-card px-4 sm:px-8"
+
+// FilterBar.tsx - wrapper div
+// from: "flex items-center gap-3"
+// to:   "flex flex-wrap items-center gap-2 sm:gap-3"
+
+// All sections - grid-cols-4
+// from: "grid grid-cols-4 gap-4"
+// to:   "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+
+// All sections - grid-cols-3
+// from: "grid grid-cols-3 gap-4"
+// to:   "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+
+// All sections - grid-cols-2
+// from: "grid grid-cols-2 gap-4"
+// to:   "grid grid-cols-1 sm:grid-cols-2 gap-4"
+```
+
+Note: `Section.tsx` uses `scrollMarginTop: '104px'` (header 56px + SectionNav 48px). On mobile the header may be taller when it wraps. Change to `scrollMarginTop: '120px'` as a conservative buffer; exact value should be verified against the wrapped mobile header height.
+
 ---
 
 ## 4. Interaction diagram
@@ -217,6 +280,12 @@ Test render
 10. With `prefers-reduced-motion: reduce` set in CSS, chart mount animations (opacity/scale transitions) are suppressed - verified by checking that the relevant Tailwind `motion-safe:` class is applied to animation utilities, not bare `transition`.
 11. Every `<section>` element has an `aria-labelledby` attribute pointing to its visible heading.
 12. SectionNav active link has `aria-current="true"` when its target section intersects the viewport.
+13. At 375px viewport width, the sticky header fits within one or two lines without horizontal overflow (no scrollbar on the x-axis of the header).
+14. At 375px viewport width, the SectionNav is fully usable - all four links are reachable by horizontal scroll, with no clipped text.
+15. At 375px viewport width, KpiCard grids render as a single column (one card per row).
+16. At 640px viewport width, KpiCard grids render as two columns.
+17. At 1024px viewport width, `grid-cols-4` grids render as four columns and `grid-cols-3` grids render as three columns.
+18. `<main>` padding is `px-4` (16px) at mobile and increases to `px-8` (32px) at 1024px.
 
 ---
 
@@ -224,9 +293,11 @@ Test render
 
 - WCAG 2.1 AAA (only AA is required per investigation D-13)
 - Screen reader testing on production browsers (VoiceOver, NVDA, JAWS) - manual testing only, not automated
-- Mobile accessibility (dashboard is desktop-only in v1 per investigation D-9)
 - Internationalization / RTL layout (out of scope for v1)
 - Automated visual contrast measurement via screenshot diffing
+- Native mobile app or PWA offline support
+- Tailwind `md` (768px) breakpoint tier - only `sm` (640px) and `lg` (1024px) are used to keep variant count minimal
+- Automated Playwright/Cypress viewport tests - manual browser testing at 375px and 1024px is sufficient for this WP
 
 ---
 
@@ -246,3 +317,7 @@ Test render
 | `src/components/sections/Reliability.test.ts` (modified) | axe check passes; section has `aria-labelledby` |
 | `src/components/sections/Billing.test.ts` (modified) | axe check passes; section has `aria-labelledby` |
 | `src/components/kpis/KpiCard.test.ts` (modified) | Info button has correct `aria-label`; insufficient-data state has `role="status"`; popover focuses first element on open; Escape closes popover and returns focus to info button |
+| `src/components/layout/DashboardLayout.test.tsx` (modified) | Header has `min-h-14` and `flex-wrap`; main has `px-4` in base class |
+| `src/components/layout/SectionNav.test.tsx` (modified) | nav has `overflow-x-auto` |
+| Manual - 375px viewport | Header does not overflow; SectionNav scrolls; KpiCard grids are single-column |
+| Manual - 1024px viewport | KpiCard grids are 4/3 columns as designed; paddings are at full width |
