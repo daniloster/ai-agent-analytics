@@ -573,6 +573,6 @@ import { Link } from 'react-router-dom'
 | [x]  | 1        | T-1: Static data layer | - | Medium |
 | [x]  | 2        | T-2: KpiEntryCard component | T-1 | Small |
 | [x]  | 3        | T-3: DecisionCard component | T-1 | Small |
-| [ ]  | 4        | T-4: UnderstandingSidebar component | T-1 | Medium |
+| [x]  | 4        | T-4: UnderstandingSidebar component | T-1 | Medium |
 | [ ]  | 5        | T-5: UnderstandingPage | T-1, T-2, T-3, T-4 | Large |
 | [ ]  | 6        | T-6: Router wiring and DashboardLayout link | T-5 | Small |
