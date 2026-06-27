@@ -124,7 +124,7 @@ export function Reliability(): JSX.Element {
     queryKey: ["reliability", params],
     queryFn: () =>
       fetch("/api/analytics/reliability?" + buildQueryParams(params)).then(
-        (r) => r.json() as Promise<ReliabilityResponse>,
+        (r) => { if (!r.ok) throw new Error(r.statusText); return r.json() as Promise<ReliabilityResponse> },
       ),
     refetchInterval: 30_000,
   });

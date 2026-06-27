@@ -32,6 +32,9 @@ export function Calendar({ className, classNames, showOutsideDays = true, ...pro
         outside: '[&>button]:text-muted-foreground [&>button]:opacity-50',
         disabled: '[&>button]:text-muted-foreground [&>button]:opacity-50',
         hidden: 'invisible',
+        range_start: 'bg-primary/15 rounded-l-md',
+        range_end: 'bg-primary/15 rounded-r-md',
+        range_middle: 'bg-primary/10 rounded-none [&>button]:bg-transparent [&>button]:hover:bg-primary/20',
         ...classNames,
       }}
       components={{

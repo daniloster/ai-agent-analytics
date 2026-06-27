@@ -102,7 +102,7 @@ export function Overview(): JSX.Element {
     queryKey: ["overview", params],
     queryFn: () =>
       fetch("/api/analytics/overview?" + buildQueryParams(params)).then(
-        (r) => r.json() as Promise<OverviewResponse>,
+        (r) => { if (!r.ok) throw new Error(r.statusText); return r.json() as Promise<OverviewResponse> },
       ),
   });
 
@@ -110,7 +110,7 @@ export function Overview(): JSX.Element {
     queryKey: ["timeseries", params],
     queryFn: () =>
       fetch("/api/analytics/timeseries?" + buildQueryParams(params)).then(
-        (r) => r.json() as Promise<TimeseriesResponse>,
+        (r) => { if (!r.ok) throw new Error(r.statusText); return r.json() as Promise<TimeseriesResponse> },
       ),
   });
 
@@ -125,7 +125,7 @@ export function Overview(): JSX.Element {
     queryKey: ["quality-trend", qtFrom, params.to],
     queryFn: () =>
       fetch(`/api/analytics/timeseries?from=${qtFrom}&to=${params.to}`).then(
-        (r) => r.json() as Promise<TimeseriesResponse>,
+        (r) => { if (!r.ok) throw new Error(r.statusText); return r.json() as Promise<TimeseriesResponse> },
       ),
   });
 

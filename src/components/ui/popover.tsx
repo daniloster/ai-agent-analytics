@@ -3,6 +3,7 @@ import { cn } from '../../lib/utils'
 
 export const Popover = PopoverPrimitive.Root
 export const PopoverTrigger = PopoverPrimitive.Trigger
+export const PopoverClose = PopoverPrimitive.Close
 
 export function PopoverContent({
   className,

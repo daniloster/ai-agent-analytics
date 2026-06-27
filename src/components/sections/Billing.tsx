@@ -108,7 +108,7 @@ export function Billing(): JSX.Element {
     queryKey: ["billing", params],
     queryFn: () =>
       fetch("/api/analytics/billing?" + buildQueryParams(params)).then(
-        (r) => r.json() as Promise<BillingResponse>,
+        (r) => { if (!r.ok) throw new Error(r.statusText); return r.json() as Promise<BillingResponse> },
       ),
   });
 

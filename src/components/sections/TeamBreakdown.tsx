@@ -88,7 +88,7 @@ export function TeamBreakdown(): JSX.Element {
       const sp = new URLSearchParams({ from: params.from, to: params.to });
       if (params.team_id) sp.set("team_id", params.team_id);
       return fetch("/api/analytics/teams?" + sp.toString()).then(
-        (r) => r.json() as Promise<TeamsResponse>,
+        (r) => { if (!r.ok) throw new Error(r.statusText); return r.json() as Promise<TeamsResponse> },
       );
     },
   });
