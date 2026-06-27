@@ -265,6 +265,7 @@ export function Overview(): JSX.Element {
               ? computeDeltaPercent(d.total_runs, d.total_runs_prior)
               : undefined
           }
+          deltaLabel="vs last month"
           trend={ts?.points.map((p) => ({ date: p.date, value: p.runs }))}
           trendColor="#2563eb"
           formulaTooltip="Total number of AI agent runs in the selected period."

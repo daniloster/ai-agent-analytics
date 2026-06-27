@@ -158,6 +158,15 @@ it('token area chart renders two Area series when timeseries data is present', a
   })
 })
 
+it('Total Runs card renders "vs last month" delta label', async () => {
+  mockFetch()
+  const { Overview } = await import('./Overview')
+  render(<Overview />, { wrapper: makeWrapper() })
+  await waitFor(() => {
+    expect(screen.getByText('vs last month')).toBeTruthy()
+  })
+})
+
 it('filter change causes fetch to be called again with new params', async () => {
   mockFetch()
   const { Overview } = await import('./Overview')

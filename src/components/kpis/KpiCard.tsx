@@ -117,7 +117,7 @@ function DeltaBadge({ delta, deltaLabel }: { delta: number; deltaLabel?: string 
       : 'bg-muted text-muted-foreground'
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center justify-between gap-1">
       <span
         className={`inline-flex items-center rounded-full px-[7px] py-0.5 text-[11px] font-semibold ${colorClass}`}
       >
