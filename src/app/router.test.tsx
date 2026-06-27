@@ -1,6 +1,6 @@
 import { it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, RouterProvider, createMemoryRouter } from 'react-router-dom'
 
 // Mock heavy dependencies to isolate DashboardRoute
 vi.mock('../lib/filters/filterSignals', () => ({
@@ -63,6 +63,10 @@ vi.mock('@preact/signals-react', async (importOriginal) => {
   }
 })
 
+vi.mock('../routes/understanding/UnderstandingPage', () => ({
+  UnderstandingPage: () => <div data-testid="understanding-page" />,
+}))
+
 const { initFiltersFromUrl } = await import('../lib/filters/filterSignals')
 
 beforeEach(() => {
@@ -97,4 +101,16 @@ it('renders all four section headings', async () => {
 it('DashboardLayout wraps the content (main element present)', async () => {
   await renderDashboardRoute()
   expect(screen.getByTestId('dashboard-layout')).toBeTruthy()
+})
+
+it('renders /understanding route', async () => {
+  const { router } = await import('./router')
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const routes = (router.routes as any[]).map((r) => ({
+    path: (r.path as string | undefined) ?? '/',
+    element: r.element as React.ReactNode,
+  }))
+  const memRouter = createMemoryRouter(routes, { initialEntries: ['/understanding'] })
+  render(<RouterProvider router={memRouter} />)
+  expect(screen.getByTestId('understanding-page')).toBeTruthy()
 })

@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useMemo } from "react";
+import { Link } from "react-router-dom";
 import { FilterBar } from "../filters/FilterBar";
 import { SectionNav } from "./SectionNav";
 import { SkipLink } from "./SkipLink";
@@ -27,6 +28,9 @@ export function DashboardLayout({
           <span className="text-sm font-semibold text-foreground">
             AI Agent Analytics
           </span>
+          <Link to="/understanding" className="text-xs text-muted-foreground hover:text-foreground ml-auto">
+            How this works
+          </Link>
           <FilterBar />
         </header>
         <SectionNav />

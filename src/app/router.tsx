@@ -10,6 +10,7 @@ import {
   initFiltersFromUrl,
   syncFiltersToUrl,
 } from "../lib/filters/filterSignals";
+import { UnderstandingPage } from "../routes/understanding/UnderstandingPage";
 
 function DashboardRoute(): JSX.Element {
   useEffect(() => {
@@ -29,7 +30,7 @@ function DashboardRoute(): JSX.Element {
   );
 }
 
-// WP-11 adds the /understanding route alongside this entry.
 export const router = createBrowserRouter([
   { path: "/", element: <DashboardRoute /> },
+  { path: "/understanding", element: <UnderstandingPage /> },
 ]);
