@@ -35,13 +35,14 @@ describe('generateReliability', () => {
     }
   })
 
-  it('error_type_breakdown contains all 4 required types', () => {
+  it('error_type_breakdown contains all 5 required types', () => {
     const result = generateReliability(makeSeededFaker(1), { from: '2026-06-01', to: '2026-06-30' })
     const types = result.error_type_breakdown.map((e) => e.type)
-    expect(types).toContain('context_overflow')
-    expect(types).toContain('tool_failure')
+    expect(types).toContain('model_error')
+    expect(types).toContain('timeout')
+    expect(types).toContain('tool_call_failure')
     expect(types).toContain('rate_limit')
-    expect(types).toContain('infrastructure')
+    expect(types).toContain('other')
   })
 
   it('error_trend_7d has at least 7 entries', () => {

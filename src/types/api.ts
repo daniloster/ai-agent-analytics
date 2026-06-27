@@ -90,20 +90,33 @@ export interface ReliabilityResponse {
   error_rate: number
   error_rate_prior: number
   timeout_rate: number
+  timeout_rate_prior: number
   p50_duration_ms: number
+  p50_duration_ms_prior: number
   p95_duration_ms: number
+  p95_duration_ms_prior: number
   p99_duration_ms: number
+  p99_duration_ms_prior: number
   queue_wait_ms: number
   error_type_breakdown: Array<{
-    type: 'context_overflow' | 'tool_failure' | 'rate_limit' | 'infrastructure'
+    type: 'model_error' | 'timeout' | 'tool_call_failure' | 'rate_limit' | 'other'
     count: number
     percentage: number
   }>
   retry_rate: number
+  retry_rate_prior: number
   platform_availability: number
   availability_by_day: Array<{ date: string; uptime_pct: number }>
   error_trend_7d: Array<{ date: string; error_rate: number }>
+  timeout_rate_trend: Array<{ date: string; value: number }>
+  p50_duration_trend: Array<{ date: string; value: number }>
+  p95_duration_trend: Array<{ date: string; value: number }>
+  p99_duration_trend: Array<{ date: string; value: number }>
+  retry_rate_trend: Array<{ date: string; value: number }>
+  mttr_trend: Array<{ date: string; value: number }>
+  cost_of_failed_runs_trend: Array<{ date: string; value: number }>
   mttr_minutes: number | null
+  mttr_minutes_prior: number | null
   incidents: Array<{
     detected_at: string
     resolved_at: string | null
@@ -111,6 +124,7 @@ export interface ReliabilityResponse {
     error_type: string
   }>
   cost_of_failed_runs: number
+  cost_of_failed_runs_prior: number
 }
 
 export interface BillingResponse {

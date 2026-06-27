@@ -32,39 +32,58 @@ vi.mock('../layout/Section', () => ({
   ),
 }))
 
+const DAILY_TREND = [
+  { date: '2026-06-01', value: 100 },
+  { date: '2026-06-02', value: 110 },
+]
+
 const RELIABILITY: ReliabilityResponse = {
   period: { from: '2026-06-01', to: '2026-06-30' },
   error_rate: 0.062,
   error_rate_prior: 0.041,
   timeout_rate: 0.014,
+  timeout_rate_prior: 0.012,
   p50_duration_ms: 12000,
+  p50_duration_ms_prior: 11000,
   p95_duration_ms: 48000,
+  p95_duration_ms_prior: 45000,
   p99_duration_ms: 120000,
+  p99_duration_ms_prior: 110000,
   queue_wait_ms: 3000,
   retry_rate: 0.081,
-  platform_availability: 0.997,
+  retry_rate_prior: 0.072,
+  platform_availability: 99.7,
   mttr_minutes: 42,
+  mttr_minutes_prior: 50.1,
   cost_of_failed_runs: 1420,
+  cost_of_failed_runs_prior: 1300,
   error_type_breakdown: [
-    { type: 'context_overflow', count: 120, percentage: 40 },
-    { type: 'tool_failure', count: 90, percentage: 30 },
-    { type: 'rate_limit', count: 60, percentage: 20 },
-    { type: 'infrastructure', count: 30, percentage: 10 },
+    { type: 'model_error', count: 203, percentage: 43 },
+    { type: 'timeout', count: 151, percentage: 32 },
+    { type: 'tool_call_failure', count: 95, percentage: 20 },
+    { type: 'other', count: 24, percentage: 5 },
   ],
   error_trend_7d: [
     { date: '2026-06-01', error_rate: 0.05 },
     { date: '2026-06-02', error_rate: 0.062 },
   ],
+  timeout_rate_trend: DAILY_TREND,
+  p50_duration_trend: DAILY_TREND,
+  p95_duration_trend: DAILY_TREND,
+  p99_duration_trend: DAILY_TREND,
+  retry_rate_trend: DAILY_TREND,
+  mttr_trend: DAILY_TREND,
+  cost_of_failed_runs_trend: DAILY_TREND,
   availability_by_day: Array.from({ length: 7 }, (_, i) => ({
     date: `2026-06-0${i + 1}`,
     uptime_pct: 99.7,
   })),
   incidents: [
-    { detected_at: '2026-06-15T10:00:00Z', resolved_at: '2026-06-15T10:42:00Z', mttr_minutes: 42, error_type: 'tool_failure' },
+    { detected_at: '2026-06-15T10:00:00Z', resolved_at: '2026-06-15T10:42:00Z', mttr_minutes: 42, error_type: 'tool_call_failure' },
   ],
 }
 
-const RELIABILITY_NO_INCIDENTS: ReliabilityResponse = { ...RELIABILITY, incidents: [], mttr_minutes: null }
+const RELIABILITY_NO_INCIDENTS: ReliabilityResponse = { ...RELIABILITY, incidents: [], mttr_minutes: null, mttr_minutes_prior: null }
 const RELIABILITY_GOOD_ERROR: ReliabilityResponse = { ...RELIABILITY, error_rate: 0.01, error_rate_prior: 0.02 }
 
 function mockFetch(data: ReliabilityResponse = RELIABILITY) {
@@ -139,7 +158,6 @@ it('incidents = [] renders no IncidentTable', async () => {
   const { Reliability } = await import('./Reliability')
   const { container } = render(<Reliability />, { wrapper: makeWrapper() })
   await waitFor(() => {
-    // No <caption> means no IncidentTable
     expect(container.querySelector('caption')).toBeNull()
   })
 })
@@ -169,4 +187,85 @@ it('loading state renders Skeleton elements, no KpiCards', async () => {
   const skeletons = container.querySelectorAll('.animate-pulse')
   expect(skeletons.length).toBeGreaterThan(0)
   expect(screen.queryAllByRole('button', { name: /more information/i })).toHaveLength(0)
+})
+
+it('error type breakdown figure shows title "Error Type Distribution"', async () => {
+  mockFetch()
+  const { Reliability } = await import('./Reliability')
+  render(<Reliability />, { wrapper: makeWrapper() })
+  await waitFor(() => {
+    expect(screen.getByText('Error Type Distribution')).toBeTruthy()
+  })
+})
+
+it('error type breakdown subtitle is "Breakdown of failure causes this period"', async () => {
+  mockFetch()
+  const { Reliability } = await import('./Reliability')
+  render(<Reliability />, { wrapper: makeWrapper() })
+  await waitFor(() => {
+    expect(screen.getByText('Breakdown of failure causes this period')).toBeTruthy()
+  })
+})
+
+it('donut center text shows total error count', async () => {
+  mockFetch()
+  const { Reliability } = await import('./Reliability')
+  const { container } = render(<Reliability />, { wrapper: makeWrapper() })
+  await waitFor(() => {
+    // Total errors = 203 + 151 + 95 + 24 = 473
+    const svgTexts = container.querySelectorAll('svg text')
+    const textContents = Array.from(svgTexts).map((el) => el.textContent)
+    expect(textContents).toContain('473')
+  })
+})
+
+it('donut center shows "errors" label', async () => {
+  mockFetch()
+  const { Reliability } = await import('./Reliability')
+  const { container } = render(<Reliability />, { wrapper: makeWrapper() })
+  await waitFor(() => {
+    const svgTexts = container.querySelectorAll('svg text')
+    const textContents = Array.from(svgTexts).map((el) => el.textContent)
+    expect(textContents).toContain('errors')
+  })
+})
+
+it('availability day boxes are rendered for each day', async () => {
+  mockFetch()
+  const { Reliability } = await import('./Reliability')
+  const { container } = render(<Reliability />, { wrapper: makeWrapper() })
+  await waitFor(() => {
+    // 7 availability_by_day entries -> 7 boxes with title attributes
+    const boxes = container.querySelectorAll('[title^="2026-06-0"]')
+    expect(boxes.length).toBe(7)
+  })
+})
+
+it('platform availability footer shows "MTD Availability"', async () => {
+  mockFetch()
+  const { Reliability } = await import('./Reliability')
+  render(<Reliability />, { wrapper: makeWrapper() })
+  await waitFor(() => {
+    expect(screen.getByText(/MTD Availability/)).toBeTruthy()
+  })
+})
+
+it('platform availability footer shows incident count', async () => {
+  mockFetch()
+  const { Reliability } = await import('./Reliability')
+  render(<Reliability />, { wrapper: makeWrapper() })
+  await waitFor(() => {
+    expect(screen.getByText(/Incidents:/)).toBeTruthy()
+  })
+})
+
+it('all 8 KpiCards have delta badges when data is loaded', async () => {
+  mockFetch()
+  const { Reliability } = await import('./Reliability')
+  const { container } = render(<Reliability />, { wrapper: makeWrapper() })
+  await waitFor(() => {
+    // DeltaBadge renders a span with bg-green-50 or bg-red-50 classes
+    const deltaBadges = container.querySelectorAll('.bg-green-50, .bg-red-50, .bg-muted')
+    expect(deltaBadges.length).toBeGreaterThanOrEqual(7)
+  })
 })

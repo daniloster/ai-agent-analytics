@@ -12,13 +12,17 @@ export interface DonutChartProps {
   slices: DonutChartSlice[]
   ariaLabel?: string
   size?: number
+  centerLine1?: string
+  centerLine2?: string
 }
 
-export function DonutChart({ slices, ariaLabel, size = 120 }: DonutChartProps): JSX.Element {
+export function DonutChart({ slices, ariaLabel, size = 120, centerLine1, centerLine2 }: DonutChartProps): JSX.Element {
   const tokens = useChartTokens()
   const outerRadius = size / 2 - 4
   const innerRadius = size / 4
   const fallbackColors = [tokens.primary, tokens.muted, tokens.border]
+  const cx = size / 2
+  const cy = size / 2
 
   return (
     <svg
@@ -27,7 +31,7 @@ export function DonutChart({ slices, ariaLabel, size = 120 }: DonutChartProps): 
       role="img"
       aria-label={ariaLabel ?? 'Donut chart'}
     >
-      <Group top={size / 2} left={size / 2}>
+      <Group top={cy} left={cx}>
         <Pie
           data={slices}
           pieValue={(d) => d.value}
@@ -45,6 +49,33 @@ export function DonutChart({ slices, ariaLabel, size = 120 }: DonutChartProps): 
           }
         </Pie>
       </Group>
+      {centerLine1 && (
+        <text
+          x={cx}
+          y={cy - 4}
+          textAnchor="middle"
+          dominantBaseline="auto"
+          fontSize={Math.round(size / 8)}
+          fontWeight={700}
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          {centerLine1}
+        </text>
+      )}
+      {centerLine2 && (
+        <text
+          x={cx}
+          y={cy + Math.round(size / 10)}
+          textAnchor="middle"
+          dominantBaseline="hanging"
+          fontSize={Math.round(size / 14)}
+          fill="#6b7280"
+          aria-hidden="true"
+        >
+          {centerLine2}
+        </text>
+      )}
     </svg>
   )
 }
