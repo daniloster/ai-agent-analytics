@@ -122,6 +122,7 @@ function DeltaBadge({ delta, deltaFormat = 'percent', deltaLabel }: { delta: num
     <div className="flex items-center justify-between gap-1">
       <span
         className={`inline-flex items-center rounded-full px-[7px] py-0.5 text-[11px] font-semibold ${colorClass}`}
+        aria-label={`${prefix}${formatPercent(Math.abs(delta), 1)} compared to prior period${deltaLabel ? ' ' + deltaLabel : ''}`}
       >
         {prefix}{deltaFormat === 'number' ? formatNumber(Math.abs(delta)) : deltaFormat === 'decimal' ? Math.abs(delta).toFixed(1) : deltaFormat === 'currency' ? formatCurrency(Math.abs(delta)) : formatPercent(Math.abs(delta), 1)}
       </span>
@@ -149,7 +150,7 @@ export function KpiCard(props: KpiCardProps): JSX.Element {
           <Popover open={open.value} onOpenChange={(v) => { open.value = v }}>
             <PopoverTrigger asChild>
               <button
-                aria-label="More information"
+                aria-label={"Formula and example for " + props.label}
                 className="flex h-[18px] w-[18px] items-center justify-center rounded-full border border-border bg-muted text-[10px] text-muted-foreground hover:bg-border"
               >
                 ?
@@ -168,7 +169,7 @@ export function KpiCard(props: KpiCardProps): JSX.Element {
             <Skeleton className="h-8 w-24" />
           ) : props.insufficientData ? (
             <>
-              <span role="status" className="text-sm text-muted-foreground">Insufficient data</span>
+              <p role="status" aria-live="polite" className="text-sm text-muted-foreground">Insufficient data</p>
               {props.insufficientDataReason && (
                 <p className="text-xs text-muted-foreground">{props.insufficientDataReason}</p>
               )}
@@ -189,7 +190,7 @@ export function KpiCard(props: KpiCardProps): JSX.Element {
           )}
         </div>
         {props.trend && props.trend.length >= 2 && (
-          <div className="mt-2">
+          <div aria-hidden="true" className="mt-2">
             <Sparkline data={props.trend} color={props.trendColor} />
           </div>
         )}

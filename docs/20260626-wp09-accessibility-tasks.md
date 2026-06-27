@@ -874,7 +874,7 @@ Overview.tsx, Reliability.tsx, TeamBreakdown.tsx, Billing.tsx
 |------|----------|------|------------|--------|
 | [x]  | 1        | T-1: a11y infrastructure - axeConfig + SkipLink | - | Small |
 | [x]  | 2        | T-2: Layout and filter ARIA | T-1 | Small |
-| [ ]  | 3        | T-3: KpiCard ARIA remediation | - | Medium |
+| [x]  | 3        | T-3: KpiCard ARIA remediation | - | Medium |
 | [ ]  | 4        | T-4: Chart ARIA - Area, Visualization, DonutChart, BarChart | - | Medium |
 | [ ]  | 5        | T-5: Heatmap ARIA + roving tabindex | WP-08 T-3 | Medium |
 | [ ]  | 6        | T-6: Section axe assertions + reduced-motion audit | T-1, T-2, T-3, T-4, T-5 | Medium |

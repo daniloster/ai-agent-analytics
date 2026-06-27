@@ -187,5 +187,5 @@ it('loading state renders Skeleton elements and no KpiCard buttons', async () =>
   const { container } = render(<Billing />, { wrapper: makeWrapper() })
   const skeletons = container.querySelectorAll('.animate-pulse')
   expect(skeletons.length).toBeGreaterThan(0)
-  expect(screen.queryAllByRole('button', { name: /more information/i })).toHaveLength(0)
+  expect(screen.queryAllByRole('button', { name: /formula and example for/i })).toHaveLength(0)
 })

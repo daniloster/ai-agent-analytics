@@ -111,7 +111,7 @@ it('query success renders 8 KpiCards', async () => {
   const { Reliability } = await import('./Reliability')
   render(<Reliability />, { wrapper: makeWrapper() })
   await waitFor(() => {
-    const infoButtons = screen.getAllByRole('button', { name: /more information/i })
+    const infoButtons = screen.getAllByRole('button', { name: /formula and example for/i })
     expect(infoButtons).toHaveLength(8)
   })
 })
@@ -168,7 +168,7 @@ it('loading state renders Skeleton elements, no KpiCards', async () => {
   const { container } = render(<Reliability />, { wrapper: makeWrapper() })
   const skeletons = container.querySelectorAll('.animate-pulse')
   expect(skeletons.length).toBeGreaterThan(0)
-  expect(screen.queryAllByRole('button', { name: /more information/i })).toHaveLength(0)
+  expect(screen.queryAllByRole('button', { name: /formula and example for/i })).toHaveLength(0)
 })
 
 it('error type breakdown figure shows title "Error Type Distribution"', async () => {

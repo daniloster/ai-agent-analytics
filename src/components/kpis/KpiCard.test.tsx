@@ -82,12 +82,19 @@ it('undefined delta renders no badge', () => {
   expect(container.querySelector('.bg-red-50')).toBeNull()
 })
 
-it('insufficientData=true renders status span with Insufficient data', () => {
+it('insufficientData=true renders status element with Insufficient data', () => {
   render(<KpiCard {...BASE_PROPS} insufficientData={true} />)
   const status = screen.getByRole('status')
   expect(status).toBeTruthy()
   expect(status.textContent).toContain('Insufficient data')
   expect(screen.queryByText('12,450')).toBeNull()
+})
+
+it('insufficient-data element is a p tag with aria-live="polite"', () => {
+  const { container } = render(<KpiCard {...BASE_PROPS} insufficientData={true} />)
+  const p = container.querySelector('p[role="status"]')
+  expect(p).not.toBeNull()
+  expect(p?.getAttribute('aria-live')).toBe('polite')
 })
 
 it('insufficientData=true with reason renders the reason text', () => {
@@ -112,18 +119,47 @@ it('no valueSuffix renders no suffix span', () => {
   expect(container.querySelector('[data-value-suffix]')).toBeNull()
 })
 
+it('info button aria-label includes the card label', () => {
+  render(<KpiCard {...BASE_PROPS} />)
+  expect(screen.getByRole('button', { name: 'Formula and example for Total Runs' })).toBeTruthy()
+})
+
 it('clicking info button renders formulaTooltip text in the DOM', () => {
   const { rerender } = render(<KpiCard {...BASE_PROPS} />)
-  const btn = screen.getByRole('button', { name: /more information/i })
+  const btn = screen.getByRole('button', { name: /formula and example for/i })
   fireEvent.click(btn)
   rerender(<KpiCard {...BASE_PROPS} />)
   expect(screen.getByText('Total runs formula')).toBeTruthy()
+})
+
+it('positive delta badge span has aria-label containing "compared to prior period"', () => {
+  const { container } = render(<KpiCard {...BASE_PROPS} delta={18.4} />)
+  const badge = container.querySelector('.bg-green-50')
+  expect(badge?.getAttribute('aria-label')).toContain('compared to prior period')
+})
+
+it('delta badge aria-label includes deltaLabel when provided', () => {
+  const { container } = render(<KpiCard {...BASE_PROPS} delta={5.0} deltaLabel="vs last month" />)
+  const badge = container.querySelector('.bg-green-50')
+  expect(badge?.getAttribute('aria-label')).toContain('vs last month')
 })
 
 it('trend array with 2+ points renders an SVG sparkline', () => {
   const trend = [{ date: '2026-06-01', value: 10 }, { date: '2026-06-02', value: 20 }]
   const { container } = render(<KpiCard {...BASE_PROPS} trend={trend} />)
   expect(container.querySelector('svg')).not.toBeNull()
+})
+
+it('sparkline wrapper div has aria-hidden="true" when trend is provided', () => {
+  const trend = [{ date: '2026-06-01', value: 10 }, { date: '2026-06-02', value: 20 }]
+  const { container } = render(<KpiCard {...BASE_PROPS} trend={trend} />)
+  const wrapper = container.querySelector('div[aria-hidden="true"]')
+  expect(wrapper).not.toBeNull()
+})
+
+it('sparkline wrapper div is absent when no trend prop', () => {
+  const { container } = render(<KpiCard {...BASE_PROPS} />)
+  expect(container.querySelector('div[aria-hidden="true"]')).toBeNull()
 })
 
 it('no trend prop renders no SVG element', () => {

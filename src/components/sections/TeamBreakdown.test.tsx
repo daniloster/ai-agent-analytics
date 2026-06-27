@@ -167,7 +167,7 @@ it('single-team view renders 4 KpiCards and no TeamTable when teamId is set', as
   const { container } = render(<TeamBreakdown />, { wrapper: makeWrapper() })
   await waitFor(() => {
     expect(container.querySelector('table')).toBeNull()
-    const infoButtons = container.querySelectorAll('button[aria-label="More information"]')
+    const infoButtons = container.querySelectorAll('button[aria-label^="Formula and example for"]')
     expect(infoButtons).toHaveLength(4)
   })
 })
@@ -179,7 +179,7 @@ it('loading state renders Skeleton elements and no table or cards', async () => 
   const skeletons = container.querySelectorAll('.animate-pulse')
   expect(skeletons.length).toBeGreaterThan(0)
   expect(container.querySelector('table')).toBeNull()
-  expect(container.querySelector('button[aria-label="More information"]')).toBeNull()
+  expect(container.querySelector('button[aria-label^="Formula and example for"]')).toBeNull()
 })
 
 it('quality score per team chart renders SVG paths for area series', async () => {
