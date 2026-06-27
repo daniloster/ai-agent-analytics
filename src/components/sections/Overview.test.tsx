@@ -47,6 +47,7 @@ const OVERVIEW: Record<string, unknown> = {
   total_cost: 14200,
   total_cost_prior: 15000,
   retention_cost: 41.76,
+  retention_cost_prior: 44.60,
   retained_users_7d: 142,
   success_rate: 94.2,
   success_rate_prior: 91.0,
@@ -156,6 +157,35 @@ it('token area chart renders two Area series when timeseries data is present', a
     const paths = container.querySelectorAll('svg path')
     // At minimum, the two Area series (input_tokens, output_tokens) each render a path
     expect(paths.length).toBeGreaterThanOrEqual(2)
+  })
+})
+
+it('Retention Cost card renders "/user" value suffix', async () => {
+  mockFetch()
+  const { Overview } = await import('./Overview')
+  render(<Overview />, { wrapper: makeWrapper() })
+  await waitFor(() => {
+    expect(screen.getByText('/user')).toBeTruthy()
+  })
+})
+
+it('Retention Cost card renders efficiency delta label', async () => {
+  mockFetch()
+  const { Overview } = await import('./Overview')
+  render(<Overview />, { wrapper: makeWrapper() })
+  await waitFor(() => {
+    const label = screen.queryByText('improving efficiency') ?? screen.queryByText('degrading efficiency')
+    expect(label).not.toBeNull()
+  })
+})
+
+it('Seat Adoption card renders seats deltaLabel in "N / M seats" format', async () => {
+  mockFetch()
+  const { Overview } = await import('./Overview')
+  render(<Overview />, { wrapper: makeWrapper() })
+  await waitFor(() => {
+    // OVERVIEW has mau=340, seat_count=400 => "340 / 400 seats"
+    expect(screen.getByText('340 / 400 seats')).toBeTruthy()
   })
 })
 

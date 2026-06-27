@@ -39,6 +39,22 @@ it('negative delta renders red badge with - prefix', () => {
   expect(badge).not.toBeNull()
 })
 
+it('deltaFormat="number" renders absolute count without % suffix', () => {
+  render(<KpiCard {...BASE_PROPS} delta={40} deltaFormat="number" />)
+  expect(screen.getByText('+40')).toBeTruthy()
+  expect(screen.queryByText('+40.0%')).toBeNull()
+})
+
+it('deltaFormat="number" with negative delta renders absolute count', () => {
+  render(<KpiCard {...BASE_PROPS} delta={-12} deltaFormat="number" />)
+  expect(screen.getByText('-12')).toBeTruthy()
+})
+
+it('deltaFormat omitted still renders percentage', () => {
+  render(<KpiCard {...BASE_PROPS} delta={18.4} />)
+  expect(screen.getByText('+18.4%')).toBeTruthy()
+})
+
 it('undefined delta renders no badge', () => {
   const { container } = render(<KpiCard {...BASE_PROPS} delta={undefined} />)
   expect(container.querySelector('.bg-green-50')).toBeNull()
@@ -62,6 +78,17 @@ it('insufficientData=true with reason renders the reason text', () => {
     />,
   )
   expect(screen.getByText('Need 10+ rated runs')).toBeTruthy()
+})
+
+it('valueSuffix renders a span with the suffix text', () => {
+  const { container } = render(<KpiCard {...BASE_PROPS} valueSuffix="/user" />)
+  expect(screen.getByText('/user')).toBeTruthy()
+  expect(container.querySelector('[data-value-suffix]')).not.toBeNull()
+})
+
+it('no valueSuffix renders no suffix span', () => {
+  const { container } = render(<KpiCard {...BASE_PROPS} />)
+  expect(container.querySelector('[data-value-suffix]')).toBeNull()
 })
 
 it('clicking info button renders formulaTooltip text in the DOM', () => {

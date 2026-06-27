@@ -290,6 +290,13 @@ export function Overview(): JSX.Element {
                 )
               : undefined
           }
+          delta={d ? d.mau - d.mau_prior : undefined}
+          deltaFormat="number"
+          deltaLabel={
+            d
+              ? `${formatNumber(d.mau)} / ${formatNumber(d.seat_count)} seats`
+              : undefined
+          }
           trend={
             ts && d
               ? ts.points.map((p) => ({
@@ -299,8 +306,8 @@ export function Overview(): JSX.Element {
               : undefined
           }
           trendColor="#7c3aed"
-          formulaTooltip="MAU / seat_count - percentage of provisioned seats actively used."
-          exampleTooltip="e.g. 85.0%"
+          formulaTooltip="Percentage of provisioned seats used by active users this period - how much of your licensed capacity is being utilized."
+          exampleTooltip="e.g. 85.0% (340 of 400 seats)"
         />
         <KpiCard
           label="Total Cost"
@@ -325,6 +332,19 @@ export function Overview(): JSX.Element {
           value={
             d && retentionCost !== null
               ? formatCurrency(retentionCost)
+              : undefined
+          }
+          valueSuffix="/user"
+          delta={
+            d && retentionCost !== null && d.retention_cost_prior > 0
+              ? -computeDeltaPercent(retentionCost, d.retention_cost_prior)
+              : undefined
+          }
+          deltaLabel={
+            d && retentionCost !== null
+              ? retentionCost <= d.retention_cost_prior
+                ? 'improving efficiency'
+                : 'degrading efficiency'
               : undefined
           }
           trend={ts?.points.map((p) => ({

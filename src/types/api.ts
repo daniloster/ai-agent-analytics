@@ -37,6 +37,7 @@ export interface OverviewResponse {
   total_cost: number
   total_cost_prior: number
   retention_cost: number
+  retention_cost_prior: number
   retained_users_7d: number
   success_rate: number
   success_rate_prior: number

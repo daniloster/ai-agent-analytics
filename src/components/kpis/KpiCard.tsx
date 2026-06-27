@@ -13,6 +13,7 @@ const STATUS_DOT_COLORS: Record<'good' | 'warning' | 'critical', string> = {
 export interface KpiCardProps {
   label: string
   value: string | undefined
+  valueSuffix?: string
   subValue?: string
   delta?: number
   deltaFormat?: 'percent' | 'number'
@@ -173,7 +174,12 @@ export function KpiCard(props: KpiCardProps): JSX.Element {
               )}
             </>
           ) : (
-            <div className="text-[28px] font-bold leading-none tracking-tight">{props.value}</div>
+            <div className="text-[28px] font-bold leading-none tracking-tight">
+              {props.value}
+              {props.valueSuffix && (
+                <span data-value-suffix className="text-[16px] font-medium text-muted-foreground ml-0.5">{props.valueSuffix}</span>
+              )}
+            </div>
           )}
           {props.subValue && (
             <p className="text-[11px] text-muted-foreground">{props.subValue}</p>
