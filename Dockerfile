@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y \
 
 ENV PLAYWRIGHT_BROWSERS_PATH=/usr/bin \
     PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 \
+    PUPPETEER_SKIP_DOWNLOAD=true \
     CHROME_BIN=/usr/bin/chromium
 
 RUN npm install -g @anthropic-ai/claude-code
